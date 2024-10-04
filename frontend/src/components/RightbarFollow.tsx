@@ -1,34 +1,47 @@
-import { useAuthStore } from "../store/useAuthStore";
+import { useEffect, useState } from "react";
+import axios from "../utils/axiosInstance";
+import ProfileCard from "./ProfileCard";
+
+interface Friend {
+    id: number;
+    name: string;
+    profileImage: string;
+}
 
 const RightbarFollow: React.FC = () => {
-    const { user } = useAuthStore();
+    const [friends, setFriends] = useState<Friend[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // JWT token ile friend profile API'sine istek yapma
+        const fetchFriendProfile = async () => {
+            try {
+                const response = await axios.get("/user/friend-profile");
+                setFriends(response.data);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchFriendProfile();
+    }, []);
     return (
         <div className="w-[300px]">
             <div className="bg-white w-full px-4 py-3 rounded-lg border">
                 <p className="text-sm font-medium">
                     Sizin için daha fazla profil
                 </p>
-                <div className="flex gap-1 mt-3 border-b pb-4">
-                    {user?.profileImage && (
-                        <img
-                            src={user.profileImage}
-                            alt="Profil Resmi"
-                            className="w-12 h-12 rounded-full border-4 bg-white border-white"
+                {!loading &&
+                    friends.map((friend) => (
+                        <ProfileCard
+                            key={friend.id}
+                            id={friend.id}
+                            name={friend.name}
+                            profileImage={friend.profileImage}
                         />
-                    )}
-                    <div className="">
-                        <p className="font-medium text-gray-800">
-                            Ahmet Karademir
-                        </p>
-                        <p className="text-gray-700 text-sm">
-                            Junior Frontend Developer | JavaScript | React | Vue
-                            | SASS...
-                        </p>
-                        <button className="border-2 mt-2 px-3 py-1 rounded-full text-sm font-medium hover:bg-blue-200 hover:border-gray-400 transition">
-                            Takip Et
-                        </button>
-                    </div>
-                </div>
+                    ))}
             </div>
         </div>
     );

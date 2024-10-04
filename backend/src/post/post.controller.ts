@@ -13,7 +13,6 @@ import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request, Response } from 'express';
-import { User } from 'src/auth/user.entity';
 
 @Controller('post')
 export class PostController {
@@ -32,6 +31,8 @@ export class PostController {
         return this.postService.allPost(id);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Get('/main')
     @UseGuards(JwtAuthGuard)
     @Delete('delete/:id')
     async userDelete(@Param('id') id: number, @Res() res: Response) {

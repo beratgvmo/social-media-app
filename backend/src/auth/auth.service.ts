@@ -1,14 +1,11 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../user/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { Response, Request } from 'express';
+import { Response } from 'express';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcryptjs';
-import path from 'path';
-import * as fs from 'fs';
-
 @Injectable()
 export class AuthService {
     constructor(
@@ -108,10 +105,6 @@ export class AuthService {
         });
     }
 
-    async updateProfileImage(userId: number, imagePath: string | null) {
-        await this.userRepository.update(userId, { profileImage: imagePath });
-    }
-
     async getProfile(userId: number): Promise<{
         id: number;
         name: string;
@@ -133,9 +126,5 @@ export class AuthService {
             email: user.email,
             profileImage: user.profileImage,
         };
-    }
-
-    async findUserById(id: number): Promise<User> {
-        return await this.userRepository.findOne({ where: { id } });
     }
 }

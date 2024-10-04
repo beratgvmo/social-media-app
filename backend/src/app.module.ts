@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { User } from './auth/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { PostModule } from './post/post.module';
-import { Post } from './post/post.entity';
+import { PostImagesModule } from './post-images/post-images.module';
+import { LikeModule } from './like/like.module';
+import { CommentModule } from './comment/comment.module';
+import { FollowerModule } from './follower/follower.module';
+import { UserModule } from './user/user.module';
 
 @Module({
     imports: [
@@ -19,13 +22,18 @@ import { Post } from './post/post.entity';
                 username: configService.get<string>('DB_USERNAME'),
                 password: configService.get<string>('DB_PASSWORD'),
                 database: configService.get<string>('DB_DATABASE'),
-                entities: [User, Post],
+                entities: [__dirname + '/**/*.entity{.ts,.js}'],
                 autoLoadEntities: true,
                 synchronize: true,
             }),
         }),
         AuthModule,
         PostModule,
+        PostImagesModule,
+        LikeModule,
+        CommentModule,
+        FollowerModule,
+        UserModule,
     ],
 })
 export class AppModule {}

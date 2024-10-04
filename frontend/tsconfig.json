@@ -1,4 +1,4 @@
-git branch -d master{
+{
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },

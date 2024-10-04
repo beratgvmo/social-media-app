@@ -27,7 +27,7 @@ const App: React.FC = () => {
 
             if (accessToken) {
                 try {
-                    const response = await axios.get("/auth/profile");
+                    const response = await axios.get("/user/profile");
                     setUser(response.data);
                 } catch (error) {
                     logout();

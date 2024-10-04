@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './post.entity';
 import { Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
-import { User } from 'src/auth/user.entity';
 import { Response } from 'express';
 
 @Injectable()
@@ -18,7 +17,7 @@ export class PostService {
         userId: number,
     ): Promise<Post> {
         const post = this.postRepository.create({
-            text: createPostDto.text,
+            content: createPostDto.content,
             user: { id: userId },
         });
         return await this.postRepository.save(post);
@@ -28,7 +27,7 @@ export class PostService {
         try {
             const userPosts = await this.postRepository.find({
                 where: { user: { id } },
-                select: ['id', 'text', 'createdAt', 'likes'],
+                select: ['id', 'content', 'createdAt', 'likes'],
                 order: {
                     createdAt: 'DESC',
                 },

@@ -13,6 +13,7 @@ import {
 import Modal from "../components/Modal";
 import Button from "../components/Button";
 import RightbarFollow from "../components/RightbarFollow";
+import FollowBtn from "../components/FollowBtn";
 
 interface Post {
     id: number;
@@ -26,7 +27,6 @@ interface PostFormData {
 }
 
 const ProfilePage: React.FC = () => {
-    const [loading, setLoading] = useState(true);
     const { logout, user, setUser } = useAuthStore();
     const [posts, setPosts] = useState<Post[]>([]);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -39,15 +39,14 @@ const ProfilePage: React.FC = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await axios.get("/auth/profile");
+                const response = await axios.get("/user/profile");
                 setUser(response.data);
             } catch (error) {
                 console.error("Profil yüklenirken bir hata oluştu", error);
                 logout();
-            } finally {
-                setLoading(false);
             }
         };
+
         fetchProfile();
     }, [setUser, logout]);
 
@@ -135,8 +134,6 @@ const ProfilePage: React.FC = () => {
         setSelectedImage(null);
     };
 
-    if (loading) return <div>Loading...</div>;
-
     return (
         <div className="flex gap-5 mt-6">
             <div className="w-[800px]">
@@ -216,9 +213,7 @@ const ProfilePage: React.FC = () => {
                                 <p className="text-2xl font-medium">
                                     {user?.name} Güven
                                 </p>
-                                <button className="bg-gray-200 px-3 py-1 rounded-md text-sm font-semibold hover:bg-blue-400 transition">
-                                    Takip Et
-                                </button>
+                                {/* {user && <FollowBtn userId={user.id} />} */}
                             </div>
                             <div className="text-sm mb-3">Berat Güven</div>
                             <div className="flex gap-5 text-sm">
