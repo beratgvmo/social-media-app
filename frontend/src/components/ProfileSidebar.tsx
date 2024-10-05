@@ -18,7 +18,7 @@ const ProfileSidebar: React.FC = () => {
                                     className="w-full h-full rounded-full border-2 bg-white border-white"
                                 />
                             ) : (
-                                <div className="flex justify-center items-center w-full h-full bg-gray-200 rounded-full border-4 border-white">
+                                <div className="p-2 flex text-blue-500 justify-center items-center w-full h-full bg-gray-200 rounded-full border-4 border-white">
                                     <TbUser size={90} />
                                 </div>
                             )}
@@ -27,9 +27,7 @@ const ProfileSidebar: React.FC = () => {
                 </div>
                 <div className="p-4 mt-6">
                     <div className="flex items-center gap-4">
-                        <p className="text-xl font-medium">
-                            {user?.name} Güven
-                        </p>
+                        <p className="text-xl font-medium">{user?.name}</p>
                     </div>
                     <div className="text-xs mt-0.5">Berat Güven</div>
                 </div>

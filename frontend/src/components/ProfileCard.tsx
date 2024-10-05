@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import axios from "../utils/axiosInstance";
 import Button from "./Button";
 import { TbUser } from "react-icons/tb";
+import { Link } from "react-router-dom";
 
 interface Friend {
     id: number;
     name: string;
     profileImage: string;
+    slug: string;
 }
 
-const ProfileCard: React.FC<Friend> = ({ id, name, profileImage }) => {
+const ProfileCard: React.FC<Friend> = ({ id, name, profileImage, slug }) => {
     const [loading, setLoading] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
 
@@ -48,7 +50,7 @@ const ProfileCard: React.FC<Friend> = ({ id, name, profileImage }) => {
 
     return (
         <>
-            {!loading ? (
+            <Link to={`/profile/${slug}`}>
                 <div className="flex gap-2 mt-3 border-b pb-4">
                     {profileImage ? (
                         <img
@@ -57,9 +59,7 @@ const ProfileCard: React.FC<Friend> = ({ id, name, profileImage }) => {
                             className="w-11 h-11 rounded-full border"
                         />
                     ) : (
-                        <div className="flex justify-center p-2 items-center w-12 h-12 bg-gray-200 rounded-full border-4 border-white">
-                            <TbUser size={90} />
-                        </div>
+                        <TbUser className="w-10 h-10 p-2 flex items-center border rounded-full text-blue-500" />
                     )}
                     <div>
                         <p className="font-medium text-gray-800">{name}</p>
@@ -87,9 +87,7 @@ const ProfileCard: React.FC<Friend> = ({ id, name, profileImage }) => {
                         </div>
                     </div>
                 </div>
-            ) : (
-                <div className="h-[100px] bg-white"></div>
-            )}
+            </Link>
         </>
     );
 };

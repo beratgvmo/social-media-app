@@ -2,6 +2,7 @@ import {
     Controller,
     Delete,
     Get,
+    Param,
     Post,
     Req,
     Res,
@@ -15,19 +16,18 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { unlinkSync } from 'fs';
 import { join } from 'path';
 import { Request, Response } from 'express';
-import { FriendProfileDto } from './dto/friend-profile.dto';
 
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
     @UseGuards(JwtAuthGuard)
-    @Get('/profile')
-    async getProfile(@Req() req: Request) {
-        const userId = req.user['sub'];
-        const userProfile = await this.userService.getProfile(userId);
+    @Get('/profile/:slug')
+    async getProfileOthers(@Param('slug') slug: string) {
+        const userProfile = await this.userService.getProfileBySlug(slug);
         return {
             id: userProfile.id,
+            slug: userProfile.slug,
             email: userProfile.email,
             name: userProfile.name,
             profileImage: userProfile.profileImage,
@@ -36,11 +36,12 @@ export class UserController {
 
     @UseGuards(JwtAuthGuard)
     @Get('/profile')
-    async getProfile(@Req() req: Request) {
+    async getMyProfile(@Req() req: Request) {
         const userId = req.user['sub'];
         const userProfile = await this.userService.getProfile(userId);
         return {
             id: userProfile.id,
+            slug: userProfile.slug,
             email: userProfile.email,
             name: userProfile.name,
             profileImage: userProfile.profileImage,
@@ -55,7 +56,7 @@ export class UserController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Post('upload-image')
+    @Post('profile/upload-image')
     @UseInterceptors(FileInterceptor('profileImage'))
     async uploadProfileImage(
         @UploadedFile() file: Express.Multer.File,
@@ -80,7 +81,7 @@ export class UserController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Delete('delete-image')
+    @Delete('profile/delete-image')
     async deleteProfileImage(@Req() req: Request, @Res() res: Response) {
         const userId = req.user['sub'];
         const user = await this.userService.findUserById(userId);

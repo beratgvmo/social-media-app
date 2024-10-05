@@ -2,12 +2,12 @@ import { createBrowserRouter } from "react-router-dom";
 import Home from "../pages/home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
-import ProfilePage from "../pages/ProfilePage";
 import {
     PrivateRouteNullUser,
-    PrivateRouteUser,
+    PrivateRouteProfile,
 } from "../components/PrivateRoute";
 import MainLayout from "../layouts/main";
+import NotFound from "../pages/NotFound"; // Import NotFound component
 
 const routes = createBrowserRouter([
     {
@@ -19,12 +19,8 @@ const routes = createBrowserRouter([
                 element: <Home />,
             },
             {
-                path: "/profile",
-                element: (
-                    <PrivateRouteUser>
-                        <ProfilePage />
-                    </PrivateRouteUser>
-                ),
+                path: "/profile/:slug",
+                element: <PrivateRouteProfile />,
             },
         ],
     },
@@ -43,6 +39,14 @@ const routes = createBrowserRouter([
                 <Register />
             </PrivateRouteNullUser>
         ),
+    },
+    {
+        path: "/404",
+        element: <NotFound />,
+    },
+    {
+        path: "*",
+        element: <NotFound />,
     },
 ]);
 

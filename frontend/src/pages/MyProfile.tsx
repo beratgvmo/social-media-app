@@ -13,7 +13,7 @@ import {
 import Modal from "../components/Modal";
 import Button from "../components/Button";
 import RightbarFollow from "../components/RightbarFollow";
-import FollowBtn from "../components/FollowBtn";
+import ProfileSkeleton from "../components/ProfileSkeleton";
 
 interface Post {
     id: number;
@@ -26,24 +26,28 @@ interface PostFormData {
     text: string;
 }
 
-const ProfilePage: React.FC = () => {
+const MyProfile: React.FC = () => {
     const { logout, user, setUser } = useAuthStore();
     const [posts, setPosts] = useState<Post[]>([]);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [croppedImage, setCroppedImage] = useState<Blob | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const { register, handleSubmit, reset } = useForm<PostFormData>();
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
+                // await new Promise((resolve) => setTimeout(resolve, 200));
                 const response = await axios.get("/user/profile");
                 setUser(response.data);
             } catch (error) {
                 console.error("Profil yüklenirken bir hata oluştu", error);
                 logout();
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -107,9 +111,13 @@ const ProfilePage: React.FC = () => {
         setSelectedImage(null);
 
         try {
-            const response = await axios.post("/auth/uploadImage", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            const response = await axios.post(
+                "user/profile/upload-image",
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }
+            );
             setUser({ ...user!, profileImage: response.data.imageUrl });
         } catch (error) {
             console.error("Resim yüklenirken bir hata oluştu", error);
@@ -133,6 +141,10 @@ const ProfilePage: React.FC = () => {
         setIsModalOpen(false);
         setSelectedImage(null);
     };
+
+    if (loading) {
+        return <ProfileSkeleton />;
+    }
 
     return (
         <div className="flex gap-5 mt-6">
@@ -211,9 +223,8 @@ const ProfilePage: React.FC = () => {
                         <div>
                             <div className="flex items-center gap-4 mb-3">
                                 <p className="text-2xl font-medium">
-                                    {user?.name} Güven
+                                    {user?.name}
                                 </p>
-                                {/* {user && <FollowBtn userId={user.id} />} */}
                             </div>
                             <div className="text-sm mb-3">Berat Güven</div>
                             <div className="flex gap-5 text-sm">
@@ -287,4 +298,4 @@ const ProfilePage: React.FC = () => {
     );
 };
 
-export default ProfilePage;
+export default MyProfile;

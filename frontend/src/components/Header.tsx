@@ -11,7 +11,9 @@ const Header: React.FC = () => {
         <header className="h-16 p-1 top-0 z-50 sticky flex items-center bg-white border-b border-gray-300">
             <div className="w-[1100px] mx-auto flex justify-between items-center">
                 <div className="flex gap-4 items-center">
-                    <TbChessFilled size={40} className="text-blue-600" />
+                    <Link to="/">
+                        <TbChessFilled size={40} className="text-blue-600" />
+                    </Link>
                     <div className="flex items-center gap-4">
                         <div className="w-[320px]">
                             <input
@@ -61,7 +63,7 @@ const Header: React.FC = () => {
                                     className="text-blue-500"
                                 />
                             </div>
-                            <Link to="/profile">
+                            <Link to={`/profile/${user.slug}`}>
                                 {user?.profileImage ? (
                                     <img
                                         src={user.profileImage}
@@ -69,7 +71,7 @@ const Header: React.FC = () => {
                                         className="w-10 h-10 ml-1 rounded-full border bg-white"
                                     />
                                 ) : (
-                                    <TbUser className="w-10 h-10 p-2 flex items-center border text-blue-500" />
+                                    <TbUser className="w-10 h-10 p-2 flex items-center border rounded-full text-blue-500" />
                                 )}
                             </Link>
                         </div>

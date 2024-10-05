@@ -28,6 +28,7 @@ export class UserService {
         id: number;
         name: string;
         email: string;
+        slug: string;
         profileImage: string | null;
     }> {
         const user = await this.userRepository.findOne({
@@ -42,6 +43,7 @@ export class UserService {
             id: user.id,
             name: user.name,
             email: user.email,
+            slug: user.slug,
             profileImage: user.profileImage,
         };
     }
@@ -49,9 +51,17 @@ export class UserService {
     async profileFriend(userId: number): Promise<FriendProfileDto[]> {
         return await this.userRepository
             .createQueryBuilder('user')
-            .select(['user.id', 'user.name', 'user.profileImage'])
+            .select(['user.id', 'user.name', 'user.profileImage', 'user.slug'])
             .where('user.id != :userId', { userId })
             .limit(10)
             .getMany();
+    }
+
+    async getProfileBySlug(slug: string): Promise<User> {
+        const user = await this.userRepository.findOne({ where: { slug } });
+        if (!user) {
+            throw new NotFoundException('Kullanıcı bulunamadı');
+        }
+        return user;
     }
 }

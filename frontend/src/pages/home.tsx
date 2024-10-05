@@ -1,10 +1,10 @@
-import { useAuthStore } from "../../store/useAuthStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { TbUser, TbUserHeart } from "react-icons/tb";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 import { HiOutlinePhoto } from "react-icons/hi2";
 
-import ProfileSidebar from "../../components/ProfileSidebar";
-import RightbarFollow from "../../components/RightbarFollow";
+import ProfileSidebar from "../components/ProfileSidebar";
+import RightbarFollow from "../components/RightbarFollow";
 
 const Home: React.FC = () => {
     const { user } = useAuthStore();
@@ -14,15 +14,17 @@ const Home: React.FC = () => {
             <div className="w-[570px]">
                 <div className="p-4 bg-white rounded-lg border mb-3">
                     <div className="mb-5 flex gap-4">
-                        {user?.profileImage ? (
-                            <img
-                                src={user.profileImage}
-                                alt="Profil Resmi"
-                                className="w-12 h-12 ml-1 rounded-full border bg-white"
-                            />
-                        ) : (
-                            <TbUser className="w-12 h-12 p-2 flex items-center border text-blue-500" />
-                        )}
+                        <div className="">
+                            {user?.profileImage ? (
+                                <img
+                                    src={user.profileImage}
+                                    alt="Profil Resmi"
+                                    className="w-12 h-12 ml-1 rounded-full border bg-white"
+                                />
+                            ) : (
+                                <TbUser className="w-10 h-10 p-2 flex items-center border rounded-full text-blue-500" />
+                            )}
+                        </div>
                         <input
                             className="w-full px-4 border rounded-3xl border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Mesajınızı yazın"
