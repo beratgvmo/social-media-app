@@ -31,6 +31,8 @@ export class UserController {
             email: userProfile.email,
             name: userProfile.name,
             profileImage: userProfile.profileImage,
+            followerCount: userProfile.followerCount,
+            followingCount: userProfile.followingCount,
         };
     }
 
@@ -45,6 +47,8 @@ export class UserController {
             email: userProfile.email,
             name: userProfile.name,
             profileImage: userProfile.profileImage,
+            followerCount: userProfile.followerCount,
+            followingCount: userProfile.followingCount,
         };
     }
 

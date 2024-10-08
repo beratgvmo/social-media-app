@@ -8,6 +8,7 @@ import {
 } from "../components/PrivateRoute";
 import MainLayout from "../layouts/main";
 import NotFound from "../pages/NotFound"; // Import NotFound component
+import MyNetwork from "../pages/MyNetwork";
 
 const routes = createBrowserRouter([
     {
@@ -21,6 +22,10 @@ const routes = createBrowserRouter([
             {
                 path: "/profile/:slug",
                 element: <PrivateRouteProfile />,
+            },
+            {
+                path: "/mynetwork",
+                element: <MyNetwork />,
             },
         ],
     },

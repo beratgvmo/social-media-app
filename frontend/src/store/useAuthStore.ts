@@ -7,6 +7,8 @@ interface User {
     email: string;
     slug: string;
     profileImage: string | null;
+    followerCount: number;
+    followingCount: number;
 }
 
 interface AuthStore {
@@ -48,7 +50,7 @@ export const useAuthStore = create(
         }),
         {
             name: "auth-storage",
-            storage: zustandLocalStorage, // Zustand uyumlu localStorage işlemleri
+            storage: zustandLocalStorage,
         }
     )
 );

@@ -38,7 +38,7 @@ const Header: React.FC = () => {
                         </NavLink>
 
                         <NavLink
-                            to="/"
+                            to="/mynetwork"
                             className={({ isActive }) =>
                                 isActive
                                     ? "bg-blue-200 text-blue-600 rounded-full w-10 h-10 p-2"

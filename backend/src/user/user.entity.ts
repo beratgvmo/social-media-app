@@ -36,6 +36,12 @@ export class User {
     @Column({ unique: true })
     slug: string;
 
+    @Column({ default: 0 })
+    followerCount: number;
+
+    @Column({ default: 0 })
+    followingCount: number;
+
     @CreateDateColumn()
     createdAt: Date;
 

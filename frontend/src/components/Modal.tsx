@@ -47,7 +47,7 @@ const Modal: FC<ModalProps> = ({
                 className={`bg-white w-full ${maxWidthClass} rounded-xl shadow-lg`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex justify-between items-center py-2 px-4 border-b-2">
+                <div className="flex justify-between items-center py-2 px-4 border-b">
                     <h3 className="text-xl font-semibold text-gray-90">
                         {title}
                     </h3>
@@ -58,7 +58,7 @@ const Modal: FC<ModalProps> = ({
                         <TbX />
                     </button>
                 </div>
-                <div className="py-5 px-6">{children}</div>
+                <div className="bg-[#f8fafd] rounded-b-xl">{children}</div>
             </div>
         </div>
     );

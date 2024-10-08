@@ -8,12 +8,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { FriendProfileDto } from './dto/friend-profile.dto';
+import { Follower } from 'src/follower/follower.entity';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(User)
-        private readonly userRepository: Repository<User>,
+        private userRepository: Repository<User>,
     ) {}
 
     async updateProfileImage(userId: number, imagePath: string | null) {
@@ -30,6 +31,8 @@ export class UserService {
         email: string;
         slug: string;
         profileImage: string | null;
+        followerCount: number;
+        followingCount: number;
     }> {
         const user = await this.userRepository.findOne({
             where: { id: userId },
@@ -45,6 +48,8 @@ export class UserService {
             email: user.email,
             slug: user.slug,
             profileImage: user.profileImage,
+            followerCount: user.followerCount,
+            followingCount: user.followingCount,
         };
     }
 
@@ -59,9 +64,11 @@ export class UserService {
 
     async getProfileBySlug(slug: string): Promise<User> {
         const user = await this.userRepository.findOne({ where: { slug } });
+
         if (!user) {
             throw new NotFoundException('Kullanıcı bulunamadı');
         }
+
         return user;
     }
 }

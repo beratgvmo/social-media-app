@@ -9,18 +9,19 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button: React.FC<ButtonProps> = ({
     children,
-    variant = "blue", // Varsayılan değer
+    variant = "blue",
     size = "normal",
     className,
     disabled,
     ...props
 }) => {
-    const baseStyles = `inline-flex items-center font-medium focus:outline-none transition ease-in-out duration-150 ${
-        disabled && "opacity-25"
-    }`;
+    const baseStyles = `inline-flex items-center font-medium focus:outline-none transition ease-in-out duration-150`;
 
     const variantStyles = {
-        blue: "bg-blue-500 hover:bg-blue-600 active:bg-blue-700 rounded-lg text-white",
+        blue: `bg-blue-500 hover:bg-blue-600 active:bg-blue-700 rounded-lg text-white ${
+            disabled &&
+            "bg-gray-200 text-gray-400 hover:bg-gray-200 cursor-not-allowed"
+        }`,
         red: "bg-red-600 hover:bg-red-500 active:bg-red-700 rounded-lg text-white",
         gray: "bg-gray-800 text-white hover:bg-gray-700 active:bg-gray-900 rounded-lg",
         outline:

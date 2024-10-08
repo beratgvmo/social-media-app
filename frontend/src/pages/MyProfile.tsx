@@ -40,7 +40,6 @@ const MyProfile: React.FC = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                // await new Promise((resolve) => setTimeout(resolve, 200));
                 const response = await axios.get("/user/profile");
                 setUser(response.data);
             } catch (error) {
@@ -182,35 +181,37 @@ const MyProfile: React.FC = () => {
                             title="Fotoğraf Yükle"
                             maxWidth="2xl"
                         >
-                            {!selectedImage && (
-                                <div className="flex items-center justify-center w-full">
-                                    <label className="flex flex-col items-center justify-center w-full h-[360px] border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <TbCloudUpload className="w-8 h-8 mb-2 text-gray-500" />
-                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                                <span className="font-semibold">
-                                                    Resim Yüklemek için tıklayın
-                                                </span>
-                                            </p>
-                                        </div>
-                                        <input
-                                            id="dropzone-file"
-                                            type="file"
-                                            onChange={onImageChange}
-                                            className="hidden"
-                                            accept="image/*"
-                                        />
-                                    </label>
-                                </div>
-                            )}
-                            {selectedImage && (
-                                <ImageCropper
-                                    imageSrc={selectedImage}
-                                    onCropComplete={onCropComplete}
-                                />
-                            )}
-
-                            <div className="mt-6 flex gap-2 justify-end">
+                            <div className="pt-5 px-6">
+                                {!selectedImage && (
+                                    <div className="flex items-center justify-center w-full">
+                                        <label className="flex flex-col items-center justify-center w-full h-[360px] border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <TbCloudUpload className="w-8 h-8 mb-2 text-gray-500" />
+                                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                                    <span className="font-semibold">
+                                                        Resim Yüklemek için
+                                                        tıklayın
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <input
+                                                id="dropzone-file"
+                                                type="file"
+                                                onChange={onImageChange}
+                                                className="hidden"
+                                                accept="image/*"
+                                            />
+                                        </label>
+                                    </div>
+                                )}
+                                {selectedImage && (
+                                    <ImageCropper
+                                        imageSrc={selectedImage}
+                                        onCropComplete={onCropComplete}
+                                    />
+                                )}
+                            </div>
+                            <div className="mt-6 bg-white py-3 px-6 flex gap-2 justify-end border-t rounded-b-xl">
                                 <Button
                                     onClick={handleImageUpload}
                                     disabled={!croppedImage}
@@ -228,8 +229,8 @@ const MyProfile: React.FC = () => {
                             </div>
                             <div className="text-sm mb-3">Berat Güven</div>
                             <div className="flex gap-5 text-sm">
-                                <p>12k takipçi</p>
-                                <p>4 takip</p>
+                                <p>{user?.followerCount} takipçi</p>
+                                <p>{user?.followingCount} takip</p>
                             </div>
                         </div>
                     </div>

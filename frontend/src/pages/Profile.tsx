@@ -23,7 +23,6 @@ const Profile: React.FC = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                // await new Promise((resolve) => setTimeout(resolve, 200));
                 const response = await axios.get(`/user/profile/${slug}`);
                 const fetchedProfile = response.data;
                 setProfile(fetchedProfile);

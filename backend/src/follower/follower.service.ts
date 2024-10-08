@@ -14,6 +14,7 @@ export class FollowerService {
         private userRepository: Repository<User>,
     ) {}
 
+    // Takip etme işlemi
     async follow(followerId: number, followingId: number): Promise<Follower> {
         const follower = await this.userRepository.findOne({
             where: { id: followerId },
@@ -22,18 +23,14 @@ export class FollowerService {
             where: { id: followingId },
         });
 
-        console.log(follower);
-        console.log(following);
-
         if (!follower || !following) {
             throw new NotFoundException('Kullanıcı bulunamadı');
         }
 
         if (follower.id === following.id) {
-            throw new Error('Kullanıcı aynı');
+            throw new Error('Kullanıcı kendini takip edemez');
         }
 
-        // Kullanıcının zaten takip edip etmediğini kontrol etme
         const existingFollow = await this.followerRepository
             .createQueryBuilder('follower')
             .where('follower.followerId = :followerId', {
@@ -48,17 +45,24 @@ export class FollowerService {
             throw new Error('Zaten takip ediliyor');
         }
 
+        // Takip kaydını oluştur
         const newFollow = this.followerRepository.create({
             follower,
             following,
         });
 
+        // Takip edilen ve takipçi sayısını güncelle
+        follower.followingCount += 1;
+        following.followerCount += 1;
+
+        await this.userRepository.save(follower);
+        await this.userRepository.save(following);
+
         return this.followerRepository.save(newFollow);
     }
 
-    // Takipten çıkma işlemi
+    // Takibi bırakma işlemi
     async unfollow(followerId: number, followingId: number): Promise<void> {
-        // Takipçi ve takip edilen kullanıcıyı buluyoruz
         const follower = await this.userRepository.findOne({
             where: { id: followerId },
         });
@@ -80,15 +84,22 @@ export class FollowerService {
             })
             .getOne();
 
-        console.log(follower);
-
         if (!followRecord) {
             throw new NotFoundException('Takip kaydı bulunamadı');
         }
 
+        // Takip kaydını kaldır
         await this.followerRepository.remove(followRecord);
+
+        // Takip edilen ve takipçi sayısını güncelle
+        follower.followingCount -= 1;
+        following.followerCount -= 1;
+
+        await this.userRepository.save(follower);
+        await this.userRepository.save(following);
     }
 
+    // Kullanıcının başka bir kullanıcıyı takip edip etmediğini kontrol et
     async isFollowing(
         followerId: number,
         followingId: number,

@@ -33,9 +33,8 @@ const ImageCropper: React.FC<ImageCropperProps> = ({
                 imageSrc,
                 croppedAreaPixels
             );
-            console.log("kırp");
 
-            onCropComplete(croppedImage); // Kırpılmış resmi üst bileşene gönder
+            onCropComplete(croppedImage);
         } catch (error) {
             console.error("Resim kırpılırken bir hata oluştu", error);
         }
