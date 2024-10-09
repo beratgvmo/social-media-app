@@ -1,44 +1,96 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { useAuthStore } from "../store/useAuthStore";
 import { TbUser, TbUserHeart } from "react-icons/tb";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 import { HiOutlinePhoto } from "react-icons/hi2";
+import axios from "../utils/axiosInstance";
 
 import ProfileSidebar from "../components/ProfileSidebar";
 import RightbarFollow from "../components/RightbarFollow";
 import Modal from "../components/Modal";
 import Button from "../components/Button";
-import banner from "../pages/banner.jpg";
 import EmojiPicker, { EmojiStyle, EmojiClickData } from "emoji-picker-react";
+import ImageGrid from "../components/ImageGridProps";
+import { useForm } from "react-hook-form";
+interface PostFormInputs {
+    content: string;
+    images: FileList;
+}
 
 const Home: React.FC = () => {
     const { user } = useAuthStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const handleOpenModal = () => setIsModalOpen(true);
-    const handleCloseModal = () => setIsModalOpen(false);
-
     const [postValue, setPostValue] = useState<string>("");
-    const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState<boolean>(false);
     const [postImages, setPostImages] = useState<string[]>([]);
-    const onEmojiClick = (emojiData: EmojiClickData) => {
-        setPostValue((prevInput) => prevInput + emojiData.emoji);
+    const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState<boolean>(false);
+    const editableDivRef = useRef<HTMLDivElement>(null);
+    const { register, handleSubmit, reset } = useForm<PostFormInputs>();
+
+    const handleOpenModal = () => setIsModalOpen(true);
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        editableDivRef == null;
+        setPostValue("");
+    };
+
+    const onEmojiClick = (emojiData: EmojiClickData): void => {
+        const updatedValue = postValue + emojiData.emoji.toString();
+        setPostValue(updatedValue);
+        if (editableDivRef.current) {
+            editableDivRef.current.innerText = updatedValue;
+        }
         setIsEmojiPickerOpen(false);
     };
 
-    const handleInput = (event: React.FormEvent<HTMLDivElement>) => {
-        setPostValue(event.currentTarget.innerHTML);
+    const handleInput = (e: React.FormEvent<HTMLDivElement>): void => {
+        setPostValue(e.currentTarget.innerText || "");
     };
 
     const onImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        event.target.value = "";
+        const files = event.target.files;
 
-        if (file) {
-            const imageUrl = URL.createObjectURL(file);
-
-            setPostImages((prevImages) => [...prevImages, imageUrl]);
+        if (files) {
+            const newImages = Array.from(files).map((file) =>
+                URL.createObjectURL(file)
+            );
+            setPostImages((prevImages) => [...prevImages, ...newImages]);
+            event.target.value = ""; // Dosya seçimini temizle
         }
+    };
+
+    const handlePost = async () => {
+        if (!postValue) return;
+
+        const formData = new FormData();
+        formData.append("content", postValue);
+
+        for (let i = 0; i < postImages.length; i++) {
+            const response = await fetch(postImages[i]);
+            const blob = await response.blob();
+            formData.append("images", blob, `image-${i}.png`);
+        }
+
+        try {
+            const response = await axios.post("/post/create", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            console.log(response.data);
+            reset();
+            setPostImages([]);
+            setPostValue("");
+        } catch (error) {
+            console.error("İçerik yüklenirken bir h ata oluştu", error);
+        }
+    };
+
+    const handleDeleteImage = (index: number) => {
+        const updatedImages = [...postImages];
+        updatedImages.splice(index, 1);
+        setPostImages(updatedImages);
     };
 
     return (
@@ -49,139 +101,88 @@ const Home: React.FC = () => {
                 title="Gönderi Olusturma"
                 maxWidth="2xl"
             >
-                <div>
-                    <div className="px-5 py-4 h-96 overflow-auto">
-                        <div className="relative mb-10">
-                            <div
-                                className="w-full text-lg focus:outline-none"
-                                contentEditable="true"
-                                onInput={handleInput}
-                                dangerouslySetInnerHTML={{ __html: postValue }}
-                                role="textbox"
-                                aria-multiline="true"
-                                suppressContentEditableWarning={true}
-                            ></div>
-                            {postValue === "" && (
-                                <p className="absolute top-0 text-gray-500 text-lg select-none pointer-events-none">
-                                    Ne hakkında konuşmak istiyorsunuz?
-                                </p>
-                            )}
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handlePost();
+                    }}
+                >
+                    <div>
+                        <div className="px-5 py-4 h-96 overflow-auto">
+                            <div className="relative mb-10">
+                                <div
+                                    className="w-full text-lg focus:outline-none"
+                                    contentEditable="true"
+                                    onInput={handleInput}
+                                    role="textbox"
+                                    aria-multiline="true"
+                                    ref={editableDivRef}
+                                    suppressContentEditableWarning={true}
+                                ></div>
+                                {postValue === "" && (
+                                    <p className="absolute top-0 text-gray-500 text-lg select-none pointer-events-none">
+                                        Ne hakkında konuşmak istiyorsunuz?
+                                    </p>
+                                )}
+                            </div>
+                            <ImageGrid
+                                handleDeleteImage={handleDeleteImage}
+                                postImages={postImages}
+                            />
                         </div>
-                        {postImages.length > 0 && (
-                            <div className="border rounded-md">
-                                {postImages.length === 1 && (
-                                    <img
-                                        src={postImages[0]}
-                                        className="rounded-md w-full"
-                                        alt="Uploaded image 1"
+
+                        <div className="relative px-6 flex gap-3">
+                            <button
+                                onClick={() =>
+                                    setIsEmojiPickerOpen(!isEmojiPickerOpen)
+                                }
+                            >
+                                <MdOutlineEmojiEmotions className="w-11 h-11 hover:bg-gray-200 transition p-2.5 rounded-full" />
+                            </button>
+                            {isEmojiPickerOpen && (
+                                <div className="absolute bottom-12 -left-36">
+                                    <EmojiPicker
+                                        height="330px"
+                                        emojiStyle={EmojiStyle.GOOGLE}
+                                        searchPlaceholder="Arama Yap"
+                                        onEmojiClick={onEmojiClick}
+                                        skinTonesDisabled={true}
                                     />
-                                )}
-
-                                {postImages.length === 2 && (
-                                    <div className="flex space-x-2">
-                                        <img
-                                            src={postImages[0]}
-                                            className="rounded-md w-[306px] h-[306px] object-cover "
-                                            alt="Uploaded image 1"
-                                        />
-                                        <img
-                                            src={postImages[1]}
-                                            className="rounded-md w-[306px] h-[306px] object-cover "
-                                            alt="Uploaded image 2"
-                                        />
-                                    </div>
-                                )}
-
-                                {postImages.length === 3 && (
-                                    <div className="flex space-x-2 w-full">
-                                        <div className="w-full">
-                                            <img
-                                                src={postImages[0]}
-                                                className="rounded-md w-[400px] h-[400px] object-cover"
-                                            />
-                                        </div>
-                                        <div className="flex flex-col space-y-2 w-[50%] justify-between">
-                                            <img
-                                                src={postImages[1]}
-                                                className="rounded-md w-[194px] h-[194px] object-cover"
-                                            />
-                                            <img
-                                                src={postImages[2]}
-                                                className="rounded-md w-[194px] h-[194px] object-cover"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                                {postImages.length === 4 && (
-                                    <div className="flex space-x-2 w-full">
-                                        <div className="w-full">
-                                            <img
-                                                src={postImages[0]}
-                                                className="rounded-md w-[458px] h-[458px] object-cover"
-                                            />
-                                        </div>
-                                        <div className="flex flex-col space-y-2 w-[32%] justify-between">
-                                            <img
-                                                src={postImages[1]}
-                                                className="rounded-md w-[146px] h-[146px] object-cover"
-                                            />
-                                            <img
-                                                src={postImages[2]}
-                                                className="rounded-md w-[146px] h-[146px] object-cover"
-                                            />
-                                            <img
-                                                src={postImages[3]}
-                                                className="rounded-md w-[146px] h-[146px] object-cover"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="relative px-6 flex gap-3">
-                        <button
-                            onClick={() =>
-                                setIsEmojiPickerOpen(!isEmojiPickerOpen)
-                            }
-                        >
-                            <MdOutlineEmojiEmotions className="w-11 h-11 hover:bg-gray-200 transition p-2.5 rounded-full" />
-                        </button>
-                        {isEmojiPickerOpen && (
-                            <div className="absolute bottom-12 -left-36">
-                                <EmojiPicker
-                                    height="330px"
-                                    emojiStyle={EmojiStyle.GOOGLE}
-                                    searchPlaceholder="Arama Yap"
-                                    onEmojiClick={onEmojiClick}
-                                    skinTonesDisabled={true}
-                                />
-                            </div>
-                        )}
-
-                        <div>
-                            <label>
-                                <div>
-                                    <HiOutlinePhoto className="w-11 h-11 hover:bg-gray-200 transition p-2.5 rounded-full" />
                                 </div>
-                                <input
-                                    id="dropzone-file"
-                                    type="file"
-                                    onChange={onImageChange}
-                                    className="hidden"
-                                />
-                            </label>
-                        </div>
+                            )}
+                            {postImages.length > 3 ? (
+                                <div>
+                                    <HiOutlinePhoto className="w-11 h-11 p-2.5 rounded-full text-gray-400" />
+                                </div>
+                            ) : (
+                                <div>
+                                    <label>
+                                        <div>
+                                            <HiOutlinePhoto className="w-11 h-11 hover:bg-gray-200 transition p-2.5 rounded-full" />
+                                        </div>
+                                        <input
+                                            id="dropzone-file"
+                                            type="file"
+                                            onChange={onImageChange}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                </div>
+                            )}
 
-                        <TbUserHeart className="w-11 h-11 hover:bg-gray-200 transition p-2.5 rounded-full" />
+                            <TbUserHeart className="w-11 h-11 hover:bg-gray-200 transition p-2.5 rounded-full" />
+                        </div>
                     </div>
-                </div>
-                <div className="mt-6 bg-white py-3 px-6 flex gap-2 justify-end border-t rounded-b-xl">
-                    <Button className="bg-blue-600 text-white focus:ring-blue-500 hover:bg-blue-700 active:bg-blue-800">
-                        Fotoğrafı kaydet
-                    </Button>
-                </div>
+                    <div className="mt-6 bg-white py-3 px-6 flex gap-2 justify-end border-t rounded-b-xl">
+                        <Button
+                            disabled={postValue === ""}
+                            type="submit"
+                            className="bg-blue-600 text-white focus:ring-blue-500 hover:bg-blue-700 active:bg-blue-800"
+                        >
+                            Paylaş
+                        </Button>
+                    </div>
+                </form>
             </Modal>
             <ProfileSidebar />
             <div className="w-[570px]">

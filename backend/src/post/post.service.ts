@@ -2,51 +2,32 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from './post.entity';
 import { Repository } from 'typeorm';
-import { CreatePostDto } from './dto/create-post.dto';
-import { Response } from 'express';
+import { PostImage } from '../post-images/post-images.entity';
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectRepository(Post)
         private postRepository: Repository<Post>,
+        @InjectRepository(PostImage)
+        private postImageRepository: Repository<PostImage>,
     ) {}
 
-    async createPost(
-        createPostDto: CreatePostDto,
-        userId: number,
-    ): Promise<Post> {
-        const post = this.postRepository.create({
-            content: createPostDto.content,
-            user: { id: userId },
+    async createPost(content: string, imageUrls: string[]): Promise<Post> {
+        const post = this.postRepository.create({ content });
+
+        const savedPost = await this.postRepository.save(post);
+        const postImages = imageUrls.map((url, index) => {
+            const postImage = this.postImageRepository.create({
+                url,
+                order: index,
+                post: savedPost,
+            });
+            return postImage;
         });
-        return await this.postRepository.save(post);
-    }
 
-    async allPost(id: number) {
-        try {
-            const userPosts = await this.postRepository.find({
-                where: { user: { id } },
-                select: ['id', 'content', 'createdAt', 'likes'],
-                order: {
-                    createdAt: 'DESC',
-                },
-            });
-            return userPosts;
-        } catch (error) {
-            throw new Error('Error user post all');
-        }
-    }
+        await this.postImageRepository.save(postImages);
 
-    async findOneDelete(id: number, res: Response) {
-        try {
-            await this.postRepository.delete(id);
-
-            res.status(200).send({
-                message: 'Başarılı Şekilde Silindi',
-            });
-        } catch (error) {
-            throw new Error('Error user post delete');
-        }
+        return savedPost;
     }
 }
