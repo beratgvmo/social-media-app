@@ -8,10 +8,12 @@ import ProfileSkeleton from "../components/ProfileSkeleton";
 
 interface UserProfile {
     id: number;
+    name: string;
     email: string;
     slug: string;
-    name: string;
     profileImage: string;
+    followerCount: number;
+    followingCount: number;
 }
 
 const Profile: React.FC = () => {
@@ -46,13 +48,13 @@ const Profile: React.FC = () => {
                 <div className="bg-white rounded-lg border">
                     <div className="relative">
                         <div className="relative">
-                            <img src={banner} className="rounded-t-lg" />
+                            <div className="rounded-t-lg bg-gray-400 w-full h-52" />
                             <TbPhotoSquareRounded className="bg-white text-blue-500 rounded-full absolute top-4 right-4 w-8 h-8 p-1 hover:text-blue-700 transition cursor-pointer" />
                         </div>
                         <div className="absolute -bottom-12 w-40 h-40 bg-white rounded-full left-8 group">
                             {profile ? (
                                 <img
-                                    src={profile.profileImage}
+                                    src={profile?.profileImage}
                                     alt="Profil Resmi"
                                     className="w-full h-full rounded-full border-4 bg-white border-white"
                                 />
@@ -72,8 +74,10 @@ const Profile: React.FC = () => {
                             </div>
                             <div className="text-sm mb-3">Berat Güven</div>
                             <div className="flex gap-5 text-sm">
-                                <p>12k takipçi</p>
-                                <p>4 takip</p>
+                                <div className="flex gap-5 text-sm">
+                                    <p>{profile?.followerCount} takipçi</p>
+                                    <p>{profile?.followingCount} takip</p>
+                                </div>
                             </div>
                         </div>
                     </div>

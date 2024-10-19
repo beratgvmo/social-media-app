@@ -23,12 +23,12 @@ const PrivateRouteNullUser: React.FC<Props> = ({ children }) => {
 const PrivateRouteProfile: React.FC = () => {
     const { user } = useAuthStore();
     const { slug } = useParams<{ slug: string }>();
-    const [loading, setLoading] = useState(true); // Loading state
-    const [error, setError] = useState<string | null>(null); // Error state
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
-            setLoading(true); // Start loading before the axios request
+            setLoading(true);
             try {
                 const response = await axios.get(`/user/profile/${slug}`);
 

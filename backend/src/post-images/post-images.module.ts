@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { BadRequestException, Module } from '@nestjs/common';
 import { PostImagesController } from './post-images.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -18,23 +18,25 @@ import { PostImage } from './post-images.entity';
                     cb(null, 'src/img');
                 },
                 filename: (req, file, cb) => {
-                    const extension =
-                        file.mimetype === 'image/jpeg'
-                            ? '.jpeg'
-                            : extname(file.originalname);
+                    const extension = extname(file.originalname).toLowerCase();
                     const filename = `${randomUUID()}${extension}`;
                     cb(null, filename);
                 },
             }),
             fileFilter: (req, file, cb) => {
-                if (
-                    file.mimetype === 'image/jpeg' ||
-                    file.mimetype === 'image/png'
-                ) {
+                const allowedMimeTypes = [
+                    'image/jpeg',
+                    'image/png',
+                    'image/webp',
+                ];
+
+                if (allowedMimeTypes.includes(file.mimetype)) {
                     cb(null, true);
                 } else {
                     cb(
-                        new Error('Only JPEG and PNG images are allowed'),
+                        new BadRequestException(
+                            'Only JPEG, PNG, and WEBP images are allowed',
+                        ),
                         false,
                     );
                 }

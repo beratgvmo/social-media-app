@@ -25,6 +25,7 @@ import { UserModule } from './user/user.module';
                 entities: [__dirname + '/**/*.entity{.ts,.js}'],
                 autoLoadEntities: true,
                 synchronize: true,
+                charset: 'utf8mb4',
             }),
         }),
         AuthModule,

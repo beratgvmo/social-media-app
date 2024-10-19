@@ -10,7 +10,7 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
-import { Comment } from '../comment/commet.entity';
+import { Comment } from '../comment/comment.entity';
 
 @Entity()
 export class Post {
@@ -19,6 +19,9 @@ export class Post {
 
     @Column('text')
     content: string;
+
+    @Column({ default: 0 })
+    likeCount: number;
 
     @CreateDateColumn()
     createdAt: Date;

@@ -20,6 +20,7 @@ const ProfileCard: React.FC<Friend> = ({ id, name, profileImage, slug }) => {
             setLoading(false);
             const response = await axios.get(`/follower/status/${id}`);
             setIsFollowing(response.data.isFollowing);
+            console.log("fsdf");
         } catch (error) {
             console.error(error);
         } finally {

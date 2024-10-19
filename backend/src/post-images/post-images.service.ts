@@ -10,10 +10,9 @@ export class PostImagesService {
         private postImageRepository: Repository<PostImage>,
     ) {}
 
-    async createImage(order: number, imagePath: string): Promise<PostImage> {
+    async createImage(imagePath: string): Promise<PostImage> {
         const postImage = this.postImageRepository.create({
             url: imagePath,
-            order: order,
         });
 
         return await this.postImageRepository.save(postImage);

@@ -2,7 +2,7 @@
 /dist
 /node_modules
 /build
-
+/src/img
 # Logs
 logs
 *.log

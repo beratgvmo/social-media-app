@@ -9,9 +9,6 @@ export class PostImage {
     @Column()
     url: string;
 
-    @Column()
-    order: number;
-
     @ManyToOne(() => Post, (post) => post.postImages)
     post: Post;
 }

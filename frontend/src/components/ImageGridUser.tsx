@@ -6,13 +6,13 @@ interface ImageGridProps {
     handleDeleteImage: (index: number) => void;
 }
 
-const ImageGrid: React.FC<ImageGridProps> = ({
+const ImageGridUser: React.FC<ImageGridProps> = ({
     postImages,
     handleDeleteImage,
 }) => {
     return (
         postImages.length > 0 && (
-            <div className="border rounded-md">
+            <div>
                 {postImages.length === 1 && (
                     <div className="relative">
                         <img
@@ -159,7 +159,7 @@ const ImageGrid: React.FC<ImageGridProps> = ({
                                     className="rounded-md w-[146px] h-[146px] object-cover"
                                 />
                                 <button
-                                    onClick={() => handleDeleteImage(2)}
+                                    onClick={() => handleDeleteImage(3)}
                                     className="absolute group top-2 right-2 bg-red-500 text-white rounded-full p-1"
                                 >
                                     <span className="animate-ping group-hover:inline-flex hidden transition absolute top-0 right-0 h-6 w-6 rounded-full bg-red-400 opacity-75"></span>
@@ -174,4 +174,4 @@ const ImageGrid: React.FC<ImageGridProps> = ({
     );
 };
 
-export default ImageGrid;
+export default ImageGridUser;

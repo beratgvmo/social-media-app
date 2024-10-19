@@ -9,7 +9,7 @@ import {
     BeforeUpdate,
 } from 'typeorm';
 import { Post } from '../post/post.entity';
-import { Comment } from '../comment/commet.entity';
+import { Comment } from '../comment/comment.entity';
 import { Like } from '../like/like.entity';
 import { Follower } from '../follower/follower.entity';
 
@@ -24,8 +24,11 @@ export class User {
     @Column()
     name: string;
 
-    @Column()
+    @Column({ select: false })
     password: string;
+
+    @Column({ nullable: true })
+    bio: string;
 
     @Column({ nullable: true })
     profileImage: string;
