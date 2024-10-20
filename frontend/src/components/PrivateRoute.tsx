@@ -14,7 +14,7 @@ const PrivateRouteNullUser: React.FC<Props> = ({ children }) => {
     const { user } = useAuthStore();
 
     if (user) {
-        return <Navigate to="/profile" />;
+        return <Navigate to={`/profile/${user.slug}`} />;
     }
 
     return <>{children}</>;

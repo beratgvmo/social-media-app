@@ -74,7 +74,7 @@ const RightbarFollow: React.FC = () => {
     }
 
     return (
-        <div className="w-[300px]">
+        <div className="min-w-[300px]">
             <div className="bg-white w-full px-4 py-3 rounded-lg border">
                 <p className="text-sm font-medium">
                     Sizin için daha fazla profil

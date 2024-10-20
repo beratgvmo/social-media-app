@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { TbBookmark, TbMessageCircle, TbShare3, TbUser } from "react-icons/tb";
+import {
+    TbBookmark,
+    TbDots,
+    TbMessageCircle,
+    TbShare3,
+    TbUser,
+} from "react-icons/tb";
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 import PostImageGrid from "./PostImageGrid";
 import TimeAgo from "./TimeAgo";
@@ -9,7 +15,7 @@ import axios from "../utils/axiosInstance";
 interface PostProps {
     id: number;
     content: string;
-    likeCount: string;
+    likeCount: number;
     images: PostImage[];
     createdAt: string;
     user: User;
@@ -33,15 +39,16 @@ const Post: React.FC<PostProps> = ({
     createdAt,
     user,
     border,
+    likeCount,
 }) => {
     const [isLike, setIsLike] = useState(false);
-    const [LikeCount, setLikeCount] = useState(false);
+    const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
 
     const fetchLike = async () => {
         try {
-            const response = await axios.post("like/post/" + id);
+            await axios.post("like/post/" + id);
             setIsLike(true);
-            setLikeCount(response.data); // Update like count with response
+            setCurrentLikeCount((prevCount) => prevCount + 1);
         } catch (error) {
             console.error(error);
         }
@@ -49,9 +56,9 @@ const Post: React.FC<PostProps> = ({
 
     const fetchRemoveLike = async () => {
         try {
-            const response = await axios.delete("like/remove/post/" + id);
+            await axios.delete("like/remove/post/" + id);
             setIsLike(false);
-            setLikeCount(response.data); // Update like count with response
+            setCurrentLikeCount((prevCount) => prevCount - 1);
         } catch (error) {
             console.error(error);
         }
@@ -79,29 +86,38 @@ const Post: React.FC<PostProps> = ({
                     : "pt-4 pb-3 bg-white rounded-t-lg border-b"
             }
         >
-            <Link to={`/profile/${user.slug}`}>
-                <div className="flex gap-2.5 px-4">
-                    <div className="w-12 h-12">
-                        {user?.profileImage ? (
-                            <img
-                                src={user.profileImage}
-                                alt="Profil Resmi"
-                                className="w-full h-full rounded-full border"
-                            />
-                        ) : (
-                            <div className="flex justify-center items-center w-full h-full bg-gray-200 rounded-full border-4 border-white">
-                                <TbUser size={90} />
+            <div className="flex justify-between">
+                <Link to={`/profile/${user.slug}`}>
+                    <div className="flex gap-2.5 pl-4">
+                        <div className="w-12 h-12">
+                            {user?.profileImage ? (
+                                <img
+                                    src={user.profileImage}
+                                    alt="Profil Resmi"
+                                    className="w-full h-full rounded-full border"
+                                />
+                            ) : (
+                                <div className="flex justify-center items-center w-full h-full bg-gray-200 rounded-full border-4 border-white">
+                                    <TbUser size={90} />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex justify-between">
+                            <div>
+                                <p className="font-medium">{user?.name}</p>
+                                <p className="text-xs text-gray-600">
+                                    <TimeAgo createdAt={createdAt} />
+                                </p>
                             </div>
-                        )}
+                        </div>
                     </div>
-                    <div>
-                        <p className="font-medium">{user?.name}</p>
-                        <p className="text-xs text-gray-600">
-                            <TimeAgo createdAt={createdAt} />
-                        </p>
-                    </div>
+                </Link>
+                <div className="pr-4">
+                    <button>
+                        <TbDots />
+                    </button>
                 </div>
-            </Link>
+            </div>
             <div className="mt-2.5 px-4">
                 <p className="text-base">{content}</p>
             </div>
@@ -119,7 +135,7 @@ const Post: React.FC<PostProps> = ({
                                 <AiFillLike className="w-full h-full text-blue-500 group-hover:text-blue-500 transition cursor-pointer" />
                             </div>
                             <p className="text-blue-500 text-sm font-medium transition">
-                                1
+                                {currentLikeCount}
                             </p>
                         </button>
                     ) : (
@@ -131,7 +147,7 @@ const Post: React.FC<PostProps> = ({
                                 <AiOutlineLike className="w-full h-full text-gray-700 group-hover:text-blue-500 transition cursor-pointer" />
                             </div>
                             <p className="text-gray-700 group-hover:text-blue-500 text-sm font-medium transition">
-                                0
+                                {currentLikeCount}
                             </p>
                         </button>
                     )}

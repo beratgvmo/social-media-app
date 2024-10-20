@@ -5,10 +5,10 @@ import { useAuthStore } from "../store/useAuthStore";
 const ProfileSidebar: React.FC = () => {
     const { user } = useAuthStore();
     return (
-        <div className="w-[230px]">
+        <div className="min-w-[230px]">
             <div className="bg-white rounded-lg border">
                 <div className="">
-                    <img src={banner} alt="" className="rounded-t-lg" />
+                    <div className="rounded-t-lg bg-gray-400 w-full h-24" />
                     <div className="relative">
                         <div className="absolute -bottom-9 w-16 h-16 bg-white rounded-full left-3 group">
                             {user?.profileImage ? (
@@ -18,7 +18,7 @@ const ProfileSidebar: React.FC = () => {
                                     className="w-full h-full rounded-full border-2 bg-white border-white"
                                 />
                             ) : (
-                                <div className="p-2 flex text-blue-500 justify-center items-center w-full h-full bg-gray-200 rounded-full border-4 border-white">
+                                <div className="p-2 flex text-blue-500 justify-center items-center w-full h-full bg-gray-200 rounded-full border-2 border-white">
                                     <TbUser size={90} />
                                 </div>
                             )}

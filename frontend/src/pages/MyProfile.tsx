@@ -4,6 +4,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import ImageCropper from "../components/ImageCropper";
 import {
     TbCloudUpload,
+    TbMessage2,
     TbPhotoEdit,
     TbPhotoSquareRounded,
     TbUser,
@@ -15,37 +16,19 @@ import ProfileSkeleton from "../components/ProfileSkeleton";
 import Post from "../components/Post";
 import { CgSpinner } from "react-icons/cg";
 import SettingsSidebar from "../components/SettingsSidebar";
-
-export interface Post {
-    id: number;
-    content: string;
-    createdAt: string;
-    postImages: PostImage[];
-    user: User;
-}
-
-export interface PostImage {
-    id: number;
-    url: string;
-}
-
-export interface User {
-    slug: string;
-    profileImage: string;
-    name: string;
-}
+import usePostStore from "../store/usePostStore";
 
 const MyProfile: React.FC = () => {
     const { logout, user, setUser } = useAuthStore();
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [croppedImage, setCroppedImage] = useState<Blob | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [posts, setPosts] = useState<Post[]>([]);
-    const limit = 1;
-    const [page, setPage] = useState<number>(1);
-    const [hasMore, setHasMore] = useState<boolean>(true);
     const [pageLoading, setPageLoading] = useState(false);
+
+    const { profilePosts, loading, hasMore, fetchProfilePosts } =
+        usePostStore();
+    const limit = 5;
+    const [page, setPage] = useState<number>(1);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -56,7 +39,7 @@ const MyProfile: React.FC = () => {
                 console.error("Profil yüklenirken bir hata oluştu", error);
                 logout();
             } finally {
-                setLoading(false);
+                setPageLoading(false);
             }
         };
 
@@ -64,31 +47,14 @@ const MyProfile: React.FC = () => {
     }, [setUser, logout]);
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            setPageLoading(true);
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            try {
-                const response = await axios.get(`/post/` + user?.slug, {
-                    params: { page, limit },
-                });
-                const newPosts: Post[] = response.data;
-
-                if (newPosts.length < limit) {
-                    setHasMore(false);
-                }
-
-                setPosts((prevPosts) => [...prevPosts, ...newPosts]);
-            } catch (error) {
-                console.error("Error fetching posts:", error);
-            } finally {
-                setPageLoading(false);
-            }
+        const loadPosts = async () => {
+            await fetchProfilePosts(page, limit, user!.slug);
         };
 
         if (hasMore) {
-            fetchPosts();
+            loadPosts();
         }
-    }, [page]);
+    }, [page, hasMore, fetchProfilePosts]);
 
     const handleScroll = () => {
         const scrollTop =
@@ -162,7 +128,7 @@ const MyProfile: React.FC = () => {
         setSelectedImage(null);
     };
 
-    if (loading) {
+    if (pageLoading) {
         return <ProfileSkeleton />;
     }
 
@@ -261,25 +227,31 @@ const MyProfile: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="w-full mt-6 mb-4 bg-white border border-b-0 rounded-t-lg">
-                        {posts.length > 0 ? (
-                            posts.map((post, index) => (
+                    {profilePosts.length > 0 ? (
+                        <div className="w-full mt-6 mb-4 bg-white border border-b-0 rounded-t-lg">
+                            {profilePosts.map((post, index) => (
                                 <Post
                                     id={post.id}
                                     content={post.content}
-                                    likeCount="0"
+                                    likeCount={post.likeCount}
                                     createdAt={post.createdAt}
                                     images={post.postImages}
                                     key={index}
                                     user={post.user}
                                     border={false}
                                 />
-                            ))
-                        ) : (
-                            <p>No messages found.</p>
-                        )}
-                    </div>
-                    {pageLoading && (
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="flex items-center justify-center flex-col mt-8">
+                            <TbMessage2 className="text-5xl bg-white p-2.5 rounded-full border-2 border-gray-800 text-gray-800 mb-2" />
+                            <p className="text-gray-800 font-medium text-lg">
+                                Gönderi bulunmakta
+                            </p>
+                        </div>
+                    )}
+
+                    {loading && (
                         <div className="w-full flex justify-center items-center h-20">
                             <CgSpinner
                                 className="animate-spin text-blue-600"
@@ -287,14 +259,10 @@ const MyProfile: React.FC = () => {
                             />
                         </div>
                     )}
-                    {/* <button
-                        onClick={handleLogout}
-                        className="py-2 px-4 bg-red-500 text-white font-semibold rounded hover:bg-red-600 transition duration-200"
-                    >
-                        Logout
-                    </button> */}
                 </div>
-                <RightbarFollow />
+                <div className="w-[270px]">
+                    <RightbarFollow />
+                </div>
             </div>
         </>
     );

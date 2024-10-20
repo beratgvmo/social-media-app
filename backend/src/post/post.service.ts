@@ -46,7 +46,10 @@ export class PostService {
             await this.postImageRepository.save(postImages);
         }
 
-        return savedPost;
+        return this.postRepository.findOne({
+            where: { id: savedPost.id },
+            relations: ['postImages', 'user'],
+        });
     }
 
     async findAllPosts(page: number, limit: number): Promise<Post[]> {
@@ -56,8 +59,12 @@ export class PostService {
             relations: ['postImages', 'user'],
             skip,
             take: limit,
+            order: {
+                createdAt: 'DESC',
+            },
         });
     }
+
     async findProfilPosts(
         page: number,
         limit: number,
@@ -74,6 +81,9 @@ export class PostService {
             relations: ['postImages', 'user'],
             skip,
             take: limit,
+            order: {
+                createdAt: 'DESC',
+            },
         });
     }
 }

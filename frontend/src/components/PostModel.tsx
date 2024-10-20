@@ -8,6 +8,8 @@ import { useForm } from "react-hook-form";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 import { HiOutlinePhoto } from "react-icons/hi2";
 import { TbUserHeart } from "react-icons/tb";
+import usePostStore from "../store/usePostStore";
+import { useAuthStore } from "../store/useAuthStore";
 
 interface PostFormInputs {
     content: string;
@@ -16,7 +18,7 @@ interface PostFormInputs {
 
 interface PostModelProps {
     isOpen: boolean;
-    onClose: () => void; // Close function passed from parent
+    onClose: () => void;
 }
 
 const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
@@ -24,13 +26,21 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
     const [postValue, setPostValue] = useState<string>("");
     const [postImages, setPostImages] = useState<string[]>([]);
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const editableDivRef = useRef<HTMLDivElement>(null);
     const { register, handleSubmit, reset } = useForm<PostFormInputs>();
+    const { user } = useAuthStore();
+    const { setProfilePosts } = usePostStore();
 
-    // Modal açılma ve kapanma durumlarını props'a göre yönet
     useEffect(() => {
         setIsModalOpen(isOpen);
     }, [isOpen]);
+
+    useEffect(() => {
+        return () => {
+            postImages.forEach((image) => URL.revokeObjectURL(image));
+        };
+    }, [postImages]);
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
@@ -43,7 +53,7 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
     };
 
     const onEmojiClick = (emojiData: EmojiClickData): void => {
-        const updatedValue = postValue + emojiData.emoji.toString();
+        const updatedValue = postValue + emojiData.emoji;
         setPostValue(updatedValue);
         if (editableDivRef.current) {
             editableDivRef.current.innerText = updatedValue;
@@ -79,16 +89,23 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
             formData.append("images", blob, `image-${i}.png`);
         }
 
+        setIsLoading(true);
         try {
-            await axios.post("/post/create", formData, {
+            const response = await axios.post("/post/create", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
+
+            const newPost = response.data.post;
+            setProfilePosts([newPost]);
+
             reset();
             handleCloseModal();
         } catch (error) {
             console.error("İçerik yüklenirken bir hata oluştu", error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -174,6 +191,7 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                                         type="file"
                                         onChange={onImageChange}
                                         className="hidden"
+                                        multiple
                                     />
                                 </label>
                             </div>
@@ -184,11 +202,11 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div className="mt-6 bg-white py-3 px-6 flex gap-2 justify-end border-t rounded-b-xl">
                     <Button
-                        disabled={postValue === ""}
+                        disabled={postValue === "" || isLoading}
                         type="submit"
                         className="bg-blue-600 text-white focus:ring-blue-500 hover:bg-blue-700 active:bg-blue-800"
                     >
-                        Paylaş
+                        {isLoading ? "Yükleniyor..." : "Paylaş"}
                     </Button>
                 </div>
             </form>

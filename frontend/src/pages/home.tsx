@@ -11,6 +11,7 @@ import RightbarFollow from "../components/RightbarFollow";
 import Post from "../components/Post";
 import { CgSpinner } from "react-icons/cg";
 import PostModel from "../components/PostModel";
+import usePostStore from "../store/usePostStore";
 
 export interface Post {
     id: number;
@@ -18,6 +19,7 @@ export interface Post {
     createdAt: string;
     postImages: PostImage[];
     user: User;
+    likeCount: number;
 }
 
 export interface PostImage {
@@ -33,39 +35,20 @@ export interface User {
 
 const Home: React.FC = () => {
     const { user } = useAuthStore();
-    const [posts, setPosts] = useState<Post[]>([]);
-    const limit = 1;
+    const { homePosts, loading, hasMore, fetchHomePosts } = usePostStore();
+    const limit = 5;
     const [page, setPage] = useState<number>(1);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [hasMore, setHasMore] = useState<boolean>(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        const fetchPosts = async () => {
-            setLoading(true);
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            try {
-                const response = await axios.get(`/post`, {
-                    params: { page, limit },
-                });
-                const newPosts: Post[] = response.data;
-
-                if (newPosts.length < limit) {
-                    setHasMore(false);
-                }
-
-                setPosts((prevPosts) => [...prevPosts, ...newPosts]);
-            } catch (error) {
-                console.error("Error fetching posts:", error);
-            } finally {
-                setLoading(false);
-            }
+        const loadPosts = async () => {
+            await fetchHomePosts(page, limit);
         };
 
         if (hasMore) {
-            fetchPosts();
+            loadPosts();
         }
-    }, [page]);
+    }, [page, hasMore, fetchHomePosts]);
 
     const handleScroll = () => {
         const scrollTop =
@@ -102,7 +85,7 @@ const Home: React.FC = () => {
             <PostModel isOpen={isModalOpen} onClose={handleCloseModal} />
             <div className="flex gap-5 mt-6">
                 <ProfileSidebar />
-                <div className="w-[570px]">
+                <div className="min-w-[570px]">
                     <div className="pt-4 px-4 pb-3 bg-white rounded-lg border mb-3">
                         <div className="mb-2.5 flex gap-3">
                             <div className="w-14">
@@ -113,7 +96,7 @@ const Home: React.FC = () => {
                                         className="w-12 h-12 ml-1 rounded-full border bg-white"
                                     />
                                 ) : (
-                                    <TbUser className="w-10 h-10 p-2 flex items-center border rounded-full text-blue-500" />
+                                    <TbUser className="w-12 h-12 p-2 flex items-center border rounded-full text-blue-500" />
                                 )}
                             </div>
                             <button
@@ -146,10 +129,10 @@ const Home: React.FC = () => {
                     </div>
                     <div className="border-b-2 border-gray-300"></div>
                     <div className="mb-4">
-                        {posts.map((post, index) => (
+                        {homePosts.map((post, index) => (
                             <Post
                                 content={post.content}
-                                likeCount="0"
+                                likeCount={post.likeCount}
                                 createdAt={post.createdAt}
                                 images={post.postImages}
                                 key={index}
