@@ -36,7 +36,11 @@ export class AuthService {
     }
 
     async login(email: string, password: string, res: Response): Promise<void> {
-        const user = await this.userRepository.findOne({ where: { email } });
+        const user = await this.userRepository.findOne({
+            where: { email },
+            select: ['id', 'email', 'name', 'password'],
+        });
+
         if (!user || !(await bcrypt.compare(password, user.password))) {
             throw new HttpException(
                 'Geçersiz kimlik bilgileri',

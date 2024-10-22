@@ -19,9 +19,10 @@ export class LikeService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    async likePost(userId: number, postId: number): Promise<number> {
+    async likePost(userId: number, postId: number): Promise<Post> {
         const post = await this.postRepository.findOne({
             where: { id: postId },
+            relations: ['user'],
         });
         const user = await this.userRepository.findOne({
             where: { id: userId },
@@ -39,7 +40,7 @@ export class LikeService {
             await this.postRepository.save(post);
         }
 
-        return post.likeCount;
+        return post;
     }
 
     async unlikePost(userId: number, postId: number): Promise<number> {
@@ -61,11 +62,14 @@ export class LikeService {
     async checkPostLikeStatus(
         userId: number,
         postId: number,
-    ): Promise<boolean> {
+    ): Promise<{ status: boolean; count: number }> {
         const like = await this.likeRepository.findOne({
             where: { user: { id: userId }, post: { id: postId } },
         });
-        return !!like;
+        const post = await this.postRepository.findOne({
+            where: { id: postId },
+        });
+        return { status: !!like, count: post.likeCount };
     }
 
     async likeComment(userId: number, comId: number): Promise<void> {

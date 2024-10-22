@@ -7,8 +7,11 @@ import {
     TbSquareRoundedPlus,
 } from "react-icons/tb";
 import PostModel from "./PostModel";
+import axios from "../utils/axiosInstance";
+import { useAuthStore } from "../store/useAuthStore";
 
 const SettingsSidebar: React.FC = () => {
+    const { logout } = useAuthStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleOpenModal = () => {
@@ -17,6 +20,15 @@ const SettingsSidebar: React.FC = () => {
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
+    };
+
+    const handleLogout = async () => {
+        try {
+            await axios.post("/auth/logout");
+            logout();
+        } catch (error) {
+            console.error("Çıkış işlemi başarısız", error);
+        }
     };
 
     return (
@@ -44,10 +56,13 @@ const SettingsSidebar: React.FC = () => {
                             <TbSettings className="text-xl mr-1.5" />
                             <p>Ayarlar</p>
                         </div>
-                        <div className="flex items-center cursor-pointer font-semibold mt-2 hover:bg-blue-100 py-2 px-3 transition rounded-full">
+                        <button
+                            onClick={() => handleLogout()}
+                            className="flex items-center cursor-pointer font-semibold mt-2 hover:bg-blue-100 py-2 px-3 transition rounded-full"
+                        >
                             <TbLogout className="text-xl mr-1.5" />
                             <p>Oturumu Kapat</p>
-                        </div>
+                        </button>
                     </div>
                 </div>
             </div>

@@ -25,7 +25,7 @@ const Button: React.FC<ButtonProps> = ({
         red: "bg-red-600 hover:bg-red-500 active:bg-red-700 rounded-lg text-white",
         gray: "bg-gray-800 text-white hover:bg-gray-700 active:bg-gray-900 rounded-lg",
         outline:
-            "border-2 border-gray-500 bg-transparent text-gray-500 rounded-3xl hover:border-gray-800 hover:text-gray-800",
+            "border-2 border-gray-500 bg-transparent text-gray-500 rounded-3xl hover:border-gray-800 hover:text-gray-800 transition",
         rounded:
             "bg-blue-500 border-2 border-transparent hover:bg-blue-600 active:bg-blue-700 rounded-3xl text-white",
     }[variant];

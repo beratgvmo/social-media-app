@@ -10,23 +10,52 @@ import {
 import { LikeService } from './like.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request } from 'express';
+import { NotificationService } from '../notification/notification.service';
 
 @Controller('like')
 export class LikeController {
-    constructor(private readonly likeService: LikeService) {}
+    constructor(
+        private readonly likeService: LikeService,
+        private readonly notificationService: NotificationService,
+    ) {}
 
     @UseGuards(JwtAuthGuard)
     @Post('post/:postId')
     async postLike(@Param('postId') postId: number, @Req() req: Request) {
-        const userId = req.user['sub'];
-        return this.likeService.likePost(userId, postId);
+        const userId = req.user['sub']; // JWT'den userId'yi alıyoruz
+
+        const likedPost = await this.likeService.likePost(userId, postId);
+
+        const postOwner = likedPost.user;
+
+        await this.notificationService.createNotification(
+            postOwner,
+            'like',
+            userId,
+            likedPost,
+        );
+
+        return likedPost.likeCount;
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete('remove/post/:postId')
     async removePostLike(@Param('postId') postId: number, @Req() req: Request) {
         const userId = req.user['sub'];
-        return this.likeService.unlikePost(userId, postId);
+        // Beğeni kaldırma işlemi
+        const updatedLikeCount = await this.likeService.unlikePost(
+            userId,
+            postId,
+        );
+
+        // Bildirim kaldırma işlemi
+        await this.notificationService.removeNotification(
+            userId,
+            postId,
+            'like',
+        );
+
+        return updatedLikeCount;
     }
 
     @UseGuards(JwtAuthGuard)

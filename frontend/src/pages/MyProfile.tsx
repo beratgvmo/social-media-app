@@ -24,11 +24,13 @@ const MyProfile: React.FC = () => {
     const [croppedImage, setCroppedImage] = useState<Blob | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [pageLoading, setPageLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    const { profilePosts, loading, hasMore, fetchProfilePosts } =
-        usePostStore();
-    const limit = 5;
+    const { profilePosts, setProfilePosts } = usePostStore();
+
+    const limit = 10;
     const [page, setPage] = useState<number>(1);
+    const [hasMore, setHasMore] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -39,7 +41,7 @@ const MyProfile: React.FC = () => {
                 console.error("Profil yüklenirken bir hata oluştu", error);
                 logout();
             } finally {
-                setPageLoading(false);
+                setLoading(false);
             }
         };
 
@@ -47,14 +49,30 @@ const MyProfile: React.FC = () => {
     }, [setUser, logout]);
 
     useEffect(() => {
-        const loadPosts = async () => {
-            await fetchProfilePosts(page, limit, user!.slug);
+        const fetchPosts = async () => {
+            setPageLoading(true);
+            try {
+                const response = await axios.get(`/post/` + user?.slug, {
+                    params: { page, limit },
+                });
+                const newPosts = response.data;
+
+                if (newPosts.length < limit) {
+                    setHasMore(false);
+                }
+
+                setProfilePosts(newPosts);
+            } catch (error) {
+                console.error("Error fetching posts:", error);
+            } finally {
+                setPageLoading(false);
+            }
         };
 
         if (hasMore) {
-            loadPosts();
+            fetchPosts();
         }
-    }, [page, hasMore, fetchProfilePosts]);
+    }, [page]);
 
     const handleScroll = () => {
         const scrollTop =
@@ -63,11 +81,10 @@ const MyProfile: React.FC = () => {
             document.documentElement.scrollHeight || document.body.scrollHeight;
         const clientHeight =
             document.documentElement.clientHeight || window.innerHeight;
-
         if (
             scrollTop + clientHeight >= scrollHeight - 5 &&
             hasMore &&
-            !loading
+            !pageLoading
         ) {
             setPage((prevPage) => prevPage + 1);
         }
@@ -76,16 +93,7 @@ const MyProfile: React.FC = () => {
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
-    }, [loading, hasMore]);
-
-    const handleLogout = async () => {
-        try {
-            await axios.post("/auth/logout");
-            logout();
-        } catch (error) {
-            console.error("Çıkış işlemi başarısız", error);
-        }
-    };
+    }, [pageLoading, hasMore]);
 
     const handleImageUpload = async () => {
         if (!croppedImage) return;
@@ -128,7 +136,7 @@ const MyProfile: React.FC = () => {
         setSelectedImage(null);
     };
 
-    if (pageLoading) {
+    if (loading) {
         return <ProfileSkeleton />;
     }
 
@@ -251,7 +259,7 @@ const MyProfile: React.FC = () => {
                         </div>
                     )}
 
-                    {loading && (
+                    {pageLoading && (
                         <div className="w-full flex justify-center items-center h-20">
                             <CgSpinner
                                 className="animate-spin text-blue-600"

@@ -35,20 +35,37 @@ export interface User {
 
 const Home: React.FC = () => {
     const { user } = useAuthStore();
-    const { homePosts, loading, hasMore, fetchHomePosts } = usePostStore();
-    const limit = 5;
+    const { setHomePosts, homePosts } = usePostStore();
+    const limit = 10;
     const [page, setPage] = useState<number>(1);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [hasMore, setHasMore] = useState<boolean>(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        const loadPosts = async () => {
-            await fetchHomePosts(page, limit);
-        };
+        const fetchPosts = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get(`/post`, {
+                    params: { page, limit },
+                });
+                const newPosts = response.data;
 
+                if (newPosts.length < limit) {
+                    setHasMore(false);
+                }
+
+                setHomePosts(newPosts);
+            } catch (error) {
+                console.error("Error fetching posts:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
         if (hasMore) {
-            loadPosts();
+            fetchPosts();
         }
-    }, [page, hasMore, fetchHomePosts]);
+    }, [page]);
 
     const handleScroll = () => {
         const scrollTop =
@@ -57,7 +74,6 @@ const Home: React.FC = () => {
             document.documentElement.scrollHeight || document.body.scrollHeight;
         const clientHeight =
             document.documentElement.clientHeight || window.innerHeight;
-
         if (
             scrollTop + clientHeight >= scrollHeight - 5 &&
             hasMore &&

@@ -32,7 +32,7 @@ const Register: React.FC = () => {
 
     useEffect(() => {
         if (user) {
-            navigate("/profile");
+            navigate("/");
         }
     }, [user, setUser]);
 

@@ -4,7 +4,6 @@ import { useAuthStore } from "../store/useAuthStore";
 import MyProfile from "../pages/MyProfile";
 import Profile from "../pages/Profile";
 import axios from "../utils/axiosInstance";
-import Loading from "./Loading";
 
 interface Props {
     children: ReactNode;
@@ -13,7 +12,7 @@ interface Props {
 const PrivateRouteNullUser: React.FC<Props> = ({ children }) => {
     const { user } = useAuthStore();
 
-    if (user) {
+    if (user?.slug) {
         return <Navigate to={`/profile/${user.slug}`} />;
     }
 

@@ -31,7 +31,7 @@ const Login: React.FC = () => {
 
     useEffect(() => {
         if (user) {
-            navigate("/profile");
+            navigate("/");
         }
     }, [user, setUser]);
 

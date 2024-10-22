@@ -1,5 +1,11 @@
 import { User } from '../user/user.entity';
-import { Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    ManyToOne,
+    PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Follower {
@@ -11,4 +17,10 @@ export class Follower {
 
     @ManyToOne(() => User, (user) => user.followers)
     following: User;
+
+    @Column({ default: 'pending' })
+    status: 'accepted' | 'pending';
+
+    @CreateDateColumn()
+    createdAt: Date;
 }

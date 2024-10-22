@@ -12,7 +12,7 @@ import { Post } from '../post/post.entity';
 import { Comment } from '../comment/comment.entity';
 import { Like } from '../like/like.entity';
 import { Follower } from '../follower/follower.entity';
-
+import { Notification } from '../notification/notification.entity';
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
@@ -29,6 +29,9 @@ export class User {
 
     @Column({ nullable: true })
     bio: string;
+
+    @Column({ default: false })
+    isPrivate: boolean;
 
     @Column({ nullable: true })
     profileImage: string;
@@ -65,6 +68,9 @@ export class User {
 
     @OneToMany(() => Follower, (follower) => follower.follower)
     following: Follower[];
+
+    @OneToMany(() => Notification, (notification) => notification.user)
+    notifications: Notification[];
 
     @BeforeInsert()
     @BeforeUpdate()

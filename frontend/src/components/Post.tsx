@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     TbBookmark,
     TbDots,
+    TbEdit,
     TbMessageCircle,
     TbShare3,
+    TbTrash,
     TbUser,
 } from "react-icons/tb";
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
@@ -42,7 +44,9 @@ const Post: React.FC<PostProps> = ({
     likeCount,
 }) => {
     const [isLike, setIsLike] = useState(false);
+    const [isBubble, setIsBubble] = useState(false);
     const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
+    const bubbleRef = useRef<HTMLDivElement | null>(null);
 
     const fetchLike = async () => {
         try {
@@ -68,7 +72,6 @@ const Post: React.FC<PostProps> = ({
         try {
             const response = await axios.get(`/like/status/post/${id}`);
             setIsLike(response.data);
-            console.log(response.data);
         } catch (error) {
             console.log(error);
         }
@@ -76,6 +79,22 @@ const Post: React.FC<PostProps> = ({
 
     useEffect(() => {
         checkPostStatus();
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                bubbleRef.current &&
+                !bubbleRef.current.contains(event.target as Node)
+            ) {
+                setIsBubble(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, []);
 
     return (
@@ -112,10 +131,22 @@ const Post: React.FC<PostProps> = ({
                         </div>
                     </div>
                 </Link>
-                <div className="pr-4">
-                    <button>
+                <div className="pr-6 relative" ref={bubbleRef}>
+                    <button onClick={() => setIsBubble(!isBubble)}>
                         <TbDots />
                     </button>
+                    {isBubble && (
+                        <div className="absolute z-10 right-4 top-6 bg-white py-1 w-36 rounded-lg border shadow">
+                            <p className="text-gray-800 text-sm font-medium flex items-center px-3 py-2 hover:bg-gray-100">
+                                <TbEdit className="mr-1" size={18} />
+                                Düzenle
+                            </p>
+                            <p className="text-gray-800 text-sm font-medium flex items-center px-3 py-2 hover:bg-gray-100">
+                                <TbTrash className="mr-1" size={18} />
+                                Kaldır
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
             <div className="mt-2.5 px-4">

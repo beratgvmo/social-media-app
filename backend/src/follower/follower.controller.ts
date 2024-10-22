@@ -6,8 +6,7 @@ import {
     UseGuards,
     Get,
     Req,
-    Res,
-    ParseIntPipe,
+    Body,
 } from '@nestjs/common';
 import { FollowerService } from './follower.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -21,24 +20,27 @@ export class FollowerController {
     @Post('follow/:userId')
     async follow(@Param('userId') userId: number, @Req() req: Request) {
         const followerId = req.user['sub'];
-
         await this.followerService.follow(followerId, userId);
-
-        return {
-            message: 'Başarılı',
-        };
+        return { message: 'Takip isteği gönderildi.' };
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete('unfollow/:userId')
     async unfollow(@Param('userId') userId: number, @Req() req: Request) {
         const followerId = req.user['sub'];
-
         await this.followerService.unfollow(followerId, userId);
+        return { message: 'Takipten çıkarıldı.' };
+    }
 
-        return {
-            message: 'Başarılı',
-        };
+    @Post(':followerId/respond')
+    async respondToFollowRequest(
+        @Param('followerId') followerId: number,
+        @Body('isAccepted') isAccepted: boolean,
+    ) {
+        return this.followerService.respondToFollowRequest(
+            followerId,
+            isAccepted,
+        );
     }
 
     @UseGuards(JwtAuthGuard)
@@ -48,12 +50,18 @@ export class FollowerController {
         @Req() req: Request,
     ) {
         const followerId = req.user['sub'];
-
         const isFollowing = await this.followerService.isFollowing(
             followerId,
             userId,
         );
-
         return { isFollowing };
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('pending-requests')
+    async getPendingFollowRequests(@Req() req: Request) {
+        const userId = req.user['sub'];
+
+        return this.followerService.getPendingFollowRequests(userId);
     }
 }
