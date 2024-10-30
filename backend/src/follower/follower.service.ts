@@ -154,4 +154,10 @@ export class FollowerService {
 
         return followRequests.map((follow) => follow);
     }
+
+    async markAsRead(id: number): Promise<void> {
+        await this.followerRepository.update(id, {
+            isRead: true,
+        });
+    }
 }

@@ -21,6 +21,9 @@ export class Follower {
     @Column({ default: 'pending' })
     status: 'accepted' | 'pending';
 
+    @Column({ default: false })
+    isRead: boolean;
+
     @CreateDateColumn()
     createdAt: Date;
 }

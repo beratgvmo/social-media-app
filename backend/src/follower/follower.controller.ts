@@ -64,4 +64,9 @@ export class FollowerController {
 
         return this.followerService.getPendingFollowRequests(userId);
     }
+
+    @Post('read/:followId')
+    async markAsRead(@Param('followId') followId: string) {
+        return this.followerService.markAsRead(Number(followId));
+    }
 }

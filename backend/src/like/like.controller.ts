@@ -22,40 +22,42 @@ export class LikeController {
     @UseGuards(JwtAuthGuard)
     @Post('post/:postId')
     async postLike(@Param('postId') postId: number, @Req() req: Request) {
-        const userId = req.user['sub']; // JWT'den userId'yi alıyoruz
+        const userId = req.user['sub'];
 
         const likedPost = await this.likeService.likePost(userId, postId);
 
         const postOwner = likedPost.user;
 
-        await this.notificationService.createNotification(
-            postOwner,
-            'like',
-            userId,
-            likedPost,
-        );
-
-        return likedPost.likeCount;
+        if (userId != postOwner.id) {
+            await this.notificationService.createNotification(
+                postOwner,
+                'like',
+                userId,
+                likedPost,
+            );
+        }
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete('remove/post/:postId')
     async removePostLike(@Param('postId') postId: number, @Req() req: Request) {
         const userId = req.user['sub'];
-        // Beğeni kaldırma işlemi
+
         const updatedLikeCount = await this.likeService.unlikePost(
             userId,
             postId,
         );
 
-        // Bildirim kaldırma işlemi
-        await this.notificationService.removeNotification(
-            userId,
-            postId,
-            'like',
-        );
+        const postOwner = updatedLikeCount.user.id;
 
-        return updatedLikeCount;
+        if (userId != postOwner) {
+            await this.notificationService.removeNotification(
+                userId,
+                postId,
+                postOwner,
+                'like',
+            );
+        }
     }
 
     @UseGuards(JwtAuthGuard)

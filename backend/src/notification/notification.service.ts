@@ -45,11 +45,13 @@ export class NotificationService {
     async removeNotification(
         userId: number,
         postId: number,
+        PostUserId: number,
         type: 'like',
     ): Promise<void> {
         await this.notificationRepository.delete({
-            user: { id: userId },
+            user: { id: PostUserId },
             post: { id: postId },
+            fromUser: { id: userId },
             type,
         });
     }

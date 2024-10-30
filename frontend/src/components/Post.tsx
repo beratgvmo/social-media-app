@@ -4,6 +4,7 @@ import {
     TbDots,
     TbEdit,
     TbMessageCircle,
+    TbSend2,
     TbShare3,
     TbTrash,
     TbUser,
@@ -13,6 +14,8 @@ import PostImageGrid from "./PostImageGrid";
 import TimeAgo from "./TimeAgo";
 import { Link } from "react-router-dom";
 import axios from "../utils/axiosInstance";
+import Comment from "./Comment";
+import CommentReply from "./CommentReply";
 
 interface PostProps {
     id: number;
@@ -44,6 +47,7 @@ const Post: React.FC<PostProps> = ({
     likeCount,
 }) => {
     const [isLike, setIsLike] = useState(false);
+    const [isComment, setIsComment] = useState(false);
     const [isBubble, setIsBubble] = useState(false);
     const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
     const bubbleRef = useRef<HTMLDivElement | null>(null);
@@ -58,6 +62,19 @@ const Post: React.FC<PostProps> = ({
         }
     };
 
+    const fetchComments = async () => {
+        try {
+            const response = await axios.get(`/comment/post/${id}`);
+            console.log(response.data);
+        } catch (error) {
+            console.error("Yorumlar çekilirken hata oluştu:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchComments();
+    }, []);
+
     const fetchRemoveLike = async () => {
         try {
             await axios.delete("like/remove/post/" + id);
@@ -71,7 +88,8 @@ const Post: React.FC<PostProps> = ({
     const checkPostStatus = async () => {
         try {
             const response = await axios.get(`/like/status/post/${id}`);
-            setIsLike(response.data);
+            setIsLike(response.data.status);
+            setCurrentLikeCount(response.data.count);
         } catch (error) {
             console.log(error);
         }
@@ -132,7 +150,10 @@ const Post: React.FC<PostProps> = ({
                     </div>
                 </Link>
                 <div className="pr-6 relative" ref={bubbleRef}>
-                    <button onClick={() => setIsBubble(!isBubble)}>
+                    <button
+                        onClick={() => setIsBubble(!isBubble)}
+                        className="hover:bg-gray-100 p-1 rounded-full transition"
+                    >
                         <TbDots />
                     </button>
                     {isBubble && (
@@ -182,7 +203,10 @@ const Post: React.FC<PostProps> = ({
                             </p>
                         </button>
                     )}
-                    <button className="flex items-center group">
+                    <button
+                        className="flex items-center group"
+                        onClick={() => setIsComment(!isComment)}
+                    >
                         <div className="w-8 h-8 p-1.5 rounded-full group-hover:bg-red-100 transition mr-0.5">
                             <TbMessageCircle className="w-full h-full text-gray-700 group-hover:text-red-500 transition cursor-pointer" />
                         </div>
@@ -200,6 +224,62 @@ const Post: React.FC<PostProps> = ({
                     </button>
                 </div>
             </div>
+
+            {isComment && (
+                <div className="bg-white border-t mt-2 px-4 pt-3">
+                    <div className="mb-2.5 flex gap-3">
+                        {user?.profileImage ? (
+                            <img
+                                src={user.profileImage}
+                                alt="Profil Resmi"
+                                className="w-10 h-10 rounded-full border bg-white"
+                            />
+                        ) : (
+                            <TbUser className="w-12 h-12 p-2 flex items-center border rounded-full text-blue-500" />
+                        )}
+
+                        <input
+                            className="w-full text-start transition px-4 border rounded-3xl border-gray-300 text-sm text-gray-600 font-medium focus:outline-none "
+                            placeholder="Yorum yaz"
+                        />
+                        <div className="w-10">
+                            <button className="bg-blue-500 w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-600 transition">
+                                <TbSend2 className="text-white" size={19} />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <p className="text-gray-500 text-sm font-medium mb-2">
+                            Yorumlar - - -
+                        </p>
+
+                        <div className="mt-3">
+                            <Comment user={user} />
+                            <div className="flex mt-3">
+                                <div className="flex min-w-10 items-center justify-center min-h-full">
+                                    <div className="bg-gray-200 h-full border-l-2"></div>
+                                </div>
+                                <div className="">
+                                    <CommentReply user={user} />
+                                    <CommentReply user={user} />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="mt-3">
+                            <Comment user={user} />
+                            <div className="flex">
+                                <div className="flex min-w-10 items-center justify-center min-h-full">
+                                    <div className="bg-gray-200 h-full border-l-2"></div>
+                                </div>
+                                <div className="">
+                                    <CommentReply user={user} />
+                                    <CommentReply user={user} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

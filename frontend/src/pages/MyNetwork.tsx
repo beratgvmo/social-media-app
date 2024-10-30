@@ -9,6 +9,7 @@ interface FollowerRequest {
     id: number;
     createdAt: string;
     status: string;
+    isRead: boolean;
     follower: {
         id: number;
         name: string;
@@ -34,6 +35,25 @@ const MyNetwork: React.FC = () => {
 
         fetchFollowerRequests();
     }, []);
+
+    useEffect(() => {
+        const markAsRead = async (id: number) => {
+            try {
+                await axios.post(`/follower/read/${id}`);
+            } catch (error) {
+                console.error(
+                    "Bildirim okundu olarak işaretlenirken hata oluştu:",
+                    error
+                );
+            }
+        };
+
+        requests.forEach((request) => {
+            if (!request.isRead) {
+                markAsRead(request.id);
+            }
+        });
+    }, [requests]);
 
     const handleRespond = async (followerId: number, isAccepted: boolean) => {
         try {

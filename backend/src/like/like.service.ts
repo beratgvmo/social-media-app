@@ -24,6 +24,7 @@ export class LikeService {
             where: { id: postId },
             relations: ['user'],
         });
+
         const user = await this.userRepository.findOne({
             where: { id: userId },
         });
@@ -43,7 +44,7 @@ export class LikeService {
         return post;
     }
 
-    async unlikePost(userId: number, postId: number): Promise<number> {
+    async unlikePost(userId: number, postId: number): Promise<Post> {
         const post = await this.postRepository.findOne({
             where: { id: postId },
         });
@@ -56,7 +57,7 @@ export class LikeService {
         post.likeCount -= 1;
         await this.postRepository.save(post);
 
-        return post.likeCount;
+        return post;
     }
 
     async checkPostLikeStatus(
