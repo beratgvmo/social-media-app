@@ -1,16 +1,18 @@
 import { AiFillLike } from "react-icons/ai";
 import { TbUser } from "react-icons/tb";
 
+interface User {
+    slug: string;
+    profileImage: string;
+    name: string;
+}
 interface CommentReplyProps {
+    id: number;
+    content: string;
     user: User;
 }
 
-interface User {
-    name: string;
-    profileImage?: string;
-}
-
-const CommentReply: React.FC<CommentReplyProps> = ({ user }) => (
+const CommentReply: React.FC<CommentReplyProps> = ({ content, user }) => (
     <div className="flex mt-3">
         <div className="relative mt-5">
             <div className="bg-gray-200 absolute -left-5 w-5 border-b-2"></div>
@@ -29,13 +31,8 @@ const CommentReply: React.FC<CommentReplyProps> = ({ user }) => (
 
         <div>
             <div className="bg-gray-100 px-3 pb-3 pt-2 rounded-xl">
-                <p className="text-sm font-medium pb-0.5">Berat Güven</p>
-                <div className="text-sm">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Nobis architecto distinctio soluta, laborum sequi animi eos
-                    explicabo doloremque nemo earum, incidunt autem totam in
-                    odit molestias! Aspernatur pariatur quidem aut?
-                </div>
+                <p className="text-sm font-medium pb-0.5">{user.name}</p>
+                <div className="text-sm">{content}</div>
             </div>
             <div className="flex items-center">
                 <div className="ml-2 mt-1 flex items-center">

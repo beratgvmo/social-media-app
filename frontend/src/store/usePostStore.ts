@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import axios from "../utils/axiosInstance";
 
 interface Post {
     id: number;
@@ -8,6 +7,7 @@ interface Post {
     postImages: PostImage[];
     user: User;
     likeCount: number;
+    commetCount: number;
 }
 
 interface PostImage {
@@ -16,6 +16,7 @@ interface PostImage {
 }
 
 interface User {
+    id: number;
     slug: string;
     profileImage: string;
     name: string;

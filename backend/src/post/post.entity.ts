@@ -23,6 +23,9 @@ export class Post {
     @Column({ default: 0 })
     likeCount: number;
 
+    @Column({ default: 0 })
+    commetCount: number;
+
     @CreateDateColumn()
     createdAt: Date;
 

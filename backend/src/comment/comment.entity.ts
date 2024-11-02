@@ -17,18 +17,21 @@ export class Comment {
     @Column()
     content: string;
 
-    @ManyToOne(() => User, (user) => user.comments)
+    @ManyToOne(() => User, (user) => user.comments, { onDelete: 'CASCADE' })
     user: User;
 
-    @ManyToOne(() => Comment, (comment) => comment.replies, { nullable: true })
+    @ManyToOne(() => Comment, (comment) => comment.replies, {
+        nullable: true,
+        onDelete: 'CASCADE',
+    })
     parentComment: Comment;
-
-    @ManyToOne(() => Post, (post) => post.comments)
-    post: Post;
 
     @OneToMany(() => Comment, (comment) => comment.parentComment)
     replies: Comment[];
 
-    @OneToMany(() => Like, (like) => like.comment)
+    @ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })
+    post: Post;
+
+    @OneToMany(() => Like, (like) => like.comment, { cascade: true })
     likes: Like[];
 }

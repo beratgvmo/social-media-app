@@ -13,26 +13,6 @@ import { CgSpinner } from "react-icons/cg";
 import PostModel from "../components/PostModel";
 import usePostStore from "../store/usePostStore";
 
-export interface Post {
-    id: number;
-    content: string;
-    createdAt: string;
-    postImages: PostImage[];
-    user: User;
-    likeCount: number;
-}
-
-export interface PostImage {
-    id: number;
-    url: string;
-}
-
-export interface User {
-    slug: string;
-    profileImage: string;
-    name: string;
-}
-
 const Home: React.FC = () => {
     const { user } = useAuthStore();
     const { setHomePosts, homePosts } = usePostStore();
@@ -151,6 +131,7 @@ const Home: React.FC = () => {
                                 likeCount={post.likeCount}
                                 createdAt={post.createdAt}
                                 images={post.postImages}
+                                commetCount={post.commetCount}
                                 key={index}
                                 user={post.user}
                                 id={post.id}
