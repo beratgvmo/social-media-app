@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
-import axios from "../utils/axiosInstance";
-import banner from "./banner.jpg";
+import axios from "@/utils/axiosInstance";
 import { TbMessage2, TbPhotoSquareRounded, TbUser } from "react-icons/tb";
-import RightbarFollow from "../components/RightbarFollow";
+import RightbarFollow from "@/components/RightbarFollow";
 import { useParams, useNavigate } from "react-router-dom";
-import ProfileSkeleton from "../components/ProfileSkeleton";
-import Post from "../components/Post";
+import ProfileSkeleton from "@/components/ProfileSkeleton";
+import Post from "@/components/post";
 import { CgSpinner } from "react-icons/cg";
-import ProfileSidebar from "../components/ProfileSidebar";
-import SettingsSidebar from "../components/SettingsSidebar";
+import SettingsSidebar from "@/components/SettingsSidebar";
 
 interface UserProfile {
     id: number;
@@ -27,6 +25,7 @@ interface Post {
     postImages: PostImage[];
     user: User;
     likeCount: number;
+    commetCount: number;
 }
 
 interface PostImage {
@@ -168,6 +167,7 @@ const Profile: React.FC = () => {
                                 createdAt={post.createdAt}
                                 images={post.postImages}
                                 key={index}
+                                commetCount={post.commetCount}
                                 user={post.user}
                                 border={false}
                             />

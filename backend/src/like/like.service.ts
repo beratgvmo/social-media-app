@@ -73,31 +73,55 @@ export class LikeService {
         return { status: !!like, count: post.likeCount };
     }
 
-    async likeComment(userId: number, comId: number): Promise<void> {
+    async likeComment(userId: number, comId: number): Promise<Comment> {
         const comment = await this.commentRepository.findOne({
             where: { id: comId },
         });
         const user = await this.userRepository.findOne({
             where: { id: userId },
         });
-        const like = this.likeRepository.create({ user, comment });
-        await this.likeRepository.save(like);
+
+        const existingLike = await this.likeRepository.findOne({
+            where: { user: { id: userId }, comment: { id: comId } },
+        });
+
+        if (!existingLike) {
+            const like = this.likeRepository.create({ user, comment });
+            await this.likeRepository.save(like);
+
+            comment.likeCount += 1;
+            await this.commentRepository.save(comment);
+        }
+
+        return comment;
     }
 
-    async unlikeComment(userId: number, comId: number): Promise<void> {
+    async unlikeComment(userId: number, comId: number): Promise<Comment> {
+        const comment = await this.commentRepository.findOne({
+            where: { id: comId },
+        });
+
         await this.likeRepository.delete({
             user: { id: userId },
             comment: { id: comId },
         });
+
+        comment.likeCount -= 1;
+        await this.commentRepository.save(comment);
+
+        return comment;
     }
 
     async checkCommentLikeStatus(
         userId: number,
         comId: number,
-    ): Promise<boolean> {
+    ): Promise<{ status: boolean; count: number }> {
         const like = await this.likeRepository.findOne({
             where: { user: { id: userId }, comment: { id: comId } },
         });
-        return !!like;
+        const comment = await this.commentRepository.findOne({
+            where: { id: comId },
+        });
+        return { status: !!like, count: comment.likeCount };
     }
 }

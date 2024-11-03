@@ -1,9 +1,9 @@
-import React, { ChangeEvent, useState } from "react";
-import Comment from "./Comment";
-import CommentReply from "./CommentReply";
-import { TbSend2, TbUser } from "react-icons/tb";
-import axios from "../utils/axiosInstance";
-import { useAuthStore } from "../store/useAuthStore";
+import { ChangeEvent, useState } from "react";
+import Comment from "@/components/post/comment";
+import CommentReply from "@/components/post/commentReply";
+import { TbChevronDown, TbChevronUp, TbSend2, TbUser } from "react-icons/tb";
+import axios from "@/utils/axiosInstance";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface CommentItemProps {
     comment: CommentType;
@@ -30,6 +30,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
     postId,
     fetchComments,
 }) => {
+    const [repliesInputOpen, setRepliesInputOpen] = useState<boolean>(false);
     const [repliesOpen, setRepliesOpen] = useState<boolean>(false);
     const [content, setContent] = useState<string>("");
     const { user } = useAuthStore();
@@ -60,17 +61,41 @@ const CommentItem: React.FC<CommentItemProps> = ({
         }
     };
     return (
-        <div className="mt-3.5">
+        <div className="mt-6">
             <Comment
                 content={comment.content}
                 id={comment.id}
                 user={comment.user}
-                toggleReplies={() => setRepliesOpen(!repliesOpen)}
+                toggleReplies={() => setRepliesInputOpen(!repliesInputOpen)}
                 border={
                     comment.replies && comment.replies.length > 0 ? true : false
                 }
             />
+
             {comment.replies && comment.replies.length > 0 && (
+                <div className="flex h-10">
+                    <div className="flex w-10 items-center justify-center">
+                        <div className="bg-gray-200 h-full border-l-2"></div>
+                    </div>
+                    <div className="">
+                        <button
+                            onClick={() => setRepliesOpen(!repliesOpen)}
+                            className="flex items-end ml-2 mt-3 hover:bg-blue-200 py-1.5 pl-3 pr-3.5 rounded-full"
+                        >
+                            {repliesOpen ? (
+                                <TbChevronUp className="text-blue-600" />
+                            ) : (
+                                <TbChevronDown className="text-blue-600" />
+                            )}
+                            <p className="text-sm text-blue-600 ml-0.5 font-medium">
+                                {comment.replies.length} yanıt
+                            </p>
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {comment.replies && comment.replies.length > 0 && repliesOpen && (
                 <div className="flex">
                     <div className="flex min-w-10 items-center justify-center min-h-full">
                         <div className="bg-gray-200 h-full border-l-2"></div>
@@ -87,7 +112,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
                     </div>
                 </div>
             )}
-            {repliesOpen && (
+            {repliesInputOpen && (
                 <div className="mb-6 flex gap-3 ml-10 mt-4">
                     {user?.profileImage ? (
                         <img

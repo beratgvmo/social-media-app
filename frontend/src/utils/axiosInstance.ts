@@ -1,6 +1,6 @@
 // axiosInstance.ts
 import axios from "axios";
-import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const apiClient = axios.create({
     baseURL: "http://localhost:3000",

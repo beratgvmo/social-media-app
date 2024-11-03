@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { RouterProvider } from "react-router-dom";
-import { useAuthStore } from "./store/useAuthStore";
-import axios from "./utils/axiosInstance";
-import routes from "./routes";
-import Loading from "./components/Loading";
+import { useAuthStore } from "@/store/useAuthStore";
+import axios from "@/utils/axiosInstance";
+import routes from "@/routes";
+import Loading from "@/components/Loading";
 
 const App: React.FC = () => {
     const { setUser, logout, setTokens, accessToken, refreshToken } =

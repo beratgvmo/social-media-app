@@ -26,6 +26,9 @@ export class Comment {
     })
     parentComment: Comment;
 
+    @Column({ default: 0 })
+    likeCount: number;
+
     @OneToMany(() => Comment, (comment) => comment.parentComment)
     replies: Comment[];
 

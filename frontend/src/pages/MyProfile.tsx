@@ -13,7 +13,7 @@ import Modal from "../components/Modal";
 import Button from "../components/Button";
 import RightbarFollow from "../components/RightbarFollow";
 import ProfileSkeleton from "../components/ProfileSkeleton";
-import Post from "../components/Post";
+import Post from "@/components/post";
 import { CgSpinner } from "react-icons/cg";
 import SettingsSidebar from "../components/SettingsSidebar";
 import usePostStore from "../store/usePostStore";
@@ -245,6 +245,7 @@ const MyProfile: React.FC = () => {
                                     createdAt={post.createdAt}
                                     images={post.postImages}
                                     key={index}
+                                    commetCount={post.commetCount}
                                     user={post.user}
                                     border={false}
                                 />

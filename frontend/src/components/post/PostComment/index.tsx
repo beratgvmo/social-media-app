@@ -1,8 +1,8 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { TbSend2, TbUser } from "react-icons/tb";
-import axios from "../utils/axiosInstance";
-import { useAuthStore } from "../store/useAuthStore";
-import CommentItem from "./CommentItem";
+import axios from "@/utils/axiosInstance";
+import { useAuthStore } from "@/store/useAuthStore";
+import CommentItem from "@/components/post/commentItem";
 
 interface PostCommentsProps {
     id: number;
@@ -24,7 +24,7 @@ interface CommentType {
     replies?: CommentType[];
 }
 
-const PostComments: React.FC<PostCommentsProps> = ({ isComment, id }) => {
+const PostComment: React.FC<PostCommentsProps> = ({ isComment, id }) => {
     const [comments, setComments] = useState<CommentType[]>([]);
     const [content, setContent] = useState<string>("");
     const { user } = useAuthStore();
@@ -121,4 +121,4 @@ const PostComments: React.FC<PostCommentsProps> = ({ isComment, id }) => {
     );
 };
 
-export default PostComments;
+export default PostComment;

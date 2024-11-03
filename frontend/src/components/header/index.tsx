@@ -1,11 +1,11 @@
 import { TbBell, TbChessFilled, TbMessage, TbUser } from "react-icons/tb";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { GoPeople } from "react-icons/go";
 import { HiOutlineHome } from "react-icons/hi";
 import { useEffect, useRef, useState } from "react";
-import axios from "../utils/axiosInstance";
-import Notifications from "./Notifications";
+import axios from "@/utils/axiosInstance";
+import Notifications from "@/components/header/notifications";
 
 interface User {
     name: string;

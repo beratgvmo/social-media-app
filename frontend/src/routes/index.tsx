@@ -1,14 +1,14 @@
 import { createBrowserRouter } from "react-router-dom";
-import Home from "../pages/Home";
-import Login from "../pages/Login";
-import Register from "../pages/Register";
+import Home from "@/pages/Home";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 import {
     PrivateRouteNullUser,
     PrivateRouteProfile,
-} from "../components/PrivateRoute";
-import MainLayout from "../layouts/main";
-import NotFound from "../pages/NotFound"; // Import NotFound component
-import MyNetwork from "../pages/MyNetwork";
+} from "@/components/PrivateRoute";
+import MainLayout from "@/layouts/main";
+import NotFound from "@/pages/NotFound";
+import MyNetwork from "@/pages/MyNetwork";
 
 const routes = createBrowserRouter([
     {

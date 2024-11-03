@@ -9,12 +9,12 @@ import {
     TbUser,
 } from "react-icons/tb";
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
-import PostImageGrid from "./PostImageGrid";
-import TimeAgo from "./TimeAgo";
 import { Link } from "react-router-dom";
-import axios from "../utils/axiosInstance";
+import axios from "@/utils/axiosInstance";
 
-import PostComments from "./PostComments";
+import PostImageGrid from "@/components/PostImageGrid";
+import TimeAgo from "@/components/TimeAgo";
+import PostComment from "@/components/post/PostComment";
 
 interface PostProps {
     id: number;
@@ -28,7 +28,6 @@ interface PostProps {
 }
 
 interface User {
-    id: number;
     slug: string;
     profileImage: string;
     name: string;
@@ -213,7 +212,7 @@ const Post: React.FC<PostProps> = ({
                     </button>
                 </div>
             </div>
-            <PostComments
+            <PostComment
                 id={id}
                 isComment={isComment}
                 toggleComment={() => setIsComment(!isComment)}

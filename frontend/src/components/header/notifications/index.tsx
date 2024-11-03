@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import axios from "../utils/axiosInstance";
-import TimeAgo from "./TimeAgo";
+import { useEffect } from "react";
+import axios from "@/utils/axiosInstance";
+import TimeAgo from "@/components/TimeAgo";
 import { TbUser } from "react-icons/tb";
 
 interface User {

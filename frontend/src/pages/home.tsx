@@ -8,7 +8,7 @@ import axios from "../utils/axiosInstance";
 
 import ProfileSidebar from "../components/ProfileSidebar";
 import RightbarFollow from "../components/RightbarFollow";
-import Post from "../components/Post";
+import Post from "@/components/post";
 import { CgSpinner } from "react-icons/cg";
 import PostModel from "../components/PostModel";
 import usePostStore from "../store/usePostStore";
