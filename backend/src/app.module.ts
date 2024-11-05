@@ -9,6 +9,7 @@ import { CommentModule } from './comment/comment.module';
 import { FollowerModule } from './follower/follower.module';
 import { UserModule } from './user/user.module';
 import { NotificationModule } from './notification/notification.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
     imports: [
@@ -37,6 +38,7 @@ import { NotificationModule } from './notification/notification.module';
         FollowerModule,
         UserModule,
         NotificationModule,
+        ChatModule,
     ],
 })
 export class AppModule {}

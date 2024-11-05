@@ -13,6 +13,8 @@ import { Comment } from '../comment/comment.entity';
 import { Like } from '../like/like.entity';
 import { Follower } from '../follower/follower.entity';
 import { Notification } from '../notification/notification.entity';
+import { Message } from 'src/chat/message.entity';
+import { ChatRoom } from 'src/chat/chat-room.entity';
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
@@ -53,6 +55,9 @@ export class User {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @OneToMany(() => Message, (message) => message.sender)
+    messages: Message[];
 
     @OneToMany(() => Post, (post) => post.user)
     posts: Post[];

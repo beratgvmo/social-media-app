@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect } from "react";
 import Modal from "../components/Modal";
-import Button from "../components/Button";
 import EmojiPicker, { EmojiStyle, EmojiClickData } from "emoji-picker-react";
 import ImageGrid from "../components/ImageGridUser";
 import axios from "../utils/axiosInstance";
@@ -10,6 +9,8 @@ import { HiOutlinePhoto } from "react-icons/hi2";
 import { TbUserHeart } from "react-icons/tb";
 import usePostStore from "../store/usePostStore";
 import { useAuthStore } from "../store/useAuthStore";
+
+import Button from "./Button";
 
 interface PostFormInputs {
     content: string;

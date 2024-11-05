@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from "react";
+import { FC, useEffect } from "react";
 import { TbX } from "react-icons/tb";
 
 interface ModalProps {

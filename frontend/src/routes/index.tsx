@@ -9,6 +9,8 @@ import {
 import MainLayout from "@/layouts/main";
 import NotFound from "@/pages/NotFound";
 import MyNetwork from "@/pages/MyNetwork";
+import Chat from "@/pages/Chat";
+import ChatLayout from "@/layouts/chat";
 
 const routes = createBrowserRouter([
     {
@@ -26,6 +28,16 @@ const routes = createBrowserRouter([
             {
                 path: "/mynetwork",
                 element: <MyNetwork />,
+            },
+        ],
+    },
+    {
+        path: "/",
+        element: <ChatLayout />,
+        children: [
+            {
+                path: "/chat",
+                element: <Chat />,
             },
         ],
     },
