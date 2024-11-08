@@ -25,12 +25,12 @@ export class Message {
     })
     chatRoom: ChatRoom;
 
-    @Column({ default: false }) // Mesajın okunup okunmadığı
+    @Column({ default: false })
     isRead: boolean;
 
     @CreateDateColumn()
     createdAt: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date; // Mesajın en son güncellenme tarihi
+    updatedAt: Date;
 }

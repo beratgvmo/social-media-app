@@ -48,10 +48,6 @@ export class ChatService {
             relations: ['user1', 'user2'],
         });
 
-        if (!rooms.length) {
-            throw new NotFoundException('Kullanıcının chat odası bulunamadı.');
-        }
-
         return rooms;
     }
 }

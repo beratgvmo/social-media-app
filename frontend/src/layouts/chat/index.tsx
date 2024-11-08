@@ -3,9 +3,9 @@ import Header from "@/components/header";
 
 const ChatLayout: React.FC = () => {
     return (
-        <div className="bg-amber-950/5 h-screen overflow-hidden max-h-screen flex flex-col">
+        <div className="bg-amber-950/5 h-screen w-screen max-w-screen max-h-screen overflow-hidden">
             <Header />
-            <div className="w-full h-full flex-1">
+            <div className="w-full h-[92%]">
                 <Outlet />
             </div>
         </div>

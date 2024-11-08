@@ -18,9 +18,6 @@ export class ChatController {
         @Param('chatRoomId', ParseIntPipe) chatRoomId: number,
     ): Promise<Message[]> {
         const messages = await this.chatService.getMessagesByRoomId(chatRoomId);
-        if (!messages.length) {
-            throw new NotFoundException('Mesaj bulunamadı.');
-        }
         return messages;
     }
 
