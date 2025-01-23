@@ -25,21 +25,31 @@ export class LikeService {
             relations: ['user'],
         });
 
+        if (!post) {
+            throw new Error('Post bulunamadı');
+        }
+
         const user = await this.userRepository.findOne({
             where: { id: userId },
         });
+
+        if (!user) {
+            throw new Error('Kullanıcı bulunamadı');
+        }
 
         const existingLike = await this.likeRepository.findOne({
             where: { user: { id: userId }, post: { id: postId } },
         });
 
-        if (!existingLike) {
-            const like = this.likeRepository.create({ user, post });
-            await this.likeRepository.save(like);
-
-            post.likeCount += 1;
-            await this.postRepository.save(post);
+        if (existingLike) {
+            return post;
         }
+
+        const like = this.likeRepository.create({ user, post });
+        await this.likeRepository.save(like);
+
+        post.likeCount += 1;
+        await this.postRepository.save(post);
 
         return post;
     }
@@ -49,10 +59,19 @@ export class LikeService {
             where: { id: postId },
         });
 
-        await this.likeRepository.delete({
-            user: { id: userId },
-            post: { id: postId },
+        if (!post) {
+            throw new Error('Post bulunamadı');
+        }
+
+        const like = await this.likeRepository.findOne({
+            where: { user: { id: userId }, post: { id: postId } },
         });
+
+        if (!like) {
+            throw new Error('Beğeni bulunamadı');
+        }
+
+        await this.likeRepository.delete(like.id);
 
         post.likeCount -= 1;
         await this.postRepository.save(post);
@@ -64,12 +83,17 @@ export class LikeService {
         userId: number,
         postId: number,
     ): Promise<{ status: boolean; count: number }> {
-        const like = await this.likeRepository.findOne({
-            where: { user: { id: userId }, post: { id: postId } },
-        });
-        const post = await this.postRepository.findOne({
-            where: { id: postId },
-        });
+        const [like, post] = await Promise.all([
+            this.likeRepository.findOne({
+                where: { user: { id: userId }, post: { id: postId } },
+            }),
+            this.postRepository.findOne({ where: { id: postId } }),
+        ]);
+
+        if (!post) {
+            throw new Error('Post bulunamadı');
+        }
+
         return { status: !!like, count: post.likeCount };
     }
 

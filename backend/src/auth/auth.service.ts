@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcryptjs';
+
 @Injectable()
 export class AuthService {
     constructor(
@@ -14,13 +15,14 @@ export class AuthService {
         private readonly jwtService: JwtService,
     ) {}
 
-    async register(registerDto: RegisterDto, res: Response): Promise<any> {
+    async register(registerDto: RegisterDto, res: Response): Promise<void> {
         const existingUser = await this.userRepository.findOne({
             where: { email: registerDto.email },
         });
+
         if (existingUser) {
             throw new HttpException(
-                'Email already in use',
+                'Email zaten kullanımda.',
                 HttpStatus.BAD_REQUEST,
             );
         }
@@ -32,7 +34,7 @@ export class AuthService {
         });
         await this.userRepository.save(user);
 
-        return this.issueTokens(user, res);
+        this.issueTokens(user, res);
     }
 
     async login(email: string, password: string, res: Response): Promise<void> {
@@ -43,39 +45,41 @@ export class AuthService {
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
             throw new HttpException(
-                'Geçersiz kimlik bilgileri',
+                'Geçersiz giriş bilgileri.',
                 HttpStatus.UNAUTHORIZED,
             );
         }
 
-        await this.issueTokens(user, res);
+        this.issueTokens(user, res);
     }
 
-    async refreshToken(refreshToken: string, res: Response): Promise<any> {
-        const payload = this.jwtService.verify(refreshToken, {
-            secret: process.env.JWT_REFRESH_SECRET,
-        });
-        const user = await this.userRepository.findOne({
-            where: { id: payload.sub },
-        });
-        if (!user) {
+    async refreshToken(refreshToken: string, res: Response): Promise<void> {
+        try {
+            const payload = this.jwtService.verify(refreshToken, {
+                secret: process.env.JWT_REFRESH_SECRET,
+            });
+
+            const user = await this.userRepository.findOne({
+                where: { id: payload.sub },
+            });
+            if (!user) {
+                throw new HttpException(
+                    'Kullanıcı bulunamadı.',
+                    HttpStatus.UNAUTHORIZED,
+                );
+            }
+
+            this.issueTokens(user, res);
+        } catch {
             throw new HttpException(
-                'Invalid refresh token',
+                'Geçersiz yenileme token.',
                 HttpStatus.UNAUTHORIZED,
             );
         }
-
-        return this.issueTokens(user, res);
     }
 
-    async logout(res: Response): Promise<void> {
-        res.clearCookie('jwt');
-        res.clearCookie('refreshToken');
-        res.send({ message: 'Başarıyla çıkış yapıldı' });
-    }
-
-    private async issueTokens(user: User, res: Response) {
-        const payload = { email: user.email, name: user.name, sub: user.id };
+    private issueTokens(user: User, res: Response): void {
+        const payload = { sub: user.id };
 
         const accessToken = this.jwtService.sign(payload, {
             secret: process.env.JWT_SECRET,
@@ -87,48 +91,21 @@ export class AuthService {
             expiresIn: '7d',
         });
 
-        res.cookie('jwt', accessToken, {
-            httpOnly: true,
-            sameSite: 'lax',
-            domain: 'http://localhost:5173',
-            maxAge: 15 * 60 * 1000,
-        });
-
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            sameSite: 'lax',
-            domain: 'http://localhost:5173',
+            sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production',
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        res.send({
-            message: 'Başarılı giriş',
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            user: { id: user.id, name: user.name, email: user.email },
+        res.status(HttpStatus.OK).send({
+            message: 'Giriş başarılı.',
+            accessToken,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+            },
         });
-    }
-
-    async getProfile(userId: number): Promise<{
-        id: number;
-        name: string;
-        email: string;
-        profileImage: string | null;
-    }> {
-        const user = await this.userRepository.findOne({
-            where: { id: userId },
-        });
-        if (!user) {
-            throw new HttpException(
-                'Kullanıcı bulunamadı',
-                HttpStatus.NOT_FOUND,
-            );
-        }
-        return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            profileImage: user.profileImage,
-        };
     }
 }

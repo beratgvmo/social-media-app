@@ -64,11 +64,11 @@ const MessageInput: FC<MessageInputProps> = ({ chatRoomId, userId }) => {
     };
 
     return (
-        <div className="flex w-[75%] items-center px-5 py-1 border-t bg-white">
+        <div className="flex items-center px-4 py-1 border-t bg-white">
             <div>
                 <button
                     onClick={() => setIsEmojiPickerOpen(!isEmojiPickerOpen)}
-                    className="p-2 rounded-lg hover:bg-gray-200"
+                    className="p-2 rounded-lg hover:bg-gray-200 transition"
                 >
                     <MdOutlineEmojiEmotions className="text-xl text-gray-600" />
                 </button>
@@ -91,12 +91,12 @@ const MessageInput: FC<MessageInputProps> = ({ chatRoomId, userId }) => {
                     onChange={handleInputChange}
                     onKeyPress={handleKeyPress}
                     placeholder="Bir mesaj yazın"
-                    className="w-full resize-none outline-none h-[36px] max-h-[100px] text-sm text-gray-800 overflow-hidden p-2"
+                    className="w-full scrollbar-hidden resize-none outline-none h-[36px] max-h-[100px] text-sm text-gray-800 p-2"
                 />
             </div>
             <button
                 onClick={sendMessage}
-                className="p-2 rounded-lg hover:bg-gray-200"
+                className="p-2 rounded-lg hover:bg-gray-200 transition"
             >
                 <TbSend2 className="text-xl text-gray-600" />
             </button>

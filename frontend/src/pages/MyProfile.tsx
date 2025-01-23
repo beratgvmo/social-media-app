@@ -3,6 +3,7 @@ import axios from "../utils/axiosInstance";
 import { useAuthStore } from "../store/useAuthStore";
 import ImageCropper from "../components/ImageCropper";
 import {
+    TbBookmark,
     TbCloudUpload,
     TbMessage2,
     TbPhotoEdit,
@@ -17,20 +18,59 @@ import Post from "@/components/post";
 import { CgSpinner } from "react-icons/cg";
 import SettingsSidebar from "../components/SettingsSidebar";
 import usePostStore from "../store/usePostStore";
+import BannerCropper from "@/components/bannerCropper";
+import { Link } from "react-router-dom";
 
 const MyProfile: React.FC = () => {
     const { logout, user, setUser } = useAuthStore();
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [selectedBanner, setSelectedBanner] = useState<string | null>(null);
     const [croppedImage, setCroppedImage] = useState<Blob | null>(null);
+    const [croppedBanner, setCroppedBanner] = useState<Blob | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [pageLoading, setPageLoading] = useState(false);
+    const [isModalBannerOpen, setIsModalBannerOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    const { profilePosts, setProfilePosts } = usePostStore();
+    const {
+        profilePosts,
+        profileFetchPosts,
+        profilePageInc,
+        profileScrollPosition,
+        setProfileScrollPosition,
+        profileHasMore,
+        profileLoading,
+        profilePage,
+    } = usePostStore();
 
-    const limit = 10;
-    const [page, setPage] = useState<number>(1);
-    const [hasMore, setHasMore] = useState<boolean>(true);
+    useEffect(() => {
+        window.scrollTo(0, profileScrollPosition);
+    }, [profileScrollPosition]);
+
+    useEffect(() => {
+        profileFetchPosts(user.slug);
+    }, [profilePage]);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollTop =
+                window.scrollY || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight;
+            const clientHeight = window.innerHeight;
+
+            if (
+                scrollTop + clientHeight >= scrollHeight - 100 &&
+                profileHasMore &&
+                !profileLoading
+            ) {
+                profilePageInc();
+            }
+
+            setProfileScrollPosition(scrollTop);
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, [profileHasMore, profileLoading]);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -47,53 +87,6 @@ const MyProfile: React.FC = () => {
 
         fetchProfile();
     }, [setUser, logout]);
-
-    useEffect(() => {
-        const fetchPosts = async () => {
-            setPageLoading(true);
-            try {
-                const response = await axios.get(`/post/` + user?.slug, {
-                    params: { page, limit },
-                });
-                const newPosts = response.data;
-
-                if (newPosts.length < limit) {
-                    setHasMore(false);
-                }
-
-                setProfilePosts(newPosts);
-            } catch (error) {
-                console.error("Error fetching posts:", error);
-            } finally {
-                setPageLoading(false);
-            }
-        };
-
-        if (hasMore) {
-            fetchPosts();
-        }
-    }, [page]);
-
-    const handleScroll = () => {
-        const scrollTop =
-            document.documentElement.scrollTop || document.body.scrollTop;
-        const scrollHeight =
-            document.documentElement.scrollHeight || document.body.scrollHeight;
-        const clientHeight =
-            document.documentElement.clientHeight || window.innerHeight;
-        if (
-            scrollTop + clientHeight >= scrollHeight - 5 &&
-            hasMore &&
-            !pageLoading
-        ) {
-            setPage((prevPage) => prevPage + 1);
-        }
-    };
-
-    useEffect(() => {
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, [pageLoading, hasMore]);
 
     const handleImageUpload = async () => {
         if (!croppedImage) return;
@@ -118,6 +111,29 @@ const MyProfile: React.FC = () => {
         }
     };
 
+    const handleBannerUpload = async () => {
+        if (!croppedBanner) return;
+
+        const formData = new FormData();
+        formData.append("banner", croppedBanner);
+        handleCloseBannerModal();
+
+        setSelectedBanner(null);
+
+        try {
+            const response = await axios.post(
+                "user/profile/banner-image",
+                formData,
+                {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }
+            );
+            setUser({ ...user!, bannerImage: response.data.imageUrl });
+        } catch (error) {
+            console.error("Resim yüklenirken bir hata oluştu", error);
+        }
+    };
+
     const onImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -126,13 +142,33 @@ const MyProfile: React.FC = () => {
         }
     };
 
+    const onImageBannerChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const imageUrl = URL.createObjectURL(file);
+            setSelectedBanner(imageUrl);
+        }
+    };
+
     const onCropComplete = (cropped: Blob | null) => {
         setCroppedImage(cropped);
+    };
+
+    const onCropCompleteBanner = (cropped: Blob | null) => {
+        setCroppedBanner(cropped);
     };
 
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => {
         setIsModalOpen(false);
+        setSelectedImage(null);
+    };
+
+    const handleOpenBannerModal = () => setIsModalBannerOpen(true);
+    const handleCloseBannerModal = () => {
+        setIsModalBannerOpen(false);
         setSelectedImage(null);
     };
 
@@ -187,16 +223,78 @@ const MyProfile: React.FC = () => {
                     </Button>
                 </div>
             </Modal>
-            <div className="flex gap-5 mt-6">
+
+            <Modal
+                isOpen={isModalBannerOpen}
+                onClose={handleCloseBannerModal}
+                title="Banner Yükle"
+                maxWidth="2xl"
+            >
+                <div className="pt-5 px-6">
+                    {!selectedBanner && (
+                        <div className="flex items-center justify-center w-full">
+                            <label className="flex flex-col items-center justify-center w-full h-[360px] border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <TbCloudUpload className="w-8 h-8 mb-2 text-gray-500" />
+                                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                        <span className="font-semibold">
+                                            Resim Yüklemek için tıklayın
+                                        </span>
+                                    </p>
+                                </div>
+                                <input
+                                    id="dropzone-file"
+                                    type="file"
+                                    onChange={onImageBannerChange}
+                                    className="hidden"
+                                    accept="image/*"
+                                />
+                            </label>
+                        </div>
+                    )}
+                    {selectedBanner && (
+                        <BannerCropper
+                            imageSrc={selectedBanner}
+                            onCropComplete={onCropCompleteBanner}
+                        />
+                    )}
+                </div>
+                <div className="mt-6 bg-white py-3 px-6 flex gap-2 justify-end border-t rounded-b-xl">
+                    <Button
+                        onClick={handleBannerUpload}
+                        disabled={!selectedBanner}
+                        className="bg-blue-600 text-white focus:ring-blue-500 hover:bg-blue-700 active:bg-blue-800"
+                    >
+                        Banneri kaydet
+                    </Button>
+                </div>
+            </Modal>
+            <div className="flex gap-5">
                 <SettingsSidebar />
                 <div className="w-[570px]">
                     <div className="bg-white rounded-lg border">
                         <div className="relative">
-                            <div className="relative">
-                                <div className="rounded-t-lg bg-gray-400 w-full h-48" />
-                                <TbPhotoSquareRounded className="bg-white text-blue-500 rounded-full absolute top-4 right-4 w-8 h-8 p-1 hover:text-blue-700 transition cursor-pointer" />
+                            <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
+                                {user.bannerImage ? (
+                                    <img
+                                        src={user.bannerImage}
+                                        alt="User banner"
+                                        className="absolute inset-0 w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="bg-gray-400 w-full h-full"></div>
+                                )}
+
+                                <button
+                                    onClick={handleOpenBannerModal}
+                                    className="absolute top-4 right-4 w-8 h-8 p-1 bg-white text-blue-500 rounded-full hover:text-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    aria-label="Edit banner"
+                                >
+                                    <TbPhotoSquareRounded className="w-full h-full" />
+                                </button>
                             </div>
-                            <div className="absolute -bottom-14 w-32 h-32 bg-white rounded-full left-4 group">
+
+                            <div className="absolute -bottom-12 w-32 h-32 bg-white rounded-full left-5 group">
                                 {user?.profileImage ? (
                                     <img
                                         src={user.profileImage}
@@ -219,17 +317,29 @@ const MyProfile: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="py-6 mt-8 px-6 flex gap-16 items-center">
-                            <div>
-                                <div className="flex items-center gap-4 mb-3">
-                                    <p className="text-2xl font-medium">
-                                        {user?.name}
-                                    </p>
+                        <div className="flex px-5 justify-between">
+                            <div className="mt-7 pt-6 pb-4">
+                                <p className="text-2xl font-medium mb-0.5">
+                                    {user?.name}
+                                </p>
+
+                                <div className="text-sm mb-1.5 text-gray-600">
+                                    {user?.bio}
                                 </div>
-                                <div className="text-sm mb-3">Berat Güven</div>
-                                <div className="flex gap-5 text-sm">
-                                    <p>{user?.followerCount} takipçi</p>
-                                    <p>{user?.followingCount} takip</p>
+                                <div className="flex gap-2 text-sm">
+                                    <Link to={"/mynetwork/follower"}>
+                                        <p className="font-medium text-blue-500 transition hover:underline cursor-pointer">
+                                            {user?.followerCount} takipçi
+                                        </p>
+                                    </Link>
+                                    <p className="font-medium text-blue-500">
+                                        •
+                                    </p>
+                                    <Link to={"/mynetwork/follower"}>
+                                        <p className="font-medium text-blue-500 transition hover:underline cursor-pointer">
+                                            {user?.followingCount} takip
+                                        </p>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -260,7 +370,7 @@ const MyProfile: React.FC = () => {
                         </div>
                     )}
 
-                    {pageLoading && (
+                    {profileLoading && (
                         <div className="w-full flex justify-center items-center h-20">
                             <CgSpinner
                                 className="animate-spin text-blue-600"

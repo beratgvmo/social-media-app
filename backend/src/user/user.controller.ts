@@ -1,9 +1,12 @@
 import {
+    Body,
     Controller,
     Delete,
     Get,
     Param,
+    Patch,
     Post,
+    Query,
     Req,
     Res,
     UploadedFile,
@@ -13,50 +16,44 @@ import {
 import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { unlinkSync } from 'fs';
-import { join } from 'path';
 import { Request, Response } from 'express';
+import { deleteFileIfExists } from '../utils/file.helper';
+import { User } from './user.entity';
 
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) {}
 
+    private readonly baseImageUrl = 'http://localhost:3000/src/img/';
+
     @UseGuards(JwtAuthGuard)
     @Get('/profile/:slug')
     async getProfileOthers(@Param('slug') slug: string) {
-        const userProfile = await this.userService.getProfileBySlug(slug);
-        return {
-            id: userProfile.id,
-            slug: userProfile.slug,
-            email: userProfile.email,
-            name: userProfile.name,
-            profileImage: userProfile.profileImage,
-            followerCount: userProfile.followerCount,
-            followingCount: userProfile.followingCount,
-        };
+        return await this.userService.getProfileBySlug(slug);
+    }
+
+    @Get('friend-search')
+    async searchUsers(
+        @Query('query') query: string,
+        @Query('order') order: 'followerCount' | 'createdAt' = 'followerCount',
+        @Query('limit') limit: number = 5,
+        @Query('offset') offset: number = 0,
+    ): Promise<User[]> {
+        return this.userService.searchUsers(query, order, limit, offset);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get('/profile')
     async getMyProfile(@Req() req: Request) {
         const userId = req.user['sub'];
-        const userProfile = await this.userService.getProfile(userId);
-        return {
-            id: userProfile.id,
-            slug: userProfile.slug,
-            email: userProfile.email,
-            name: userProfile.name,
-            profileImage: userProfile.profileImage,
-            followerCount: userProfile.followerCount,
-            followingCount: userProfile.followingCount,
-        };
+        return await this.userService.getProfile(userId);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get('/friend-profile')
     async friendProfile(@Req() req: Request) {
         const userId = req.user['sub'];
-        return this.userService.profileFriend(userId);
+        return await this.userService.profileFriend(userId);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -67,21 +64,32 @@ export class UserController {
         @Req() req: Request,
         @Res() res: Response,
     ) {
-        if (!file) {
-            return res.status(400).send({
-                error: 'Resim yüklenemedi, lütfen geçerli bir dosya seçin.',
-            });
-        }
+        await this.handleImageUpload(file, req, res, 'profileImage');
+    }
 
+    @UseGuards(JwtAuthGuard)
+    @Post('profile/banner-image')
+    @UseInterceptors(FileInterceptor('banner'))
+    async uploadBannerImage(
+        @UploadedFile() file: Express.Multer.File,
+        @Req() req: Request,
+        @Res() res: Response,
+    ) {
+        await this.handleImageUpload(file, req, res, 'bannerImage');
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Patch('/update-profile')
+    async updateProfile(
+        @Req() req: Request,
+        @Body() updateProfileDto: { name: string; bio: string },
+    ) {
         const userId = req.user['sub'];
-        const imagePath = `http://localhost:3000/src/img/${file.filename}`;
-
-        await this.userService.updateProfileImage(userId, imagePath);
-
-        return res.send({
-            message: 'Profil resmi başarıyla yüklendi.',
-            imageUrl: imagePath,
-        });
+        const updatedUser = await this.userService.updateProfile(
+            userId,
+            updateProfileDto,
+        );
+        return updatedUser;
     }
 
     @UseGuards(JwtAuthGuard)
@@ -94,20 +102,39 @@ export class UserController {
             return res.status(400).json({ error: 'Profil resmi bulunamadı.' });
         }
 
-        try {
-            const filePath = join(
-                process.cwd(),
-                'src/img',
-                user.profileImage.split('/').pop(),
-            );
-            unlinkSync(filePath);
-        } catch (error) {
-            return res
-                .status(500)
-                .json({ error: 'Dosya silinirken hata oluştu.' });
-        }
+        deleteFileIfExists(user.profileImage, this.baseImageUrl);
 
         await this.userService.updateProfileImage(userId, null);
         return res.json({ message: 'Profil resmi başarıyla silindi.' });
+    }
+
+    private async handleImageUpload(
+        file: Express.Multer.File,
+        req: Request,
+        res: Response,
+        field: 'profileImage' | 'bannerImage',
+    ) {
+        if (!file) {
+            return res.status(400).json({
+                error: 'Resim yüklenemedi, lütfen geçerli bir dosya seçin.',
+            });
+        }
+
+        const userId = req.user['sub'];
+        const newImagePath = `${this.baseImageUrl}${file.filename}`;
+
+        const user = await this.userService.findById(userId);
+        const oldImagePath = user[field];
+
+        if (oldImagePath) {
+            deleteFileIfExists(oldImagePath, this.baseImageUrl);
+        }
+
+        await this.userService.updateImage(userId, newImagePath, field);
+
+        return res.json({
+            message: `${field === 'profileImage' ? 'Profil' : 'Banner'} resmi başarıyla güncellendi.`,
+            imageUrl: newImagePath,
+        });
     }
 }

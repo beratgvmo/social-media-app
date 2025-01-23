@@ -27,7 +27,7 @@ const ChatHeader: FC<ChatHeaderProps> = ({ room, user }) => {
         : null;
 
     return (
-        <div className="min-h-16  bg-white pl-4 flex items-center border-b border-gray-300">
+        <div className="min-h-16 bg-white pl-4 flex items-center border-b">
             {chatUser ? (
                 <div className="flex gap-2 items-center">
                     <div className="w-10 h-10">
@@ -38,7 +38,7 @@ const ChatHeader: FC<ChatHeaderProps> = ({ room, user }) => {
                                 className="w-full h-full rounded-full bg-white"
                             />
                         ) : (
-                            <div className="p-2 flex text-gray-500 justify-center items-center w-full h-full bg-gray-300 rounded-full">
+                            <div className="p-2 flex text-gray-600 justify-center items-center w-full h-full bg-gray-300 rounded-full">
                                 <TbUser size={20} />
                             </div>
                         )}

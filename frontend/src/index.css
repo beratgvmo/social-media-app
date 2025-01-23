@@ -4,7 +4,7 @@
 
 @layer utilities {
     .scrollbar-custom::-webkit-scrollbar {
-        width: 4px;
+        width: 6px;
         height: 4px;
         border-radius: 6px;
     }
@@ -13,6 +13,43 @@
     }
     .scrollbar-custom::-webkit-scrollbar-thumb {
         border-radius: 6px;
-        background: rgb(147, 147, 147);
+        cursor: default;
+        background: #c3c3c3;
+    }
+
+    @property --var1 {
+        syntax: "<color>";
+        inherits: true;
+        initial-value: white;
+    }
+
+    .scrollbar-transition {
+        overflow-y: scroll;
+        transition: --var1 0.2s;
+    }
+
+    .scrollbar-transition:hover {
+        --var1: #c3c3c3;
+    }
+
+    .scrollbar-transition::-webkit-scrollbar {
+        background: white;
+        width: 6px;
+    }
+
+    .scrollbar-transition::-webkit-scrollbar-thumb {
+        background: var(--var1);
+        border-radius: 4px;
+    }
+
+    .scrollbar-hidden::-webkit-scrollbar {
+        width: 0px;
+        height: 0px;
+    }
+    .scrollbar-hidden::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+    .scrollbar-hidden::-webkit-scrollbar-thumb {
+        background: transparent;
     }
 }

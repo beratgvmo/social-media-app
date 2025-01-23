@@ -15,6 +15,7 @@ import { Follower } from '../follower/follower.entity';
 import { Notification } from '../notification/notification.entity';
 import { Message } from 'src/chat/message.entity';
 import { ChatRoom } from 'src/chat/chat-room.entity';
+import { PostSaved } from 'src/post-saved/post-saved.entity';
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
@@ -50,10 +51,10 @@ export class User {
     @Column({ default: 0 })
     followingCount: number;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ select: false })
     createdAt: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ select: false })
     updatedAt: Date;
 
     @OneToMany(() => Message, (message) => message.sender)
@@ -61,6 +62,9 @@ export class User {
 
     @OneToMany(() => Post, (post) => post.user)
     posts: Post[];
+
+    @OneToMany(() => PostSaved, (postSaved) => postSaved.user)
+    savedPosts: PostSaved[];
 
     @OneToMany(() => Comment, (comment) => comment.user)
     comments: Comment[];

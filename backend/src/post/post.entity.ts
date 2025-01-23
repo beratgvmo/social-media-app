@@ -11,6 +11,12 @@ import {
     UpdateDateColumn,
 } from 'typeorm';
 import { Comment } from '../comment/comment.entity';
+import { PostSaved } from 'src/post-saved/post-saved.entity';
+
+export enum PostType {
+    CODE = 'code',
+    TEXT = 'text',
+}
 
 @Entity()
 export class Post {
@@ -19,6 +25,13 @@ export class Post {
 
     @Column('text')
     content: string;
+
+    @Column({
+        type: 'enum',
+        enum: PostType,
+        default: PostType.TEXT,
+    })
+    type: PostType;
 
     @Column({ default: 0 })
     likeCount: number;
@@ -43,4 +56,7 @@ export class Post {
 
     @OneToMany(() => Like, (like) => like.post)
     likes: Like[];
+
+    @OneToMany(() => PostSaved, (postsaved) => postsaved.post)
+    savedByUsers: PostSaved[];
 }

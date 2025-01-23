@@ -70,6 +70,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
                 border={
                     comment.replies && comment.replies.length > 0 ? true : false
                 }
+                commentReplyCount={comment.replies.length}
             />
 
             {comment.replies && comment.replies.length > 0 && (

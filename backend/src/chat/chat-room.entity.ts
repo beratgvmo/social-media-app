@@ -5,6 +5,7 @@ import {
     OneToMany,
     CreateDateColumn,
     UpdateDateColumn,
+    Column,
 } from 'typeorm';
 import { User } from '../user/user.entity';
 import { Message } from './message.entity';
@@ -27,5 +28,8 @@ export class ChatRoom {
     createdAt: Date;
 
     @UpdateDateColumn()
-    updatedAt: Date; // Sohbet odasının en son güncellenme tarihi
+    updatedAt: Date;
+
+    @Column({ type: 'timestamp', nullable: true })
+    lastMessageDate: Date;
 }

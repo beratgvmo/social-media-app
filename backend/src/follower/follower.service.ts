@@ -4,7 +4,7 @@ import {
     Injectable,
     NotFoundException,
 } from '@nestjs/common';
-import { Follower } from './follower.entity';
+import { Follower, FollowStatus } from './follower.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
@@ -49,9 +49,10 @@ export class FollowerService {
             throw new Error('Zaten takip ediliyor');
         }
 
-        let newFollowStatus: 'pending' | 'accepted' = 'pending';
+        let newFollowStatus: FollowStatus.PENDING | FollowStatus.ACCEPTED =
+            FollowStatus.ACCEPTED;
         if (!following.isPrivate) {
-            newFollowStatus = 'accepted';
+            newFollowStatus = FollowStatus.ACCEPTED;
         }
 
         const newFollow = this.followerRepository.create({
@@ -121,7 +122,7 @@ export class FollowerService {
         }
 
         if (isAccepted) {
-            followRequest.status = 'accepted';
+            followRequest.status = FollowStatus.ACCEPTED;
             await this.followerRepository.save(followRequest);
         } else {
             await this.followerRepository.remove(followRequest);
@@ -159,5 +160,58 @@ export class FollowerService {
         await this.followerRepository.update(id, {
             isRead: true,
         });
+    }
+
+    async userFollowingAll(
+        userId: number,
+        page: number,
+        limit: number,
+    ): Promise<object> {
+        const skip = (page - 1) * limit;
+
+        const [followings] = await this.followerRepository.findAndCount({
+            where: { follower: { id: userId }, status: FollowStatus.ACCEPTED },
+            relations: ['following'],
+            skip,
+            take: limit,
+            order: { createdAt: 'DESC' },
+        });
+
+        return {
+            followings: followings.map((f) => this.filterUser(f.following)),
+        };
+    }
+
+    async userFollowerAll(
+        userId: number,
+        page: number,
+        limit: number,
+    ): Promise<object> {
+        const skip = (page - 1) * limit;
+
+        const [followers] = await this.followerRepository.findAndCount({
+            where: { following: { id: userId }, status: FollowStatus.ACCEPTED },
+            relations: ['follower'],
+            skip,
+            take: limit,
+            order: { createdAt: 'DESC' },
+        });
+
+        return {
+            followers: followers.map((f) => this.filterUser(f.follower)),
+        };
+    }
+
+    private filterUser(user: User) {
+        if (!user) {
+            return null;
+        }
+        return {
+            id: user.id,
+            name: user.name,
+            bio: user.bio,
+            profileImage: user.profileImage,
+            slug: user.slug,
+        };
     }
 }

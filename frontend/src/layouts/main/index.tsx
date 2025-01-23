@@ -1,11 +1,31 @@
 import { Outlet } from "react-router-dom";
 import Header from "@/components/header";
+import { useState } from "react";
 
 const MainLayout: React.FC = () => {
+    const [isInputFocused, setIsInputFocused] = useState(false);
+
+    const handleOverlayClick = () => {
+        setIsInputFocused(false);
+    };
+
     return (
-        <div className="bg-amber-950/5 min-h-screen">
-            <Header />
-            <div className="w-full max-w-[1100px] h-full mx-auto">
+        <div className="relative bg-amber-950/5 min-h-screen">
+            <Header
+                setInputFocus={setIsInputFocused}
+                isInputFocused={isInputFocused}
+            />
+            {isInputFocused && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-10"
+                    onClick={handleOverlayClick}
+                ></div>
+            )}
+            <div
+                className={`relative w-full max-w-[1100px] h-full mx-auto transition-colors pt-6 ${
+                    isInputFocused ? "z-0" : "z-10"
+                }`}
+            >
                 <Outlet />
             </div>
         </div>

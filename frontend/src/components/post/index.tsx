@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
     TbBookmark,
+    TbBookmarkFilled,
     TbDots,
     TbEdit,
     TbMessageCircle,
@@ -31,6 +32,7 @@ interface User {
     slug: string;
     profileImage: string;
     name: string;
+    bio: string;
 }
 
 interface PostImage {
@@ -48,28 +50,34 @@ const Post: React.FC<PostProps> = ({
     commetCount,
 }) => {
     const [isLike, setIsLike] = useState(false);
+    const [isSave, setIsSave] = useState(false);
     const [isComment, setIsComment] = useState(false);
     const [isBubble, setIsBubble] = useState(false);
     const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
     const bubbleRef = useRef<HTMLDivElement | null>(null);
+    const [currentCommentCount, setCurrentCommentCount] = useState(commetCount);
+
+    const incrementCommentCount = () => {
+        setCurrentCommentCount((prevCount) => prevCount + 1);
+    };
 
     const fetchLike = async () => {
         try {
-            await axios.post("like/post/" + id);
+            await axios.post(`/like/post/${id}`);
             setIsLike(true);
-            setCurrentLikeCount((prevCount) => prevCount + 1);
+            setCurrentLikeCount(currentLikeCount + 1);
         } catch (error) {
-            console.error(error);
+            console.error("error", error);
         }
     };
 
     const fetchRemoveLike = async () => {
         try {
-            await axios.delete("like/remove/post/" + id);
+            await axios.delete(`/like/remove/post/${id}`);
             setIsLike(false);
-            setCurrentLikeCount((prevCount) => prevCount - 1);
+            setCurrentLikeCount(currentLikeCount - 1);
         } catch (error) {
-            console.error(error);
+            console.error("error", error);
         }
     };
 
@@ -83,8 +91,27 @@ const Post: React.FC<PostProps> = ({
         }
     };
 
+    const savePost = async (postId: number) => {
+        try {
+            await axios.post(`/post-saved/${postId}`);
+            setIsSave(!isSave);
+        } catch (error) {
+            console.error("Error saving post:", error);
+        }
+    };
+
+    const checkSavePostStatus = async () => {
+        try {
+            const response = await axios.get(`/post-saved/status/${id}`);
+            setIsSave(response.data.status);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     useEffect(() => {
         checkPostStatus();
+        checkSavePostStatus();
     }, []);
 
     useEffect(() => {
@@ -107,14 +134,14 @@ const Post: React.FC<PostProps> = ({
         <div
             className={
                 border
-                    ? "pt-4 pb-3 bg-white rounded-lg border mt-3"
-                    : "pt-4 pb-3 bg-white rounded-t-lg border-b"
+                    ? "pt-3 pb-3 bg-white rounded-lg border mb-3"
+                    : "pt-3 pb-3 bg-white rounded-t-lg border-b"
             }
         >
             <div className="flex justify-between">
                 <Link to={`/profile/${user.slug}`}>
                     <div className="flex gap-2.5 pl-4">
-                        <div className="w-12 h-12">
+                        <div className="w-12 h-12 mt-1">
                             {user?.profileImage ? (
                                 <img
                                     src={user.profileImage}
@@ -123,24 +150,23 @@ const Post: React.FC<PostProps> = ({
                                 />
                             ) : (
                                 <div className="flex justify-center items-center w-full h-full bg-gray-200 rounded-full border-4 border-white">
-                                    <TbUser size={90} />
+                                    <TbUser />
                                 </div>
                             )}
                         </div>
-                        <div className="flex justify-between">
-                            <div>
-                                <p className="font-medium">{user?.name}</p>
-                                <p className="text-xs text-gray-600">
-                                    <TimeAgo createdAt={createdAt} />
-                                </p>
-                            </div>
+                        <div className="flex flex-col">
+                            <p className="font-medium -mb-0.5">{user?.name}</p>
+                            <p className="text-xs text-gray-600">{user?.bio}</p>
+                            <p className="text-xs text-gray-500">
+                                <TimeAgo createdAt={createdAt} />
+                            </p>
                         </div>
                     </div>
                 </Link>
-                <div className="pr-6 relative" ref={bubbleRef}>
+                <div className="pr-4 relative" ref={bubbleRef}>
                     <button
                         onClick={() => setIsBubble(!isBubble)}
-                        className="hover:bg-gray-100 p-1 rounded-full transition"
+                        className="hover:bg-gray-100 p-1.5 rounded-full transition"
                     >
                         <TbDots />
                     </button>
@@ -199,16 +225,23 @@ const Post: React.FC<PostProps> = ({
                             <TbMessageCircle className="w-full h-full text-gray-700 group-hover:text-red-500 transition cursor-pointer" />
                         </div>
                         <p className="text-gray-700 group-hover:text-red-500 text-sm font-medium transition">
-                            {commetCount}
+                            {currentCommentCount}
                         </p>
                     </button>
-                    <button className="w-8 h-8 p-1.5 rounded-full group hover:bg-green-100 transition mr-0.5">
+                    <button className="w-8 h-8 p-1.5 rounded-full group hover:bg-green-100 transition">
                         <TbShare3 className="w-full h-full text-gray-700 group-hover:text-green-600 transition cursor-pointer" />
                     </button>
                 </div>
                 <div>
-                    <button className="w-8 h-8 p-1.5 rounded-full hover:bg-gray-200 transition mr-0.5">
-                        <TbBookmark className="w-full h-full text-gray-700 transition cursor-pointer" />
+                    <button
+                        onClick={() => savePost(id)}
+                        className="w-8 h-8 p-1.5 rounded-full hover:bg-gray-200 transition"
+                    >
+                        {isSave ? (
+                            <TbBookmarkFilled className="w-full h-full text-gray-700 transition cursor-pointer" />
+                        ) : (
+                            <TbBookmark className="w-full h-full text-gray-700 transition cursor-pointer" />
+                        )}
                     </button>
                 </div>
             </div>
@@ -216,6 +249,7 @@ const Post: React.FC<PostProps> = ({
                 id={id}
                 isComment={isComment}
                 toggleComment={() => setIsComment(!isComment)}
+                onAddComment={incrementCommentCount}
             />
         </div>
     );

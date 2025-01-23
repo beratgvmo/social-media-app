@@ -29,9 +29,9 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
     const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const editableDivRef = useRef<HTMLDivElement>(null);
-    const { register, handleSubmit, reset } = useForm<PostFormInputs>();
     const { user } = useAuthStore();
     const { setProfilePosts } = usePostStore();
+    const { register, handleSubmit, reset } = useForm<PostFormInputs>();
 
     useEffect(() => {
         setIsModalOpen(isOpen);

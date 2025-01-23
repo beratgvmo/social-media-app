@@ -2,6 +2,8 @@ import {
     Controller,
     Delete,
     Get,
+    HttpException,
+    HttpStatus,
     Param,
     Post,
     Req,
@@ -24,16 +26,28 @@ export class LikeController {
     async postLike(@Param('postId') postId: number, @Req() req: Request) {
         const userId = req.user['sub'];
 
-        const likedPost = await this.likeService.likePost(userId, postId);
+        try {
+            const likedPost = await this.likeService.likePost(userId, postId);
 
-        const postOwner = likedPost.user;
+            const postOwner = likedPost.user;
+            // if (userId !== postOwner.id) {
+            //     await this.notificationService.createNotification(
+            //         postOwner,
+            //         'like',
+            //         userId,
+            //         likedPost,
+            //     );
+            // }
 
-        if (userId != postOwner.id) {
-            await this.notificationService.createNotification(
-                postOwner,
-                'like',
-                userId,
-                likedPost,
+            return {
+                success: true,
+                message: 'Post başarıyla beğenildi.',
+                likeCount: likedPost.likeCount,
+            };
+        } catch (error) {
+            throw new HttpException(
+                error.message || 'Post beğenme işlemi başarısız.',
+                HttpStatus.BAD_REQUEST,
             );
         }
     }
@@ -43,19 +57,30 @@ export class LikeController {
     async removePostLike(@Param('postId') postId: number, @Req() req: Request) {
         const userId = req.user['sub'];
 
-        const updatedLikeCount = await this.likeService.unlikePost(
-            userId,
-            postId,
-        );
-
-        const postOwner = updatedLikeCount.user.id;
-
-        if (userId != postOwner) {
-            await this.notificationService.removeNotification(
+        try {
+            const updatedPost = await this.likeService.unlikePost(
                 userId,
                 postId,
-                postOwner,
-                'like',
+            );
+
+            // if (userId !== updatedPost.user.id) {
+            //     await this.notificationService.removeNotification(
+            //         userId,
+            //         postId,
+            //         updatedPost.user.id,
+            //         'like',
+            //     );
+            // }
+
+            return {
+                success: true,
+                message: 'Like başarıyla kaldırıldı.',
+                likeCount: updatedPost.likeCount,
+            };
+        } catch (error) {
+            throw new HttpException(
+                error.message || 'Like kaldırma işlemi başarısız.',
+                HttpStatus.BAD_REQUEST,
             );
         }
     }

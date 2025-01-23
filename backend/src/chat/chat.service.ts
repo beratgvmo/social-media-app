@@ -28,7 +28,12 @@ export class ChatService {
             chatRoom: { id: chatRoomId },
             sender: { id: senderId },
         });
-        return this.messageRepository.save(message);
+        await this.messageRepository.save(message);
+
+        chatRoom.lastMessageDate = new Date();
+        await this.chatRoomRepository.save(chatRoom);
+
+        return message;
     }
 
     async getMessagesByRoomId(chatRoomId: number): Promise<Message[]> {
@@ -41,6 +46,15 @@ export class ChatService {
         return messages;
     }
 
+    async createRoom(currentUserId: number, userId: number): Promise<ChatRoom> {
+        const room = this.chatRoomRepository.create({
+            user1: { id: currentUserId },
+            user2: { id: userId },
+        });
+
+        return this.chatRoomRepository.save(room);
+    }
+
     async getUserRooms(userId: number): Promise<ChatRoom[]> {
         const rooms = await this.chatRoomRepository.find({
             where: [{ user1: { id: userId } }, { user2: { id: userId } }],
@@ -49,5 +63,19 @@ export class ChatService {
         });
 
         return rooms;
+    }
+
+    async findExistingRoom(
+        currentUserId: number,
+        userId: number,
+    ): Promise<ChatRoom | null> {
+        const existingRoom = await this.chatRoomRepository.findOne({
+            where: [
+                { user1: { id: currentUserId }, user2: { id: userId } },
+                { user1: { id: userId }, user2: { id: currentUserId } },
+            ],
+        });
+
+        return existingRoom || null;
     }
 }

@@ -8,6 +8,7 @@ interface PostCommentsProps {
     id: number;
     isComment: boolean;
     toggleComment: () => void;
+    onAddComment?: () => void;
 }
 
 interface User {
@@ -24,7 +25,11 @@ interface CommentType {
     replies?: CommentType[];
 }
 
-const PostComment: React.FC<PostCommentsProps> = ({ isComment, id }) => {
+const PostComment: React.FC<PostCommentsProps> = ({
+    isComment,
+    id,
+    onAddComment,
+}) => {
     const [comments, setComments] = useState<CommentType[]>([]);
     const [content, setContent] = useState<string>("");
     const { user } = useAuthStore();
@@ -62,6 +67,7 @@ const PostComment: React.FC<PostCommentsProps> = ({ isComment, id }) => {
                 parentCommentId: null,
             });
             setContent("");
+            onAddComment();
             fetchComments();
         } catch (error) {
             console.error("Yorum eklenirken hata oluştu:", error);

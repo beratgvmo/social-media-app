@@ -7,6 +7,11 @@ import {
     PrimaryGeneratedColumn,
 } from 'typeorm';
 
+export enum FollowStatus {
+    ACCEPTED = 'accepted',
+    PENDING = 'pending',
+}
+
 @Entity()
 export class Follower {
     @PrimaryGeneratedColumn()
@@ -18,8 +23,12 @@ export class Follower {
     @ManyToOne(() => User, (user) => user.followers)
     following: User;
 
-    @Column({ default: 'pending' })
-    status: 'accepted' | 'pending';
+    @Column({
+        type: 'enum',
+        enum: FollowStatus,
+        default: FollowStatus.PENDING,
+    })
+    status: FollowStatus;
 
     @Column({ default: false })
     isRead: boolean;

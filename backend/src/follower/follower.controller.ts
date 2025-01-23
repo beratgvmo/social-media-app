@@ -7,6 +7,7 @@ import {
     Get,
     Req,
     Body,
+    Query,
 } from '@nestjs/common';
 import { FollowerService } from './follower.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -66,7 +67,25 @@ export class FollowerController {
     }
 
     @Post('read/:followId')
-    async markAsRead(@Param('followId') followId: string) {
-        return this.followerService.markAsRead(Number(followId));
+    async markAsRead(@Param('followId') followId: number) {
+        return this.followerService.markAsRead(followId);
+    }
+
+    @Get('following-all/:userId')
+    async userFollowingAll(
+        @Query('page') page: number = 1,
+        @Query('limit') limit: number = 10,
+        @Param('userId') userId: number,
+    ) {
+        return await this.followerService.userFollowingAll(userId, page, limit);
+    }
+
+    @Get('follower-all/:userId')
+    async userFollowerAll(
+        @Query('page') page: number = 1,
+        @Query('limit') limit: number = 10,
+        @Param('userId') userId: number,
+    ) {
+        return await this.followerService.userFollowerAll(userId, page, limit);
     }
 }

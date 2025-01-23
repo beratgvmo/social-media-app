@@ -10,6 +10,7 @@ import { FollowerModule } from './follower/follower.module';
 import { UserModule } from './user/user.module';
 import { NotificationModule } from './notification/notification.module';
 import { ChatModule } from './chat/chat.module';
+import { PostSavedModule } from './post-saved/post-saved.module';
 
 @Module({
     imports: [
@@ -39,6 +40,7 @@ import { ChatModule } from './chat/chat.module';
         UserModule,
         NotificationModule,
         ChatModule,
+        PostSavedModule,
     ],
 })
 export class AppModule {}

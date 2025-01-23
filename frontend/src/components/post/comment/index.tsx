@@ -14,6 +14,7 @@ interface CommentProps {
     user: User;
     border: boolean;
     toggleReplies: () => void;
+    commentReplyCount: number;
 }
 
 const Comment: React.FC<CommentProps> = ({
@@ -22,6 +23,7 @@ const Comment: React.FC<CommentProps> = ({
     user,
     border,
     toggleReplies,
+    commentReplyCount,
 }) => {
     const [isLike, setIsLike] = useState(false);
     const [currentLikeCount, setCurrentLikeCount] = useState(1);
@@ -129,7 +131,7 @@ const Comment: React.FC<CommentProps> = ({
                                 Yanıtla
                             </button>
                             <p className="text-gray-600 text-xs pl-1 pr-1">
-                                100
+                                {commentReplyCount}
                             </p>
                         </div>
                     </div>

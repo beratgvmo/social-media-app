@@ -16,16 +16,18 @@ const Login: React.FC = () => {
         formState: { errors },
     } = useForm<LoginFormData>();
     const navigate = useNavigate();
-    const { setUser, user, setTokens } = useAuthStore();
+    const { setUser, user, setAccessToken } = useAuthStore();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const onSubmit = async (data: LoginFormData) => {
         try {
             const response = await axios.post("/auth/login", data);
-            setUser(response.data.user);
-            setTokens(response.data.accessToken, response.data.refreshToken);
-        } catch (error) {
-            setErrorMessage("Giriş hatası: Hatalı kullanıcı bilgileri");
+            setAccessToken(response.data.accessToken);
+            const profile = await axios.get("/user/profile");
+            setUser(profile.data);
+            navigate("/");
+        } catch (error: any) {
+            setErrorMessage(error.response?.data?.message || "Giriş hatası.");
         }
     };
 
@@ -33,7 +35,7 @@ const Login: React.FC = () => {
         if (user) {
             navigate("/");
         }
-    }, [user, setUser]);
+    }, [user, navigate]);
 
     return (
         <div className="flex justify-center items-center h-screen bg-gradient-to-r from-green-400 to-blue-500">
@@ -49,9 +51,7 @@ const Login: React.FC = () => {
                 )}
                 <div>
                     <input
-                        {...register("email", {
-                            required: "Email is required",
-                        })}
+                        {...register("email", { required: "Email gerekli." })}
                         className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Email"
                         type="email"
@@ -65,10 +65,10 @@ const Login: React.FC = () => {
                 <div>
                     <input
                         {...register("password", {
-                            required: "Password is required",
+                            required: "Şifre gerekli.",
                         })}
                         className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Password"
+                        placeholder="Şifre"
                         type="password"
                     />
                     {errors.password && (
@@ -78,15 +78,15 @@ const Login: React.FC = () => {
                     )}
                 </div>
                 <button className="w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200 font-semibold">
-                    Login
+                    Giriş Yap
                 </button>
                 <p className="text-center text-gray-600">
-                    Don't have an account?
+                    Hesabınız yok mu?{" "}
                     <a
                         href="/register"
                         className="text-blue-500 hover:underline"
                     >
-                        Register
+                        Kayıt Ol
                     </a>
                 </p>
             </form>

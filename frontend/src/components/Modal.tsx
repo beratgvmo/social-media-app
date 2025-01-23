@@ -58,7 +58,7 @@ const Modal: FC<ModalProps> = ({
                         <TbX />
                     </button>
                 </div>
-                <div className="bg-[#f8fafd] rounded-b-xl">{children}</div>
+                <div className="bg-gray-50 rounded-b-xl">{children}</div>
             </div>
         </div>
     );

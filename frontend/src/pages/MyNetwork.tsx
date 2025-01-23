@@ -72,19 +72,19 @@ const MyNetwork: React.FC = () => {
     };
 
     return (
-        <div className="mt-6 flex gap-5">
+        <div className="flex gap-5">
             <ProfileSidebar />
             <div className="w-full">
                 <div className="pt-3 bg-white rounded-lg border w-full">
                     <p className="px-4 pb-3">Davetler</p>
-                    <div className="">
+                    <div>
                         {requests.length > 0 ? (
                             requests.map((request) => (
                                 <div
                                     key={request.follower.id}
                                     className="flex px-4 border-t justify-between items-center py-3"
                                 >
-                                    <div className="flex items-center gap-2.5">
+                                    <div className="flex items-center gap-1.5">
                                         {request.follower?.profileImage ? (
                                             <img
                                                 src={
@@ -97,7 +97,7 @@ const MyNetwork: React.FC = () => {
                                         ) : (
                                             <TbUser className="w-14 h-14 p-2 flex items-center border rounded-full text-blue-500" />
                                         )}
-                                        <div className="flex flex-col gap-0.5">
+                                        <div className="flex flex-col gap-1">
                                             <p className="font-medium text-gray-800">
                                                 {request.follower.name}
                                             </p>

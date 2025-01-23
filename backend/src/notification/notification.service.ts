@@ -48,6 +48,10 @@ export class NotificationService {
         PostUserId: number,
         type: 'like',
     ): Promise<void> {
+        this.notificationRepository.findOne({
+            where: { user: { id: userId }, post: { id: postId } },
+        });
+
         await this.notificationRepository.delete({
             user: { id: PostUserId },
             post: { id: postId },

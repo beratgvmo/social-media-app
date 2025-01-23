@@ -23,7 +23,6 @@ interface User {
 const Chat: React.FC = () => {
     const [chatRooms, setChatRooms] = useState<RoomChat[]>([]);
     const [thisRoom, setThisRoom] = useState<number | null>(null);
-    const [messageInput, setMessageInput] = useState<string>("");
     const { user } = useAuthStore();
 
     const inputRef = useRef<HTMLInputElement>(null);
@@ -46,34 +45,48 @@ const Chat: React.FC = () => {
     }, [user.id]);
 
     return (
-        <div className="w-full h-full flex">
-            <ChatSidebar
-                user={user}
-                chatRooms={chatRooms}
-                thisRoom={thisRoom}
-                setThisRoom={setThisRoom}
-                handleInputClick={handleInputClick}
-                inputRef={inputRef}
-            />
-            <div className="w-full h-full">
+        <div className="flex w-full h-full">
+            <div className="w-2/6 min-w-[300px] h-full bg-white">
+                <ChatSidebar
+                    user={user}
+                    chatRooms={chatRooms}
+                    thisRoom={thisRoom}
+                    setThisRoom={setThisRoom}
+                    handleInputClick={handleInputClick}
+                    inputRef={inputRef}
+                />
+            </div>
+
+            <div className="flex flex-1 flex-col h-full w-4/6 bg-white">
                 {!thisRoom && <ChatWelcome />}
                 {thisRoom && (
-                    <div className="h-[100%] relative flex flex-col justify-end">
-                        <div className="absolute top-0 w-full z-10">
+                    <div className="flex flex-col h-full">
+                        <div>
                             {chatRooms.map(
                                 (room) =>
-                                    room.id == thisRoom && (
-                                        <ChatHeader room={room} user={user} />
+                                    room.id === thisRoom && (
+                                        <ChatHeader
+                                            key={room.id}
+                                            room={room}
+                                            user={user}
+                                        />
                                     )
                             )}
                         </div>
-                        <div className="bg-slate-200 w-[100%] h-[83%]">
+
+                        <div className="flex-1 overflow-y-auto mr-0.5">
                             <ChatMessage
                                 chatRoomId={thisRoom}
                                 userId={user.id}
                             />
                         </div>
-                        <MessageInput chatRoomId={thisRoom} userId={user.id} />
+
+                        <div>
+                            <MessageInput
+                                chatRoomId={thisRoom}
+                                userId={user.id}
+                            />
+                        </div>
                     </div>
                 )}
             </div>

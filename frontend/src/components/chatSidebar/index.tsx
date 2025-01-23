@@ -1,5 +1,9 @@
-import { FC, RefObject } from "react";
-import { TbSearch, TbUser } from "react-icons/tb";
+import { FC, RefObject, useEffect, useState } from "react";
+import { TbLibraryPlus, TbSearch } from "react-icons/tb";
+import Modal from "@/components/Modal";
+import axios from "@/utils/axiosInstance";
+import ChatUserItem from "./chatUserItem";
+import FriendItem from "./friendItem";
 
 interface ChatSidebarProps {
     chatRooms: RoomChat[];
@@ -14,6 +18,7 @@ interface RoomChat {
     id: number;
     user1: User;
     user2: User;
+    lastMessageDate?: string;
 }
 
 interface User {
@@ -31,64 +36,130 @@ const ChatSidebar: FC<ChatSidebarProps> = ({
     inputRef,
     user,
 }) => {
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [mutualFriends, setMutualFriends] = useState<User[]>([]);
+    const [openModalId, setOpenModalId] = useState<number | null>(null);
+
+    const filteredChatRooms = chatRooms.filter((room) => {
+        const chatUser = room.user1.id === user.id ? room.user2 : room.user1;
+        return chatUser.name.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+
+    const handleModalOpen = () => setIsModalOpen(true);
+    const handleModalClose = () => setIsModalOpen(false);
+
+    useEffect(() => {
+        const fetchRooms = async () => {
+            try {
+                const response = await axios.get(`chat/new/friends`);
+                setMutualFriends(response.data);
+            } catch (error) {
+                console.error("Mesajları alırken hata oluştu:", error);
+            }
+        };
+
+        fetchRooms();
+    }, []);
+
+    const formatMessageDate = (date: string) => {
+        const messageDate = new Date(date);
+        const now = new Date();
+
+        const differenceInMs = now.getTime() - messageDate.getTime();
+        const differenceInHours = Math.floor(differenceInMs / (1000 * 60 * 60));
+
+        const isYesterday =
+            new Date(now.getTime() - 86400000).toDateString() ===
+            messageDate.toDateString();
+
+        if (
+            differenceInHours < 24 &&
+            messageDate.toDateString() === now.toDateString()
+        ) {
+            return messageDate.toLocaleTimeString("tr-TR", {
+                hour: "2-digit",
+                minute: "2-digit",
+            });
+        } else if (isYesterday) {
+            return "Dün";
+        } else {
+            return messageDate.toLocaleDateString("tr-TR");
+        }
+    };
+
     return (
-        <div className="min-w-[25%] w-[25%] max-w-[25%] h-full bg-white p-4 border-r">
-            <p className="text-xl font-medium mb-4 mt-1 ml-2">Sohbetler</p>
-
-            <div
-                onClick={handleInputClick}
-                className="w-full flex items-center border-2 mb-3 border-gray-300 rounded-md focus-within:border-blue-500 px-2 cursor-pointer"
-            >
-                <TbSearch className="text-gray-500 text-lg" />
-                <input
-                    ref={inputRef}
-                    type="text"
-                    className="w-full p-1.5 text-sm outline-none"
-                    placeholder="Aratın veya yeni sohbet başlatın"
-                />
-            </div>
-
-            {chatRooms.map((room) => (
+        <div className="w-full h-full bg-white py-4 px-1 border-r">
+            <div className="flex mb-3 mt-1 ml-2 px-3 justify-between items-center">
+                <p className="text-xl font-medium">Sohbetler</p>
                 <div
-                    key={room.id}
-                    onClick={() => setThisRoom(room.id)}
-                    className={`px-3 py-2 rounded-md mt-1 cursor-pointer transition ${
-                        thisRoom === room.id
-                            ? "bg-gray-200/60"
-                            : "hover:bg-gray-200/40"
-                    }`}
+                    className="hover:bg-blue-100 p-2 rounded-full transition cursor-pointer"
+                    onClick={handleModalOpen}
                 >
-                    {[room.user1, room.user2].map(
-                        (chatUser) =>
-                            user.id !== chatUser.id && (
-                                <div className="flex gap-3" key={chatUser.id}>
-                                    <div className="w-12 h-12">
-                                        {chatUser.profileImage ? (
-                                            <img
-                                                src={chatUser.profileImage}
-                                                alt="Profil Resmi"
-                                                className="w-full h-full rounded-full bg-white"
-                                            />
-                                        ) : (
-                                            <div className="p-2 flex text-gray-500 justify-center items-center w-full h-full bg-gray-300 rounded-full">
-                                                <TbUser size={90} />
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="flex flex-col">
-                                        <p className="font-medium text-sm text-gray-800">
-                                            {chatUser.name}
-                                        </p>
-                                        <p className="text-sm text-gray-600">
-                                            merhaba ben berat
-                                        </p>
-                                    </div>
-                                </div>
-                            )
-                    )}
+                    <TbLibraryPlus className="text-xl" />
                 </div>
-            ))}
+            </div>
+            <div className="pl-3 pr-2">
+                <div
+                    onClick={handleInputClick}
+                    className="w-full flex items-center px-2 border-2 mb-3 border-gray-300 rounded-md focus-within:border-blue-500 cursor-pointer"
+                >
+                    <TbSearch className="text-gray-500 text-lg" />
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        className="w-full p-1.5 text-sm outline-none"
+                        placeholder="Aratın veya yeni sohbet başlatın"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+            </div>
+            <div className="flex flex-col overflow-scroll scrollbar-transition h-[86%] pl-3 pr-1">
+                {filteredChatRooms.length === 0 ? (
+                    <p className="text-gray-500 text-center mt-4">
+                        Sonuç bulunamadı
+                    </p>
+                ) : (
+                    filteredChatRooms.map((room) => {
+                        const chatUser =
+                            room.user1.id === user.id ? room.user2 : room.user1;
+                        return (
+                            <ChatUserItem
+                                key={room.id}
+                                chatUser={chatUser}
+                                lastMessageDate={room.lastMessageDate}
+                                thisRoom={thisRoom}
+                                roomId={room.id}
+                                onClick={() => {
+                                    setThisRoom(room.id);
+                                    setOpenModalId(room.id);
+                                }}
+                                formatMessageDate={formatMessageDate}
+                                openModalId={openModalId}
+                                setOpenModalId={setOpenModalId}
+                            />
+                        );
+                    })
+                )}
+            </div>
+            <Modal
+                maxWidth="md"
+                isOpen={isModalOpen}
+                onClose={handleModalClose}
+                title="Yeni Sohbet Başlat"
+            >
+                <div className="p-4">
+                    {mutualFriends.map((friend) => (
+                        <FriendItem
+                            handleModalClose={handleModalClose}
+                            key={friend.id}
+                            friend={friend}
+                            setThisRoom={setThisRoom}
+                        />
+                    ))}
+                </div>
+            </Modal>
         </div>
     );
 };

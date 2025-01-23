@@ -53,7 +53,6 @@ export class PostController {
         };
     }
 
-    @UseGuards(JwtAuthGuard)
     @Get()
     async getAllHome(
         @Query('page') page: number = 1,
