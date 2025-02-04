@@ -12,10 +12,12 @@ import {
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import axios from "@/utils/axiosInstance";
-
 import PostImageGrid from "@/components/PostImageGrid";
 import TimeAgo from "@/components/TimeAgo";
 import PostComment from "@/components/post/PostComment";
+
+import CodeMirror from "@uiw/react-codemirror";
+import { javascript } from "@codemirror/lang-javascript";
 
 interface PostProps {
     id: number;
@@ -26,6 +28,7 @@ interface PostProps {
     createdAt: string;
     user: User;
     border: boolean;
+    postType: string;
 }
 
 interface User {
@@ -48,6 +51,7 @@ const Post: React.FC<PostProps> = ({
     border,
     likeCount,
     commetCount,
+    postType,
 }) => {
     const [isLike, setIsLike] = useState(false);
     const [isSave, setIsSave] = useState(false);
@@ -140,7 +144,7 @@ const Post: React.FC<PostProps> = ({
         >
             <div className="flex justify-between">
                 <Link to={`/profile/${user.slug}`}>
-                    <div className="flex gap-2.5 pl-4">
+                    <div className="flex gap-2.5 pl-3">
                         <div className="w-12 h-12 mt-1">
                             {user?.profileImage ? (
                                 <img
@@ -155,8 +159,10 @@ const Post: React.FC<PostProps> = ({
                             )}
                         </div>
                         <div className="flex flex-col">
-                            <p className="font-medium -mb-0.5">{user?.name}</p>
-                            <p className="text-xs text-gray-600">{user?.bio}</p>
+                            <p className="font-medium m-0 p-0 -mb-[3px] -mt-0.5 text-[16px]">
+                                {user?.name}
+                            </p>
+                            <p className="text-xs text-gray-600">{user.bio}</p>
                             <p className="text-xs text-gray-500">
                                 <TimeAgo createdAt={createdAt} />
                             </p>
@@ -185,7 +191,22 @@ const Post: React.FC<PostProps> = ({
                 </div>
             </div>
             <div className="mt-2.5 px-4">
-                <p className="text-base">{content}</p>
+                {postType == "writing" ? (
+                    <p className="text-base">{content}</p>
+                ) : (
+                    <CodeMirror
+                        value={content}
+                        basicSetup={{
+                            foldGutter: false,
+                            highlightActiveLine: false,
+                            highlightActiveLineGutter: false,
+                        }}
+                        extensions={[javascript()]}
+                        theme="light"
+                        readOnly={true}
+                        className="custom-scrollbar !border-none !cursor-none"
+                    />
+                )}
             </div>
             <div className="px-4 mt-2">
                 <PostImageGrid postImages={images.map((image) => image.url)} />

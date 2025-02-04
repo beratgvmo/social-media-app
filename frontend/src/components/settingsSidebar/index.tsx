@@ -6,16 +6,20 @@ import {
     TbSettings,
     TbSquareRoundedPlus,
 } from "react-icons/tb";
-import PostModel from "./PostModel";
-import axios from "../utils/axiosInstance";
-import { useAuthStore } from "../store/useAuthStore";
-import EditProfile from "./editProfile";
+import PostModel from "@/components/postModel";
+import axios from "@/utils/axiosInstance";
+import { useAuthStore } from "@/store/useAuthStore";
+import EditProfile from "@/components/settingsSidebar/editProfile";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import EditSetting from "./editSetting";
+
 const SettingsSidebar: React.FC = () => {
     const { logout } = useAuthStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
+    const [isModalOpenSetting, setIsModalOpenSetting] = useState(false);
+
     const navigate = useNavigate();
 
     const handleOpenModal = () => {
@@ -34,6 +38,14 @@ const SettingsSidebar: React.FC = () => {
         setIsModalOpenEdit(false);
     };
 
+    const handleOpenModalSetting = () => {
+        setIsModalOpenSetting(true);
+    };
+
+    const handleCloseModalSetting = () => {
+        setIsModalOpenSetting(false);
+    };
+
     const handleLogout = async () => {
         try {
             await axios.post("/auth/logout");
@@ -50,6 +62,10 @@ const SettingsSidebar: React.FC = () => {
             <EditProfile
                 isOpen={isModalOpenEdit}
                 onClose={handleCloseModalEdit}
+            />
+            <EditSetting
+                isOpen={isModalOpenSetting}
+                onClose={handleCloseModalSetting}
             />
             <div className="min-w-[230px]">
                 <div className="bg-white rounded-lg border px-4 py-3">
@@ -74,10 +90,13 @@ const SettingsSidebar: React.FC = () => {
                                 <p>Kayıt Edilenler</p>
                             </div>
                         </Link>
-                        <div className="flex items-center mt-2 cursor-pointer font-semibold hover:bg-blue-100 py-2 px-3 transition rounded-full">
+                        <button
+                            onClick={handleOpenModalSetting}
+                            className="flex items-center mt-2 cursor-pointer font-semibold hover:bg-blue-100 py-2 px-3 transition rounded-full"
+                        >
                             <TbSettings className="text-xl mr-1.5" />
                             <p>Ayarlar</p>
-                        </div>
+                        </button>
                         <button
                             onClick={() => handleLogout()}
                             className="flex items-center cursor-pointer font-semibold mt-2 hover:bg-blue-100 py-2 px-3 transition rounded-full"

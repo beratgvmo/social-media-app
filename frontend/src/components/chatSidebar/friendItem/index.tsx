@@ -2,12 +2,13 @@ import React from "react";
 import axios from "@/utils/axiosInstance";
 import { TbUser } from "react-icons/tb";
 
-const FriendItem = ({ friend, handleModalClose, setThisRoom }) => {
+const FriendItem = ({ friend, handleModalClose, setThisRoom, fetchRooms }) => {
     const handleCreateRoom = async (userId: number) => {
         try {
             const response = await axios.post(`chat/create-room/${userId}`);
             console.log("Room created:", response.data);
             setThisRoom(response.data.id);
+            fetchRooms();
             handleModalClose();
         } catch (error) {
             console.error("Error creating room:", error);

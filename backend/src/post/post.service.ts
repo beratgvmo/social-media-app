@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Post } from './post.entity';
+import { Post, PostType } from './post.entity';
 import { Repository } from 'typeorm';
 import { PostImage } from '../post-images/post-images.entity';
 import { User } from 'src/user/user.entity';
@@ -18,6 +18,7 @@ export class PostService {
 
     async createPost(
         content: string,
+        postType: PostType,
         imageUrls: string[] = [],
         userId: number,
     ): Promise<Post> {
@@ -29,19 +30,16 @@ export class PostService {
 
         const post = this.postRepository.create({
             content,
+            postType,
             user,
         });
 
         const savedPost = await this.postRepository.save(post);
 
         if (imageUrls.length > 0) {
-            const postImages = imageUrls.map((url) => {
-                const postImage = this.postImageRepository.create({
-                    url,
-                    post: savedPost,
-                });
-                return postImage;
-            });
+            const postImages = imageUrls.map((url) =>
+                this.postImageRepository.create({ url, post: savedPost }),
+            );
 
             await this.postImageRepository.save(postImages);
         }
@@ -85,5 +83,17 @@ export class PostService {
                 createdAt: 'DESC',
             },
         });
+    }
+
+    async deletePost(postId: number, userId: number): Promise<void> {
+        const post = await this.postRepository.findOne({
+            where: { id: postId, user: { id: userId } },
+        });
+
+        if (!post) {
+            throw new NotFoundException('Post not found');
+        }
+
+        await this.postRepository.remove(post);
     }
 }

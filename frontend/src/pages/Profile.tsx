@@ -13,7 +13,7 @@ import Post from "@/components/post";
 import { CgSpinner } from "react-icons/cg";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { Link } from "react-router-dom";
-import Button from "@/components/Button";
+import Button from "@/components/button";
 
 interface UserProfile {
     id: number;

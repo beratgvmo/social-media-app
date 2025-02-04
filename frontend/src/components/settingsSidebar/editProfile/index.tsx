@@ -1,10 +1,9 @@
 import { useEffect } from "react";
-import Button from "../Button";
-import Modal from "../Modal";
+import Button from "@/components/button";
+import Modal from "@/components/Modal";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useForm } from "react-hook-form";
 import axios from "@/utils/axiosInstance";
-import { useNavigate } from "react-router-dom";
 
 type FormData = {
     name: string;
@@ -24,7 +23,6 @@ const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => {
         formState: { errors },
     } = useForm<FormData>();
     const { user, setUser } = useAuthStore();
-    const navigate = useNavigate();
 
     useEffect(() => {
         if (user) {

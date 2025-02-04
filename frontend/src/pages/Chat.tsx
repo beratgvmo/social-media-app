@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import axios from "../utils/axiosInstance";
+import axios from "@/utils/axiosInstance";
 import { useAuthStore } from "@/store/useAuthStore";
 import ChatMessage from "@/components/chatMessage";
 import ChatSidebar from "@/components/chatSidebar";
@@ -31,16 +31,16 @@ const Chat: React.FC = () => {
         inputRef.current?.focus();
     };
 
-    useEffect(() => {
-        const fetchRooms = async () => {
-            try {
-                const response = await axios.get(`chat/userRooms/${user.id}`);
-                setChatRooms(response.data);
-            } catch (error) {
-                console.error("Mesajları alırken hata oluştu:", error);
-            }
-        };
+    const fetchRooms = async () => {
+        try {
+            const response = await axios.get(`chat/userRooms/${user.id}`);
+            setChatRooms(response.data);
+        } catch (error) {
+            console.error("Mesajları alırken hata oluştu:", error);
+        }
+    };
 
+    useEffect(() => {
         fetchRooms();
     }, [user.id]);
 
@@ -54,6 +54,7 @@ const Chat: React.FC = () => {
                     setThisRoom={setThisRoom}
                     handleInputClick={handleInputClick}
                     inputRef={inputRef}
+                    fetchRooms={fetchRooms}
                 />
             </div>
 

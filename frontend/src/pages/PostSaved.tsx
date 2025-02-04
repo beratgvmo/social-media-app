@@ -1,7 +1,6 @@
 import Post from "@/components/post";
-import ProfileSidebar from "@/components/ProfileSidebar";
 import RightbarFollow from "@/components/RightbarFollow";
-import SettingsSidebar from "@/components/SettingsSidebar";
+import SettingsSidebar from "@/components/settingsSidebar";
 import axios from "@/utils/axiosInstance";
 import React, { useEffect, useState } from "react";
 

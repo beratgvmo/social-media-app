@@ -7,6 +7,7 @@ interface Friend {
     name: string;
     profileImage: string;
     slug: string;
+    bio: string;
 }
 
 const RightbarFollow: React.FC = () => {
@@ -54,6 +55,7 @@ const RightbarFollow: React.FC = () => {
                             name={friend.name}
                             slug={friend.slug}
                             profileImage={friend.profileImage}
+                            bio={friend.bio}
                         />
                     ))
                 ) : (

@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
-import axios from "../utils/axiosInstance";
+import axios from "@/utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface LoginFormData {
     email: string;

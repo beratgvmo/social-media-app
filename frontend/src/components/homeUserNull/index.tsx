@@ -26,6 +26,7 @@ const HomeUserNull: React.FC = () => {
         try {
             const response = await axios.post("/auth/login", data);
             setAccessToken(response.data.accessToken);
+            console.log(response.data);
             const profile = await axios.get("/user/profile");
             setUser(profile.data);
             navigate("/");

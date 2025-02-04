@@ -1,13 +1,15 @@
 import axios from "axios";
 import { useAuthStore } from "@/store/useAuthStore";
 
+const { getState, setState } = useAuthStore;
+
 const apiClient = axios.create({
     baseURL: "http://localhost:3000",
     withCredentials: true,
 });
 
 apiClient.interceptors.request.use((config) => {
-    const { accessToken } = useAuthStore.getState(); // Store'un state'ine doğrudan erişim
+    const { accessToken } = getState(); // Store'un state'ine doğrudan erişim
     if (accessToken) {
         config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
@@ -17,30 +19,18 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
-        const originalRequest = error.config;
-
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-
+        if (error.response?.status === 401) {
             try {
                 const refreshResponse = await apiClient.post("/auth/refresh");
                 const newAccessToken = refreshResponse.data.accessToken;
 
-                const { setAccessToken } = useAuthStore.getState();
-                setAccessToken(newAccessToken);
-
-                originalRequest.headers[
+                setState({ accessToken: newAccessToken });
+                error.config.headers[
                     "Authorization"
                 ] = `Bearer ${newAccessToken}`;
-                return apiClient(originalRequest);
-            } catch (err) {
-                console.error(
-                    "Refresh token expired or invalid. Logging out..."
-                );
-
-                const { setAccessToken, setUser } = useAuthStore.getState();
-                setAccessToken(null);
-                setUser(null);
+                return apiClient(error.config);
+            } catch (refreshError) {
+                return Promise.reject(refreshError);
             }
         }
 

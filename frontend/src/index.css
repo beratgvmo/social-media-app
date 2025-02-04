@@ -52,4 +52,36 @@
     .scrollbar-hidden::-webkit-scrollbar-thumb {
         background: transparent;
     }
+
+    .custom-scrollbar .cm-scroller {
+        scrollbar-width: thin;
+        scrollbar-color: #bfbfbf #858585;
+    }
+
+    .custom-scrollbar .cm-scroller::-webkit-scrollbar {
+        width: 11px;
+        height: 11px;
+        border-radius: 4px;
+    }
+
+    .custom-scrollbar .cm-scroller::-webkit-scrollbar-track {
+        border-radius: 100vh;
+        background: #f7f4ed;
+    }
+
+    .custom-scrollbar .cm-scroller::-webkit-scrollbar-thumb {
+        background: #aad0ae;
+        border-radius: 100vh;
+        border: 3px solid #f6f7ed;
+    }
+
+    .custom-scrollbar .cm-scroller::-webkit-scrollbar-thumb:hover {
+        background: #9fbd9a;
+    }
+
+    .ql-container {
+        border: none !important;
+        font-family: "Arial", sans-serif !important;
+        font-size: 18px !important;
+    }
 }

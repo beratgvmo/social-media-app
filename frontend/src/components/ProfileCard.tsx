@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "../utils/axiosInstance";
-import Button from "./Button";
+import Button from "./button";
 import { TbUser } from "react-icons/tb";
 import { Link } from "react-router-dom";
 import { CgSpinner } from "react-icons/cg";
@@ -10,9 +10,16 @@ interface Friend {
     name: string;
     profileImage: string;
     slug: string;
+    bio: string;
 }
 
-const ProfileCard: React.FC<Friend> = ({ id, name, profileImage, slug }) => {
+const ProfileCard: React.FC<Friend> = ({
+    id,
+    name,
+    profileImage,
+    slug,
+    bio,
+}) => {
     const [loading, setLoading] = useState(true);
     const [isFollowing, setIsFollowing] = useState<string | null>(null);
 
@@ -66,8 +73,8 @@ const ProfileCard: React.FC<Friend> = ({ id, name, profileImage, slug }) => {
             <div className="w-[70%]">
                 <Link to={`/profile/${slug}`}>
                     <p className="font-medium text-gray-800">{name}</p>
-                    <p className="text-gray-700 text-xs mb-3">
-                        Backend Developer
+                    <p className="text-gray-700 text-xs mb-2 overflow-hidden text-ellipsis whitespace-nowrap">
+                        {bio ? bio : "bio"}
                     </p>
                 </Link>
                 {loading ? (

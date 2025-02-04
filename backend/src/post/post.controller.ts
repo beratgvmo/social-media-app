@@ -10,6 +10,7 @@ import {
     Query,
     BadRequestException,
     Param,
+    Delete,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -24,12 +25,16 @@ export class PostController {
 
     @UseGuards(JwtAuthGuard)
     @Post('/create')
-    @UseInterceptors(FilesInterceptor('images'))
+    @UseInterceptors(FilesInterceptor('images', 4)) // ✅ Maksimum 4 dosya
     async createPost(
         @Body() createPostDto: CreatePostDto,
-        @UploadedFiles() files: Express.Multer.File[] = [],
+        @UploadedFiles() files: Express.Multer.File[],
         @Req() req: Request,
-    ): Promise<{ message: string; post: PostEntity }> {
+    ) {
+        if (!createPostDto.content || !createPostDto.postType) {
+            throw new BadRequestException('İçerik ve postType zorunludur.');
+        }
+
         if (files.length > 4) {
             throw new BadRequestException(
                 'En fazla 4 resim yükleyebilirsiniz.',
@@ -38,11 +43,12 @@ export class PostController {
 
         const userId = req.user['sub'];
         const imageUrls: string[] = files.map(
-            (file) => `http://localhost:3000/src/img/${file.filename}`,
+            (file) => `http://localhost:3000/${file.path}`,
         );
 
         const post = await this.postService.createPost(
             createPostDto.content,
+            createPostDto.postType,
             imageUrls,
             userId,
         );
@@ -50,6 +56,17 @@ export class PostController {
         return {
             message: 'Post başarıyla oluşturuldu.',
             post,
+        };
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete('delete/:postId')
+    async deletePost(@Param('postId') postId: number, @Req() req: Request) {
+        const userId = req.user['sub'];
+        await this.postService.deletePost(postId, userId);
+
+        return {
+            message: 'Post başarıyla silindi.',
         };
     }
 

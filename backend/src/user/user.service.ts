@@ -41,6 +41,7 @@ export class UserService {
         email: string;
         bio: string;
         slug: string;
+        isPrivate: boolean;
         profileImage: string | null;
         followerCount: number;
         followingCount: number;
@@ -60,6 +61,7 @@ export class UserService {
             name: user.name,
             email: user.email,
             slug: user.slug,
+            isPrivate: user.isPrivate,
             profileImage: user.profileImage,
             bannerImage: user.bannerImage,
             followerCount: user.followerCount,
@@ -89,10 +91,28 @@ export class UserService {
         };
     }
 
+    async updatePrivate(userId: number): Promise<void> {
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+        });
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        user.isPrivate = !user.isPrivate;
+        await this.userRepository.save(user);
+    }
+
     async profileFriend(userId: number): Promise<FriendProfileDto[]> {
         return await this.userRepository
             .createQueryBuilder('user')
-            .select(['user.id', 'user.name', 'user.profileImage', 'user.slug'])
+            .select([
+                'user.id',
+                'user.name',
+                'user.profileImage',
+                'user.slug',
+                'user.bio',
+            ])
             .leftJoin(
                 'user.followers',
                 'follower',

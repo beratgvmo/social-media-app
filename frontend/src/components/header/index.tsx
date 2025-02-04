@@ -13,7 +13,7 @@ import { HiOutlineHome } from "react-icons/hi";
 import { useEffect, useRef, useState } from "react";
 import axios from "@/utils/axiosInstance";
 import Notifications from "@/components/header/notifications";
-import useSearchStore from "@/store/useSearchStore";
+import SearchComponent from "../SearchComponent";
 
 interface User {
     name: string;
@@ -46,25 +46,9 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
     const location = useLocation();
     const [isBubble, setIsBubble] = useState(false);
     const bubbleRef = useRef<HTMLDivElement | null>(null);
-    const [notificationCount, setNotificationCount] = useState<number>(0);
     const [followerCount, setFollowerCount] = useState<number>(0);
+    const [notificationCount, setNotificationCount] = useState<number>(0);
     const [notifications, setNotifications] = useState<Notification[]>([]);
-    const inputRef = useRef(null);
-    const { recentSearches, addSearch } = useSearchStore();
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (inputRef.current && !inputRef.current.contains(event.target)) {
-                setInputFocus(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [inputRef]);
-
     const fetchFollowerRequests = async () => {
         try {
             const response = await axios.get<FollowerRequest[]>(
@@ -126,28 +110,6 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
         };
     }, []);
 
-    const [query, setQuery] = useState("");
-    const [results, setResults] = useState<User[]>([]);
-
-    useEffect(() => {
-        if (query.trim()) {
-            fetchUsers();
-        } else {
-            setResults([]);
-        }
-    }, [query]);
-
-    const fetchUsers = async () => {
-        try {
-            const res = await axios.get("/user/friend-search", {
-                params: { query },
-            });
-            setResults(res.data);
-        } catch (err) {
-            console.error("Kullanıcı arama hatası:", err);
-        }
-    };
-
     return (
         user && (
             <header className="h-16 p-1 top-0 z-50 sticky flex items-center bg-white border-b border-gray-300">
@@ -160,86 +122,10 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
                             />
                         </Link>
                         <div className="flex items-center gap-4">
-                            <div className="w-[420px] relative" ref={inputRef}>
-                                <input
-                                    type="text"
-                                    className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md p-2 outline-none transition-all duration-300 ${
-                                        isInputFocused
-                                            ? "ring-1 ring-blue-500 border-blue-500 w-full"
-                                            : "focus:ring-1 focus:ring-blue-500 focus:border-blue-500 w-[70%]"
-                                    }`}
-                                    placeholder="Arama yap"
-                                    required
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    onFocus={() => setInputFocus(true)}
-                                />
-                                {isInputFocused && (
-                                    <div className="absolute bg-white shadow-lg z-20 rounded-md border mt-0.5 w-full">
-                                        <div className="flex gap-3">
-                                            {recentSearches &&
-                                                recentSearches.map((search) => (
-                                                    <div>{search}</div>
-                                                ))}
-                                        </div>
-                                        {results.length > 0 ? (
-                                            <>
-                                                {results.map((user) => (
-                                                    <Link
-                                                        to={`/profile/${user.slug}`}
-                                                        key={user.id}
-                                                        onClick={() => {
-                                                            addSearch(
-                                                                user.name
-                                                            );
-                                                        }}
-                                                        className="flex items-center p-3 cursor-pointer hover:bg-gray-100"
-                                                    >
-                                                        <div className="w-11 h-11 mr-2">
-                                                            {user?.profileImage ? (
-                                                                <img
-                                                                    src={
-                                                                        user.profileImage
-                                                                    }
-                                                                    alt="Profil Resmi"
-                                                                    className="w-full h-full rounded-full border border-gray-300"
-                                                                />
-                                                            ) : (
-                                                                <div className="w-full h-full rounded-full border border-gray-300 flex bg-gray-200 items-center justify-center">
-                                                                    <TbUser className="w-[60%] h-[60%] text-gray-700" />
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-medium text-gray-800">
-                                                                {user.name}
-                                                            </p>
-                                                            <p className="text-xs text-gray-500">
-                                                                {user.bio}
-                                                            </p>
-                                                        </div>
-                                                    </Link>
-                                                ))}
-                                            </>
-                                        ) : query.length > 0 ? (
-                                            <div className="p-3 flex items-center gap-1.5">
-                                                <TbSearchOff className="w-4 h-4 text-gray-500" />
-                                                <p className="text-gray-500 text-sm">
-                                                    Sonuç bulunamadı.
-                                                </p>
-                                            </div>
-                                        ) : (
-                                            <div className="p-3 flex items-center gap-1.5">
-                                                <TbSearch className="w-4 h-4 text-gray-500" />
-                                                <p className="text-gray-500 text-sm">
-                                                    Arama yapmak için bir şeyler
-                                                    yazın.
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
+                            <SearchComponent
+                                isInputFocused={isInputFocused}
+                                setInputFocus={setInputFocus}
+                            />
                             <NavLink
                                 to="/"
                                 className={({ isActive }) =>
@@ -296,14 +182,20 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
                                 <Notifications notifications={notifications} />
                             )}
                         </div>
-                        <div className="hover:bg-gray-100 transition p-2 rounded-full">
-                            <Link to="/chat">
-                                <TbMessage
-                                    size={24}
-                                    className="text-blue-500"
-                                />
-                            </Link>
-                        </div>
+
+                        <NavLink
+                            className={({ isActive }) =>
+                                `transition p-2 rounded-full ${
+                                    isActive
+                                        ? "bg-gray-200"
+                                        : "hover:bg-gray-200"
+                                }`
+                            }
+                            to="/chat"
+                        >
+                            <TbMessage size={24} className="text-blue-500" />
+                        </NavLink>
+
                         <Link to={`/profile/${user.slug}`}>
                             {user?.profileImage ? (
                                 <img

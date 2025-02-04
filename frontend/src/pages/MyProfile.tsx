@@ -1,23 +1,22 @@
 import { useEffect, useState } from "react";
-import axios from "../utils/axiosInstance";
-import { useAuthStore } from "../store/useAuthStore";
-import ImageCropper from "../components/ImageCropper";
+import axios from "@/utils/axiosInstance";
+import { useAuthStore } from "@/store/useAuthStore";
+import ImageCropper from "@/components/ImageCropper";
 import {
-    TbBookmark,
     TbCloudUpload,
     TbMessage2,
     TbPhotoEdit,
     TbPhotoSquareRounded,
     TbUser,
 } from "react-icons/tb";
-import Modal from "../components/Modal";
-import Button from "../components/Button";
-import RightbarFollow from "../components/RightbarFollow";
-import ProfileSkeleton from "../components/ProfileSkeleton";
-import Post from "@/components/post";
 import { CgSpinner } from "react-icons/cg";
-import SettingsSidebar from "../components/SettingsSidebar";
-import usePostStore from "../store/usePostStore";
+import Modal from "@/components/Modal";
+import Button from "@/components/button";
+import RightbarFollow from "@/components/RightbarFollow";
+import ProfileSkeleton from "@/components/ProfileSkeleton";
+import Post from "@/components/post";
+import SettingsSidebar from "@/components/settingsSidebar";
+import usePostStore from "@/store/usePostStore";
 import BannerCropper from "@/components/bannerCropper";
 import { Link } from "react-router-dom";
 

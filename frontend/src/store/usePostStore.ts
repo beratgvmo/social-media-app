@@ -45,6 +45,7 @@ interface PostState {
     profileFetchPosts: (slug: string) => Promise<void>;
     profilePageInc: () => void;
     setProfileScrollPosition: (position: number) => void;
+    setProfilePosts: (newPosts: Post[]) => void;
 }
 
 const usePostStore = create<PostState>((set, get) => ({
@@ -64,7 +65,7 @@ const usePostStore = create<PostState>((set, get) => ({
 
     fetchPosts: async () => {
         const { page, hasMore, fetchedPages, homePosts } = get();
-        const limit = 3;
+        const limit = 6;
 
         if (!hasMore || fetchedPages.includes(page)) return;
 
@@ -87,6 +88,11 @@ const usePostStore = create<PostState>((set, get) => ({
         }
     },
 
+    setProfilePosts: (newPosts: Post[]) => {
+        const { profilePosts } = get();
+        set({ profilePosts: [...newPosts, ...profilePosts] });
+    },
+
     pageInc: () => set((state) => ({ page: state.page + 1 })),
     setScrollPosition: (position: number) => set({ scrollPosition: position }),
 
@@ -97,7 +103,7 @@ const usePostStore = create<PostState>((set, get) => ({
             profileFetchedPages,
             profilePosts,
         } = get();
-        const limit = 3;
+        const limit = 6;
 
         if (!slug) {
             console.error("Slug is undefined");

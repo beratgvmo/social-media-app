@@ -7,6 +7,7 @@ interface User {
     email: string;
     slug: string;
     bio: string;
+    isPrivate: boolean;
     profileImage: string | null;
     bannerImage: string | null;
     followerCount: number;

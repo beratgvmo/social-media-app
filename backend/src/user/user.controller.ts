@@ -93,6 +93,14 @@ export class UserController {
     }
 
     @UseGuards(JwtAuthGuard)
+    @Patch('/update-profile/private')
+    async updatePrivate(@Req() req: Request) {
+        const userId = req.user['sub'];
+        const updatedUser = await this.userService.updatePrivate(userId);
+        return updatedUser;
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Delete('profile/delete-image')
     async deleteProfileImage(@Req() req: Request, @Res() res: Response) {
         const userId = req.user['sub'];

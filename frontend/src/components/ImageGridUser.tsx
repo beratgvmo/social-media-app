@@ -1,7 +1,7 @@
 import { TbTrash } from "react-icons/tb";
 
 interface ImageGridProps {
-    postImages: string[];
+    postImages: File[];
     handleDeleteImage: (index: number) => void;
 }
 
@@ -15,7 +15,7 @@ const ImageGridUser: React.FC<ImageGridProps> = ({
                 {postImages.length === 1 && (
                     <div className="relative">
                         <img
-                            src={postImages[0]}
+                            src={URL.createObjectURL(postImages[0])}
                             className="rounded-md w-full"
                             alt="Uploaded image 1"
                         />
@@ -34,7 +34,7 @@ const ImageGridUser: React.FC<ImageGridProps> = ({
                     <div className="flex space-x-2">
                         <div className="relative">
                             <img
-                                src={postImages[0]}
+                                src={URL.createObjectURL(postImages[0])}
                                 className="rounded-md w-[306px] h-[306px] object-cover "
                                 alt="Uploaded image 1"
                             />
@@ -50,7 +50,7 @@ const ImageGridUser: React.FC<ImageGridProps> = ({
 
                         <div className="relative">
                             <img
-                                src={postImages[1]}
+                                src={URL.createObjectURL(postImages[1])}
                                 className="rounded-md w-[306px] h-[306px] object-cover "
                                 alt="Uploaded image 2"
                             />
@@ -69,7 +69,7 @@ const ImageGridUser: React.FC<ImageGridProps> = ({
                     <div className="flex space-x-2 w-full">
                         <div className="w-full relative">
                             <img
-                                src={postImages[0]}
+                                src={URL.createObjectURL(postImages[0])}
                                 className="rounded-md w-[400px] h-[400px] object-cover"
                             />
                             <button
@@ -83,7 +83,7 @@ const ImageGridUser: React.FC<ImageGridProps> = ({
                         <div className="flex flex-col space-y-2 w-[50%] justify-between">
                             <div className="relative">
                                 <img
-                                    src={postImages[1]}
+                                    src={URL.createObjectURL(postImages[1])}
                                     className="rounded-md w-[194px] h-[194px] object-cover"
                                 />
                                 <button
@@ -96,7 +96,7 @@ const ImageGridUser: React.FC<ImageGridProps> = ({
                             </div>
                             <div className="relative">
                                 <img
-                                    src={postImages[2]}
+                                    src={URL.createObjectURL(postImages[2])}
                                     className="rounded-md w-[194px] h-[194px] object-cover"
                                 />
                                 <button
@@ -114,7 +114,7 @@ const ImageGridUser: React.FC<ImageGridProps> = ({
                     <div className="flex space-x-2 w-full">
                         <div className="w-full  relative">
                             <img
-                                src={postImages[0]}
+                                src={URL.createObjectURL(postImages[0])}
                                 className="rounded-md w-[458px] h-[458px] object-cover"
                             />
                             <button
@@ -128,7 +128,7 @@ const ImageGridUser: React.FC<ImageGridProps> = ({
                         <div className="flex flex-col space-y-2 w-[32%] justify-between">
                             <div className="relative">
                                 <img
-                                    src={postImages[1]}
+                                    src={URL.createObjectURL(postImages[1])}
                                     className="rounded-md w-[146px] h-[146px] object-cover"
                                 />
                                 <button
@@ -141,7 +141,7 @@ const ImageGridUser: React.FC<ImageGridProps> = ({
                             </div>
                             <div className="relative">
                                 <img
-                                    src={postImages[2]}
+                                    src={URL.createObjectURL(postImages[2])}
                                     className="rounded-md w-[146px] h-[146px] object-cover"
                                 />
                                 <button
@@ -154,7 +154,7 @@ const ImageGridUser: React.FC<ImageGridProps> = ({
                             </div>
                             <div className="relative">
                                 <img
-                                    src={postImages[3]}
+                                    src={URL.createObjectURL(postImages[3])}
                                     className="rounded-md w-[146px] h-[146px] object-cover"
                                 />
                                 <button

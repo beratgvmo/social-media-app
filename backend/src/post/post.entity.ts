@@ -15,7 +15,7 @@ import { PostSaved } from 'src/post-saved/post-saved.entity';
 
 export enum PostType {
     CODE = 'code',
-    TEXT = 'text',
+    Writing = 'writing',
 }
 
 @Entity()
@@ -29,9 +29,9 @@ export class Post {
     @Column({
         type: 'enum',
         enum: PostType,
-        default: PostType.TEXT,
+        default: PostType.Writing,
     })
-    type: PostType;
+    postType: PostType;
 
     @Column({ default: 0 })
     likeCount: number;

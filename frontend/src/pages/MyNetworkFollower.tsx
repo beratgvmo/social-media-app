@@ -1,7 +1,7 @@
 import { TbUser } from "react-icons/tb";
-import ProfileSidebar from "../components/ProfileSidebar";
-import Button from "../components/Button";
-import axios from "../utils/axiosInstance";
+import ProfileSidebar from "@/components/ProfileSidebar";
+import Button from "@/components/button";
+import axios from "@/utils/axiosInstance";
 import { useEffect, useState, useCallback } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 

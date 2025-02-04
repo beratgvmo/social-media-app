@@ -12,6 +12,7 @@ interface ChatSidebarProps {
     handleInputClick: () => void;
     inputRef: RefObject<HTMLInputElement>;
     user: User;
+    fetchRooms: () => void;
 }
 
 interface RoomChat {
@@ -35,6 +36,7 @@ const ChatSidebar: FC<ChatSidebarProps> = ({
     handleInputClick,
     inputRef,
     user,
+    fetchRooms,
 }) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -149,16 +151,23 @@ const ChatSidebar: FC<ChatSidebarProps> = ({
                 onClose={handleModalClose}
                 title="Yeni Sohbet Başlat"
             >
-                <div className="p-4">
-                    {mutualFriends.map((friend) => (
-                        <FriendItem
-                            handleModalClose={handleModalClose}
-                            key={friend.id}
-                            friend={friend}
-                            setThisRoom={setThisRoom}
-                        />
-                    ))}
-                </div>
+                {mutualFriends.length > 0 ? (
+                    <div className="p-4">
+                        {mutualFriends.map((friend) => (
+                            <FriendItem
+                                handleModalClose={handleModalClose}
+                                key={friend.id}
+                                fetchRooms={fetchRooms}
+                                friend={friend}
+                                setThisRoom={setThisRoom}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="py-6 flex justify-center items-center">
+                        <p className="text-sm text-gray-800">Arkadaşın yok</p>
+                    </div>
+                )}
             </Modal>
         </div>
     );

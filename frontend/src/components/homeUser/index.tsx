@@ -8,7 +8,7 @@ import ProfileSidebar from "@/components/ProfileSidebar";
 import RightbarFollow from "@/components/RightbarFollow";
 import Post from "@/components/post";
 import { CgSpinner } from "react-icons/cg";
-import PostModel from "@/components/PostModel";
+import PostModel from "@/components/postModel";
 
 const HomeUser: React.FC = () => {
     const { user } = useAuthStore();

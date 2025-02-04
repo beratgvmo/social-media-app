@@ -28,7 +28,7 @@ export const useSearchStore = create<SearchState>()(
                 const updatedSearches = [
                     search,
                     ...get().recentSearches.filter((s) => s !== search),
-                ].slice(0, 5);
+                ].slice(0, 4);
                 set({ recentSearches: updatedSearches });
             },
             clearSearches: () => set({ recentSearches: [] }),
