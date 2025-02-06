@@ -9,7 +9,10 @@ interface Post {
     postImages: PostImage[];
     user: User;
     likeCount: number;
-    commetCount: number; // Fixed typo
+    commetCount: number;
+    postType: string;
+    githubApiUrl?: string;
+    githubType?: string;
 }
 
 interface PostImage {

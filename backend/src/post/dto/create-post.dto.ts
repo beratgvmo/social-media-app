@@ -1,5 +1,5 @@
 import { IsString, MaxLength, IsEnum, IsOptional } from 'class-validator';
-import { PostType } from '../post.entity';
+import { GithubType, PostType } from '../post.entity';
 
 export class CreatePostDto {
     @IsString()
@@ -8,6 +8,14 @@ export class CreatePostDto {
 
     @IsEnum(PostType)
     postType: PostType;
+
+    @IsEnum(GithubType)
+    @IsOptional()
+    githubType?: GithubType;
+
+    @IsString()
+    @IsOptional()
+    githubApiUrl?: string;
 
     @IsOptional()
     images?: Express.Multer.File[];

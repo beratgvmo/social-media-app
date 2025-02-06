@@ -1,25 +1,46 @@
 import { FC, useState } from "react";
 import axios from "axios";
 import Modal from "@/components/Modal";
+import {
+    TbBook2,
+    TbClipboardPlus,
+    TbExternalLink,
+    TbFile,
+    TbSearch,
+    TbStar,
+} from "react-icons/tb";
+import { CgSpinner } from "react-icons/cg";
+import { GitHubRepo, GitHubUser } from "@/types";
+import { GithubRepoView, GithubUserView } from "../githubRepoView";
 
 interface GitHubFetcherProps {
     isOpen: boolean;
     onClose: () => void;
+    handleGithub: (value: GitHubUser | GitHubRepo | null, type: string) => void;
+    handleGithubApi: (value: string) => void;
 }
 
-const GitHubFetcher: FC<GitHubFetcherProps> = ({ isOpen, onClose }) => {
+const GitHubFetcher: FC<GitHubFetcherProps> = ({
+    isOpen,
+    onClose,
+    handleGithub,
+    handleGithubApi,
+}) => {
     const [searchState, setSearchState] = useState("");
-    const [userData, setUserData] = useState<any>(null);
-    const [repos, setRepos] = useState<any[]>([]);
+    const [user, setUser] = useState<GitHubUser | null>(null);
+    const [repo, setRepo] = useState<GitHubRepo | null>(null);
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const searchGithub = async () => {
         setError("");
-        setUserData(null);
-        setRepos([]);
+        setUser(null);
+        setRepo(null);
+        setLoading(true);
 
         if (!searchState.trim()) {
             setError("Lütfen bir kullanıcı adı veya repo adı girin.");
+            setLoading(false);
             return;
         }
 
@@ -31,16 +52,18 @@ const GitHubFetcher: FC<GitHubFetcherProps> = ({ isOpen, onClose }) => {
                     `https://api.github.com/repos/${username}/${reponame}`
                 );
 
-                setRepos([repoResponse.data]);
+                setRepo(repoResponse.data);
             } else {
                 const userResponse = await axios.get(
                     `https://api.github.com/users/${searchState}`
                 );
 
-                setUserData(userResponse.data);
+                setUser(userResponse.data);
             }
         } catch (err) {
             setError("Bilgi bulunamadı veya geçersiz kullanıcı/repo adı.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -49,78 +72,51 @@ const GitHubFetcher: FC<GitHubFetcherProps> = ({ isOpen, onClose }) => {
             isOpen={isOpen}
             onClose={onClose}
             title="GitHub Bilgileri"
-            maxWidth="2xl"
+            maxWidth="xl"
         >
             <div className="p-4">
-                <h2 className="text-xl font-bold mb-2">
-                    GitHub Kullanıcı & Repo Getir
-                </h2>
-
-                <div className="flex gap-2">
+                <div className="flex mb-3">
                     <input
                         type="text"
-                        placeholder="GitHub Kullanıcı Adı veya kullanıcıadı/repoadı"
+                        placeholder="Kullanıcı Adı/repo adı"
                         value={searchState}
                         onChange={(e) => setSearchState(e.target.value)}
-                        className="w-full p-2 border rounded"
+                        className="bg-white border-2 border-gray-300 border-r-0 text-gray-900 transition-all text-sm rounded-s-lg block w-full p-2.5 outline-none focus:border-blue-500"
                     />
                     <button
                         onClick={searchGithub}
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                        className="px-4 py-2 bg-blue-500 border-blue-500 text-white rounded-e-lg hover:bg-blue-600 transition"
                     >
-                        Ara
+                        <TbSearch />
                     </button>
                 </div>
 
-                {error && <p className="text-red-500 mt-2">{error}</p>}
-
-                {userData && (
-                    <div className="border p-4 rounded text-center mt-4">
-                        <img
-                            src={userData.avatar_url}
-                            alt={userData.login}
-                            className="w-24 h-24 mx-auto rounded-full border"
-                        />
-                        <h3 className="text-lg font-bold mt-2">
-                            {userData.name || userData.login}
-                        </h3>
-                        <p className="text-gray-600">@{userData.login}</p>
-                        <p>{userData.bio || "Biyografi yok"}</p>
-                        <p className="text-sm text-gray-600">
-                            📌 Lokasyon: {userData.location || "Belirtilmemiş"}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                            📌 Takipçiler: {userData.followers} | Takip Edilen:{" "}
-                            {userData.following}
-                        </p>
-                        <a
-                            href={userData.html_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 underline"
-                        >
-                            Profili Görüntüle
-                        </a>
-                    </div>
+                {error && (
+                    <p className="text-red-500 mt-1 ml-1 text-xs">{error}</p>
                 )}
 
-                {repos.length > 0 && (
-                    <div className="mt-4">
-                        <h3 className="text-lg font-bold">📂 Repositories</h3>
-                        <ul className="list-disc pl-4 space-y-2">
-                            {repos.map((repo) => (
-                                <li key={repo.id}>
-                                    <a
-                                        href={repo.html_url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-500 hover:underline"
-                                    >
-                                        {repo.name}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
+                {user && (
+                    <GithubUserView
+                        user={user}
+                        handleGithub={handleGithub}
+                        handleGithubApi={handleGithubApi}
+                    />
+                )}
+
+                {repo && (
+                    <GithubRepoView
+                        repo={repo}
+                        handleGithub={handleGithub}
+                        handleGithubApi={handleGithubApi}
+                    />
+                )}
+
+                {loading && (
+                    <div className="w-full flex justify-center items-center h-20">
+                        <CgSpinner
+                            className="animate-spin text-blue-600"
+                            size={45}
+                        />
                     </div>
                 )}
             </div>

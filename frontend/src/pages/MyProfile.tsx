@@ -357,6 +357,7 @@ const MyProfile: React.FC = () => {
                                     commetCount={post.commetCount}
                                     user={post.user}
                                     border={false}
+                                    postType={post.postType}
                                 />
                             ))}
                         </div>

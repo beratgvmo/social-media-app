@@ -1,5 +1,6 @@
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
+import { githubLight } from "@uiw/codemirror-theme-github";
 
 interface WritingCodeProps {
     codeValue: string;
@@ -12,30 +13,16 @@ export default function WritingCode({
 }: WritingCodeProps) {
     return (
         <div>
-            <div className="rounded-lg overflow-hidden p-1.5 bg-[#282c34]">
+            <div className="rounded-lg min-h-7 mt-2.5 mx-4 mb-5 overflow-hidden border">
                 <CodeMirror
                     value={codeValue}
                     height="w-full"
-                    extensions={[javascript()]}
-                    theme={"dark"}
+                    extensions={[javascript({ jsx: true, typescript: true })]}
+                    theme={githubLight}
                     onChange={(value) => handleInput(value)}
                     className="custom-scrollbar"
                 />
             </div>
-            {/* <ul>
-                {messages.map((message) => (
-                    <li key={message.id} className="rounded-lg bg-[#282c34]">
-                        <CodeMirror
-                            value={message.content}
-                            height="200px"
-                            extensions={[javascript()]}
-                            theme={"dark"}
-                            readOnly={true}
-                            className="custom-scrollbar"
-                        />
-                    </li>
-                ))}
-            </ul> */}
         </div>
     );
 }

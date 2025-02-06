@@ -18,6 +18,11 @@ export enum PostType {
     Writing = 'writing',
 }
 
+export enum GithubType {
+    User = 'user',
+    Repo = 'repo',
+}
+
 @Entity()
 export class Post {
     @PrimaryGeneratedColumn()
@@ -25,6 +30,16 @@ export class Post {
 
     @Column('text')
     content: string;
+
+    @Column('text', { nullable: true })
+    githubApiUrl?: string;
+
+    @Column({
+        type: 'enum',
+        enum: GithubType,
+        default: null,
+    })
+    githubType: GithubType;
 
     @Column({
         type: 'enum',

@@ -25,7 +25,7 @@ export class PostController {
 
     @UseGuards(JwtAuthGuard)
     @Post('/create')
-    @UseInterceptors(FilesInterceptor('images', 4)) // ✅ Maksimum 4 dosya
+    @UseInterceptors(FilesInterceptor('images', 4))
     async createPost(
         @Body() createPostDto: CreatePostDto,
         @UploadedFiles() files: Express.Multer.File[],
@@ -49,6 +49,8 @@ export class PostController {
         const post = await this.postService.createPost(
             createPostDto.content,
             createPostDto.postType,
+            createPostDto?.githubApiUrl,
+            createPostDto.githubType,
             imageUrls,
             userId,
         );

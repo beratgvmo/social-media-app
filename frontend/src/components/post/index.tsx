@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import {
     TbBookmark,
     TbBookmarkFilled,
+    TbCheck,
+    TbCopy,
     TbDots,
     TbEdit,
     TbMessageCircle,
@@ -12,12 +14,16 @@ import {
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import axios from "@/utils/axiosInstance";
+import axiosDefulat from "axios";
 import PostImageGrid from "@/components/PostImageGrid";
 import TimeAgo from "@/components/TimeAgo";
 import PostComment from "@/components/post/PostComment";
-
+import { createTheme } from "@uiw/codemirror-themes";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
+import { githubLight } from "@uiw/codemirror-theme-github";
+import { GithubRepoView, GithubUserView } from "../postModel/githubRepoView";
+import { GitHubRepo, GitHubUser } from "@/types";
 
 interface PostProps {
     id: number;
@@ -29,6 +35,8 @@ interface PostProps {
     user: User;
     border: boolean;
     postType: string;
+    githubApiUrl: string;
+    githubType: string;
 }
 
 interface User {
@@ -52,6 +60,8 @@ const Post: React.FC<PostProps> = ({
     likeCount,
     commetCount,
     postType,
+    githubApiUrl,
+    githubType,
 }) => {
     const [isLike, setIsLike] = useState(false);
     const [isSave, setIsSave] = useState(false);
@@ -60,6 +70,12 @@ const Post: React.FC<PostProps> = ({
     const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
     const bubbleRef = useRef<HTMLDivElement | null>(null);
     const [currentCommentCount, setCurrentCommentCount] = useState(commetCount);
+    const [expanded, setExpanded] = useState(false);
+    const [githubUser, setGithubUser] = useState<GitHubUser | null>(null);
+    const [githubRepo, setGithubRepo] = useState<GitHubRepo | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    const toggleExpanded = () => setExpanded(!expanded);
 
     const incrementCommentCount = () => {
         setCurrentCommentCount((prevCount) => prevCount + 1);
@@ -116,7 +132,28 @@ const Post: React.FC<PostProps> = ({
     useEffect(() => {
         checkPostStatus();
         checkSavePostStatus();
+
+        if (githubType && githubApiUrl) {
+            githubFetcher();
+        }
     }, []);
+
+    const githubFetcher = async () => {
+        setLoading(true);
+        try {
+            if (githubType == "user") {
+                const response = await axiosDefulat.get(githubApiUrl);
+                setGithubUser(response.data);
+            } else if (githubType == "repo") {
+                const response = await axiosDefulat.get(githubApiUrl);
+                setGithubRepo(response.data);
+            }
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -133,6 +170,18 @@ const Post: React.FC<PostProps> = ({
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(content);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500); // 1.5 saniye sonra geri dön
+        } catch (err) {
+            console.error("Kopyalama hatası:", err);
+        }
+    };
 
     return (
         <div
@@ -192,22 +241,80 @@ const Post: React.FC<PostProps> = ({
             </div>
             <div className="mt-2.5 px-4">
                 {postType == "writing" ? (
-                    <p className="text-base">{content}</p>
+                    <div className="text-base">
+                        <div
+                            dangerouslySetInnerHTML={{
+                                __html: expanded
+                                    ? content
+                                    : content.slice(0, 600),
+                            }}
+                        />
+                        {content.length > 600 && (
+                            <span
+                                onClick={toggleExpanded}
+                                className="text-gray-400 text-xs cursor-pointer"
+                            >
+                                {expanded || "Devamını Oku"}
+                            </span>
+                        )}
+                    </div>
                 ) : (
-                    <CodeMirror
-                        value={content}
-                        basicSetup={{
-                            foldGutter: false,
-                            highlightActiveLine: false,
-                            highlightActiveLineGutter: false,
-                        }}
-                        extensions={[javascript()]}
-                        theme="light"
-                        readOnly={true}
-                        className="custom-scrollbar !border-none !cursor-none"
-                    />
+                    <div className="border rounded p-2 mt-3 bg-gray-50">
+                        <div className="flex justify-between mx-2 mt-1 mb-2.5">
+                            <p className="text-xs text-gray-700">React</p>
+                            <button onClick={handleCopy} className="">
+                                {copied ? (
+                                    <div className="flex items-center justify-center gap-0.5 text-xs text-gray-700">
+                                        <TbCheck />
+                                        <p>Kopyalandı</p>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center justify-center gap-0.5 text-xs text-gray-700">
+                                        <TbCopy />
+                                        <p>Kopyala</p>
+                                    </div>
+                                )}
+                            </button>
+                        </div>
+                        <CodeMirror
+                            value={expanded ? content : content.slice(0, 600)}
+                            basicSetup={{
+                                lineNumbers: false,
+                                foldGutter: false,
+                                highlightActiveLine: false,
+                            }}
+                            extensions={[
+                                javascript({ jsx: true, typescript: true }),
+                            ]}
+                            theme={githubLight}
+                            readOnly={true}
+                            editable={false}
+                            className="custom-scrollbar ͼ1 text-sm"
+                        />
+                        {content.length > 600 && (
+                            <div className="flex justify-end mt-2">
+                                <button
+                                    onClick={toggleExpanded}
+                                    className="text-gray-400 hover:text-gray-500 transition mx-1 items-end text-xs cursor-pointer"
+                                >
+                                    {expanded || "Devamını Oku"}
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
+            {loading || (
+                <div className="p-4">
+                    {githubUser && githubType == "user" && (
+                        <GithubUserView user={githubUser} button={false} />
+                    )}
+
+                    {githubRepo && githubType == "repo" && (
+                        <GithubRepoView repo={githubRepo} button={false} />
+                    )}
+                </div>
+            )}
             <div className="px-4 mt-2">
                 <PostImageGrid postImages={images.map((image) => image.url)} />
             </div>

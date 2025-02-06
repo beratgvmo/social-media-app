@@ -119,6 +119,9 @@ const HomeUser: React.FC = () => {
                                 user={post.user}
                                 id={post.id}
                                 border={true}
+                                postType={post.postType}
+                                githubApiUrl={post.githubApiUrl}
+                                githubType={post.githubType}
                             />
                         ))}
                     </div>

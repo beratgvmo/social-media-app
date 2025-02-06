@@ -8,11 +8,21 @@ import { FaGithub } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Button from "@/components/button";
 import GitHubRepoFetcher from "@/components/postModel/gitHubFetcher";
-import Code from "@/components/postModel/writingCode";
-import { TbAlignJustified, TbCode, TbPhotoCircle } from "react-icons/tb";
+import {
+    TbAlignJustified,
+    TbBook2,
+    TbCode,
+    TbExternalLink,
+    TbFile,
+    TbPhotoCircle,
+    TbStar,
+} from "react-icons/tb";
 import WritingText from "./writingText";
 import ReactQuill from "react-quill";
 import EmojiPickerModal from "./emojiPickerModal";
+import WritingCode from "@/components/postModel/writingCode";
+import { GitHubRepo, GitHubUser } from "@/types";
+import { GithubRepoView, GithubUserView } from "./githubRepoView";
 
 interface PostFormInputs {
     content: string;
@@ -33,6 +43,32 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
     const { setProfilePosts } = usePostStore();
     const [isWritingMode, setIsWritingMode] = useState(true);
     const [isModalGithubOpen, setIsModalGithubOpen] = useState<boolean>(false);
+    const quillRef = useRef<ReactQuill | null>(null);
+    const [range, setRange] = useState<{
+        index: number;
+        length: number;
+    } | null>(null);
+
+    const [githubUser, setGithubUser] = useState<GitHubUser | null>(null);
+    const [githubRepo, setGithubRepo] = useState<GitHubRepo | null>(null);
+    const [githubType, setGithubType] = useState<"user" | "repo" | null>(null);
+    const [githubApiUrl, setGithubApiUrl] = useState<string>("");
+
+    const handleGithubApi = (value: string) => {
+        setGithubApiUrl(value);
+    };
+
+    const handleGithub = (
+        value: GitHubUser | GitHubRepo | null,
+        type: "user" | "repo"
+    ) => {
+        setGithubType(type);
+        if (type === "user") {
+            setGithubUser(value as GitHubUser);
+        } else {
+            setGithubRepo(value as GitHubRepo);
+        }
+    };
 
     const handleToggle = () => {
         setIsWritingMode(!isWritingMode);
@@ -71,12 +107,14 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
         if (!postValue && !codeValue) return;
 
         const formData = new FormData();
-        formData.append(
-            "content",
-            isWritingMode ? postValue.replace(/<\/?[^>]+(>|$)/g, "") : codeValue
-        );
+        formData.append("content", isWritingMode ? postValue : codeValue);
 
         formData.append("postType", isWritingMode ? "writing" : "code");
+
+        if (githubApiUrl) {
+            formData.append("githubApiUrl", githubApiUrl);
+            formData.append("githubType", githubType);
+        }
 
         postImages.forEach((image, index) => {
             formData.append("images", image, `image-${index}.png`);
@@ -120,12 +158,6 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
         }
     };
 
-    const quillRef = useRef<ReactQuill | null>(null);
-    const [range, setRange] = useState<{
-        index: number;
-        length: number;
-    } | null>(null);
-
     return (
         <Modal
             isOpen={isOpen}
@@ -139,7 +171,7 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                     handlePost();
                 }}
             >
-                <div className={`${isWritingMode || "bg-[#282c34]"}`}>
+                <div>
                     <div className="px-2 mb-2 py-2 h-96 overflow-auto">
                         <div className="mb-2">
                             {isWritingMode ? (
@@ -150,9 +182,24 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                                     setRange={setRange}
                                 />
                             ) : (
-                                <Code
+                                <WritingCode
                                     codeValue={codeValue}
                                     handleInput={handleCodeInput}
+                                />
+                            )}
+                        </div>
+                        <div className="px-4">
+                            {githubUser && githubType == "user" && (
+                                <GithubUserView
+                                    user={githubUser}
+                                    button={false}
+                                />
+                            )}
+
+                            {githubRepo && githubType == "repo" && (
+                                <GithubRepoView
+                                    repo={githubRepo}
+                                    button={false}
                                 />
                             )}
                         </div>
@@ -164,7 +211,7 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                         </div>
                     </div>
                 </div>
-                <div className="px-6 flex justify-between">
+                <div className="px-6 mb-2 flex justify-between items-center">
                     <div className="flex gap-3.5">
                         <EmojiPickerModal
                             onEmojiSelectFunc={addEmoji}
@@ -217,7 +264,7 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                         </motion.span>
                     </button>
                 </div>
-                <div className="mt-3 bg-white py-3 px-6 flex gap-2 justify-end border-t rounded-b-xl">
+                <div className="bg-white py-3 px-6 flex gap-2 justify-end border-t rounded-b-xl">
                     <Button
                         disabled={
                             (isWritingMode ? postValue : codeValue) === "" ||
@@ -233,6 +280,8 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
             <GitHubRepoFetcher
                 isOpen={isModalGithubOpen}
                 onClose={handleCloseGithubModal}
+                handleGithub={handleGithub}
+                handleGithubApi={handleGithubApi}
             />
         </Modal>
     );
