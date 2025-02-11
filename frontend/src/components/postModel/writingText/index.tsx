@@ -1,36 +1,47 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import "@/index.css";
+import Sources from "quill";
 
 interface WritingTextProps {
-    postValue: string;
     handleInput: (value: string) => void;
-    quillRef: React.RefObject<ReactQuill>;
-    setRange: React.Dispatch<
-        React.SetStateAction<{ index: number; length: number } | null>
-    >;
+    quillRef: React.MutableRefObject<ReactQuill | null>;
+    setRange: (range: number | null) => void;
 }
 
 const WritingText: React.FC<WritingTextProps> = ({
-    postValue,
     handleInput,
     quillRef,
     setRange,
 }) => {
-    const handleSelectionChange = (range: any, source: string, editor: any) => {
-        setRange(range);
+    const handleInputChange = (
+        value: string,
+        delta: any,
+        source: any,
+        editor: ReactQuill.UnprivilegedEditor
+    ) => {
+        handleInput(editor.getText());
+    };
+
+    const handleSelectionChange = (
+        selection: ReactQuill.Range | null,
+        source: Sources,
+        editor: ReactQuill.UnprivilegedEditor
+    ) => {
+        if (selection) {
+            setRange(selection.index);
+        }
     };
 
     return (
         <div className="h-auto">
             <ReactQuill
                 ref={quillRef}
-                value={postValue}
-                onChange={handleInput}
+                onChange={handleInputChange}
                 onChangeSelection={handleSelectionChange}
                 className="w-full h-full ql-container"
-                placeholder="ne hakkında konuşmak istiyorsunuz?"
+                placeholder="Ne hakkında konuşmak istiyorsunuz?"
                 modules={{ toolbar: false }}
                 style={{ border: "none" }}
             />

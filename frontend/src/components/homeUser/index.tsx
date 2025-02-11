@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import usePostStore from "@/store/usePostStore";
-import { TbUser, TbUserHeart } from "react-icons/tb";
+import { TbCode, TbPhotoCircle, TbUser, TbUserHeart } from "react-icons/tb";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 import { HiOutlinePhoto } from "react-icons/hi2";
 import ProfileSidebar from "@/components/ProfileSidebar";
@@ -9,6 +9,7 @@ import RightbarFollow from "@/components/RightbarFollow";
 import Post from "@/components/post";
 import { CgSpinner } from "react-icons/cg";
 import PostModel from "@/components/postModel";
+import { FaGithub } from "react-icons/fa";
 
 const HomeUser: React.FC = () => {
     const { user } = useAuthStore();
@@ -86,24 +87,33 @@ const HomeUser: React.FC = () => {
                             </button>
                         </div>
                         <div className="flex items-center justify-around">
-                            <div className="flex items-center hover:bg-gray-200 p-2 rounded-md cursor-pointer">
-                                <HiOutlinePhoto className="text-red-500 mr-1 w-5 h-5" />
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="flex items-center hover:bg-gray-200 p-2 rounded-md cursor-pointer"
+                            >
+                                <TbPhotoCircle className="text-red-500 mr-1 w-5 h-5" />
                                 <p className="font-medium text-red-500 text-sm">
                                     Resim
                                 </p>
-                            </div>
-                            <div className="flex items-center hover:bg-gray-200 p-2 rounded-md cursor-pointer">
-                                <MdOutlineEmojiEmotions className="text-orange-500 mr-1 w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="flex items-center hover:bg-gray-200 p-2 rounded-md cursor-pointer"
+                            >
+                                <FaGithub className="text-orange-500 mr-1 w-5 h-5" />
                                 <p className="font-medium text-orange-500 text-sm">
-                                    Emoji
+                                    Github
                                 </p>
-                            </div>
-                            <div className="flex items-center hover:bg-gray-200 p-2 rounded-md cursor-pointer">
-                                <TbUserHeart className="text-green-500 mr-1 w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="flex items-center hover:bg-gray-200 p-2 rounded-md cursor-pointer"
+                            >
+                                <TbCode className="text-green-500 mr-1 w-5 h-5" />
                                 <p className="font-medium text-green-500 text-sm">
-                                    Etiketle
+                                    Code
                                 </p>
-                            </div>
+                            </button>
                         </div>
                     </div>
                     <div className="border-b-2 border-gray-300"></div>
@@ -114,14 +124,16 @@ const HomeUser: React.FC = () => {
                                 likeCount={post.likeCount}
                                 createdAt={post.createdAt}
                                 images={post.postImages}
-                                commetCount={post.commetCount}
+                                commentCount={post.commentCount}
                                 key={post.id}
                                 user={post.user}
                                 id={post.id}
                                 border={true}
-                                postType={post.postType}
                                 githubApiUrl={post.githubApiUrl}
                                 githubType={post.githubType}
+                                codeContent={post.codeContent}
+                                codeLanguage={post.codeLanguage}
+                                codeTheme={post.codeTheme}
                             />
                         ))}
                     </div>

@@ -37,8 +37,8 @@ interface FollowerRequest {
 }
 
 interface HeaderProps {
-    setInputFocus: (focused: boolean) => void;
-    isInputFocused: boolean;
+    setInputFocus?: (focused: boolean) => void;
+    isInputFocused?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {

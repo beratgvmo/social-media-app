@@ -1,6 +1,5 @@
 import axios from "@/utils/axiosInstance";
 import { create } from "zustand";
-import { useAuthStore } from "./useAuthStore";
 
 interface Post {
     id: number;
@@ -9,10 +8,13 @@ interface Post {
     postImages: PostImage[];
     user: User;
     likeCount: number;
-    commetCount: number;
+    commentCount: number;
     postType: string;
     githubApiUrl?: string;
     githubType?: string;
+    codeContent?: string;
+    codeLanguage?: string;
+    codeTheme?: string;
 }
 
 interface PostImage {

@@ -1,14 +1,53 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    Injectable,
+    NotFoundException,
+    HttpException,
+    HttpStatus,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Like as ILike } from 'typeorm';
 import { User } from './user.entity';
-import { Like, Repository } from 'typeorm';
+import { Like } from 'src/like/like.entity';
+import { Post } from 'src/post/post.entity';
+import { Comment } from 'src/comment/comment.entity';
+import { Message } from 'src/chat/message.entity';
+import { Follower } from 'src/follower/follower.entity';
+import { ChatRoom } from 'src/chat/chat-room.entity';
 import { FriendProfileDto } from './dto/friend-profile.dto';
-
+import { PostImage } from 'src/post-images/post-images.entity';
+import { PostSaved } from 'src/post-saved/post-saved.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Req } from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 @Injectable()
 export class UserService {
     constructor(
         @InjectRepository(User)
-        private userRepository: Repository<User>,
+        private readonly userRepository: Repository<User>,
+
+        @InjectRepository(Like)
+        private readonly likeRepository: Repository<Like>,
+
+        @InjectRepository(Post)
+        private readonly postRepository: Repository<Post>,
+
+        @InjectRepository(PostSaved)
+        private readonly postSavedRepository: Repository<PostSaved>,
+
+        @InjectRepository(Comment)
+        private readonly commentRepository: Repository<Comment>,
+
+        @InjectRepository(Message)
+        private readonly messageRepository: Repository<Message>,
+
+        @InjectRepository(Follower)
+        private readonly followerRepository: Repository<Follower>,
+
+        @InjectRepository(ChatRoom)
+        private readonly chatRoomRepository: Repository<ChatRoom>,
+
+        @InjectRepository(PostImage)
+        private readonly postImageRepository: Repository<PostImage>,
     ) {}
 
     async updateProfileImage(userId: number, imagePath: string | null) {
@@ -33,6 +72,45 @@ export class UserService {
 
     async findUserById(id: number): Promise<User> {
         return await this.userRepository.findOne({ where: { id } });
+    }
+
+    async findUserByPassword(userId: number) {
+        // Şifresini kontrol etmek için yalnızca password döndürmek yerine, tüm kullanıcıyı döndürüyoruz
+        return this.userRepository.findOne({
+            where: { id: userId },
+            select: ['id', 'password'], // Şifreyi döndürüyoruz
+        });
+    }
+
+    async removeUserRelations(userId: number) {
+        // PostImage ve Post ilişkilerinin silinmesi
+        await this.postImageRepository.delete({
+            post: { user: { id: userId } },
+        });
+        await this.postRepository.delete({ user: { id: userId } });
+
+        // Kullanıcının kaydettiği postları silme
+        await this.postSavedRepository.delete({ user: { id: userId } });
+
+        // Kullanıcının yaptığı beğenileri silme (hem post hem yorum için)
+        await this.likeRepository.delete({ user: { id: userId } });
+
+        // Yorumları silme (hem yorumun kendisini hem de yorumla ilişkilendirilmiş olan beğenileri)
+        await this.commentRepository.delete({ user: { id: userId } });
+
+        // Kullanıcının gönderdiği mesajları silme
+        await this.messageRepository.delete({ sender: { id: userId } });
+
+        // ChatRoom'da kullanıcıyla ilişkili odaları silme
+        await this.chatRoomRepository.delete({ user1: { id: userId } });
+        await this.chatRoomRepository.delete({ user2: { id: userId } });
+
+        // Takipçi ve takip edilen ilişkilerini silme
+        await this.followerRepository.delete({ following: { id: userId } });
+        await this.followerRepository.delete({ follower: { id: userId } });
+
+        // Son olarak kullanıcıyı silme
+        await this.userRepository.delete({ id: userId });
     }
 
     async getProfile(userId: number): Promise<{
@@ -82,12 +160,12 @@ export class UserService {
 
         user.name = updateProfileDto.name;
         user.bio = updateProfileDto.bio;
-        const newuser = await this.userRepository.save(user);
+        const newUser = await this.userRepository.save(user);
 
-        console.log(newuser);
+        console.log(newUser);
 
         return {
-            user: newuser,
+            user: newUser,
         };
     }
 
@@ -142,9 +220,9 @@ export class UserService {
         offset: number = 0,
     ): Promise<User[]> {
         const whereConditions = [
-            { name: Like(`%${query}%`) },
-            { slug: Like(`%${query}%`) },
-            { bio: Like(`%${query}%`) },
+            { name: ILike(`%${query}%`) },
+            { slug: ILike(`%${query}%`) },
+            { bio: ILike(`%${query}%`) },
         ];
 
         return this.userRepository.find({

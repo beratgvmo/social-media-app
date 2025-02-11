@@ -1,14 +1,7 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import axios from "axios";
 import Modal from "@/components/Modal";
-import {
-    TbBook2,
-    TbClipboardPlus,
-    TbExternalLink,
-    TbFile,
-    TbSearch,
-    TbStar,
-} from "react-icons/tb";
+import { TbSearch } from "react-icons/tb";
 import { CgSpinner } from "react-icons/cg";
 import { GitHubRepo, GitHubUser } from "@/types";
 import { GithubRepoView, GithubUserView } from "../githubRepoView";
@@ -31,6 +24,12 @@ const GitHubFetcher: FC<GitHubFetcherProps> = ({
     const [repo, setRepo] = useState<GitHubRepo | null>(null);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        setSearchState("");
+        setUser(null);
+        setRepo(null);
+    }, [isOpen]);
 
     const searchGithub = async () => {
         setError("");
@@ -61,6 +60,7 @@ const GitHubFetcher: FC<GitHubFetcherProps> = ({
                 setUser(userResponse.data);
             }
         } catch (err) {
+            console.log(err);
             setError("Bilgi bulunamadı veya geçersiz kullanıcı/repo adı.");
         } finally {
             setLoading(false);
@@ -94,12 +94,12 @@ const GitHubFetcher: FC<GitHubFetcherProps> = ({
                 {error && (
                     <p className="text-red-500 mt-1 ml-1 text-xs">{error}</p>
                 )}
-
                 {user && (
                     <GithubUserView
                         user={user}
                         handleGithub={handleGithub}
                         handleGithubApi={handleGithubApi}
+                        deleteBtn={false}
                     />
                 )}
 
@@ -108,6 +108,7 @@ const GitHubFetcher: FC<GitHubFetcherProps> = ({
                         repo={repo}
                         handleGithub={handleGithub}
                         handleGithubApi={handleGithubApi}
+                        deleteBtn={false}
                     />
                 )}
 

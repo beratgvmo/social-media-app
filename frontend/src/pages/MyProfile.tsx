@@ -348,16 +348,21 @@ const MyProfile: React.FC = () => {
                         <div className="w-full mt-6 mb-4 bg-white border border-b-0 rounded-t-lg">
                             {profilePosts.map((post, index) => (
                                 <Post
-                                    id={post.id}
                                     content={post.content}
                                     likeCount={post.likeCount}
                                     createdAt={post.createdAt}
                                     images={post.postImages}
-                                    key={index}
-                                    commetCount={post.commetCount}
+                                    commentCount={post.commentCount}
+                                    key={post.id}
                                     user={post.user}
-                                    border={false}
+                                    id={post.id}
                                     postType={post.postType}
+                                    githubApiUrl={post.githubApiUrl}
+                                    githubType={post.githubType}
+                                    codeContent={post.codeContent}
+                                    codeLanguage={post.codeLanguage}
+                                    codeTheme={post.codeTheme}
+                                    border={false}
                                 />
                             ))}
                         </div>

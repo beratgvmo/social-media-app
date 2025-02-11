@@ -13,14 +13,14 @@ import {
 import { Comment } from '../comment/comment.entity';
 import { PostSaved } from 'src/post-saved/post-saved.entity';
 
-export enum PostType {
-    CODE = 'code',
-    Writing = 'writing',
-}
-
 export enum GithubType {
     User = 'user',
     Repo = 'repo',
+}
+
+export enum CodeTheme {
+    Dark = 'dark',
+    Light = 'light',
 }
 
 @Entity()
@@ -32,27 +32,33 @@ export class Post {
     content: string;
 
     @Column('text', { nullable: true })
+    codeContent?: string;
+
+    @Column('text', { nullable: true })
+    codeLanguage?: string;
+
+    @Column({
+        type: 'enum',
+        enum: CodeTheme,
+        nullable: true,
+    })
+    codeTheme?: CodeTheme;
+
+    @Column('text', { nullable: true })
     githubApiUrl?: string;
 
     @Column({
         type: 'enum',
         enum: GithubType,
-        default: null,
+        nullable: true,
     })
-    githubType: GithubType;
-
-    @Column({
-        type: 'enum',
-        enum: PostType,
-        default: PostType.Writing,
-    })
-    postType: PostType;
+    githubType?: GithubType;
 
     @Column({ default: 0 })
     likeCount: number;
 
     @Column({ default: 0 })
-    commetCount: number;
+    commentCount: number;
 
     @CreateDateColumn()
     createdAt: Date;
@@ -60,7 +66,7 @@ export class Post {
     @UpdateDateColumn()
     updatedAt: Date;
 
-    @ManyToOne(() => User, (user) => user.posts)
+    @ManyToOne(() => User, (user) => user.posts, { onDelete: 'CASCADE' })
     user: User;
 
     @OneToMany(() => Comment, (comment) => comment.post)

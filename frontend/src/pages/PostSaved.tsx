@@ -90,14 +90,16 @@ const PostSaved: React.FC = () => {
                                 createdAt={createdAt}
                                 images={postImages || []}
                                 key={item.id}
-                                commetCount={commetCount}
+                                commentCount={commetCount}
                                 user={user}
                                 border={true}
                             />
                         );
                     })
                 ) : (
-                    <p>Kayıtlı herhangi bir gönderi yok</p>
+                    <p className="text-gray-600 text-center text-sm">
+                        Kayıtlı herhangi bir gönderi yok
+                    </p>
                 )}
                 {pageLoading && <p>Yükleniyor...</p>}
             </div>

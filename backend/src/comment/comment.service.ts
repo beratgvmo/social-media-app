@@ -39,7 +39,7 @@ export class CommentService {
         });
 
         if (post) {
-            post.commetCount += 1;
+            post.commentCount += 1;
             await this.postsRepository.save(post);
         }
 

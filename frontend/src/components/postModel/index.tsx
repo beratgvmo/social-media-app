@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import Modal from "@/components/Modal";
 import ImageGrid from "@/components/ImageGridUser";
 import axios from "@/utils/axiosInstance";
@@ -8,21 +8,14 @@ import { FaGithub } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Button from "@/components/button";
 import GitHubRepoFetcher from "@/components/postModel/gitHubFetcher";
-import {
-    TbAlignJustified,
-    TbBook2,
-    TbCode,
-    TbExternalLink,
-    TbFile,
-    TbPhotoCircle,
-    TbStar,
-} from "react-icons/tb";
+import { TbCode, TbCodeOff, TbPhotoCircle } from "react-icons/tb";
 import WritingText from "./writingText";
 import ReactQuill from "react-quill";
 import EmojiPickerModal from "./emojiPickerModal";
 import WritingCode from "@/components/postModel/writingCode";
 import { GitHubRepo, GitHubUser } from "@/types";
 import { GithubRepoView, GithubUserView } from "./githubRepoView";
+import PhotoModal from "./photoModal";
 
 interface PostFormInputs {
     content: string;
@@ -38,24 +31,47 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
     const [postValue, setPostValue] = useState<string>("");
     const [postImages, setPostImages] = useState<File[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [codeValue, setCodeValue] = useState<string>("");
     const { reset } = useForm<PostFormInputs>();
     const { setProfilePosts } = usePostStore();
-    const [isWritingMode, setIsWritingMode] = useState(true);
+    const [isCode, setIsCode] = useState(false);
     const [isModalGithubOpen, setIsModalGithubOpen] = useState<boolean>(false);
     const quillRef = useRef<ReactQuill | null>(null);
-    const [range, setRange] = useState<{
-        index: number;
-        length: number;
-    } | null>(null);
+    const [range, setRange] = useState<number | null>(null);
+
+    const [photoModal, setPhotoModal] = useState(false);
 
     const [githubUser, setGithubUser] = useState<GitHubUser | null>(null);
     const [githubRepo, setGithubRepo] = useState<GitHubRepo | null>(null);
     const [githubType, setGithubType] = useState<"user" | "repo" | null>(null);
     const [githubApiUrl, setGithubApiUrl] = useState<string>("");
 
+    const [codeValue, setCodeValue] = useState<string>("");
+    const [theme, setTheme] = useState(true);
+    const [codeLanguage, setCodeLanguage] = useState("code");
+
+    const handleTheme = () => {
+        setTheme(!theme);
+    };
+
+    const handleClosePhotoModal = () => {
+        setPhotoModal(false);
+    };
+
+    const handleOpenPhotoModal = () => setPhotoModal(true);
+
     const handleGithubApi = (value: string) => {
         setGithubApiUrl(value);
+    };
+
+    const handleCodeLanguage = (value: string) => {
+        setCodeLanguage(value);
+    };
+
+    const handleGithubDelete = () => {
+        setGithubUser(null);
+        setGithubRepo(null);
+        setGithubType(null);
+        setGithubApiUrl("");
     };
 
     const handleGithub = (
@@ -68,12 +84,6 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
         } else {
             setGithubRepo(value as GitHubRepo);
         }
-    };
-
-    const handleToggle = () => {
-        setIsWritingMode(!isWritingMode);
-        setCodeValue("");
-        setPostValue("");
     };
 
     const handleCloseGithubModal = () => setIsModalGithubOpen(false);
@@ -94,22 +104,21 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
         setCodeValue(value);
     };
 
-    const onImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (files) {
-            const newImages = Array.from(files);
-            setPostImages((prevImages) => [...prevImages, ...newImages]);
-        }
-        event.target.value = "";
+    const imageUpdate = (file: File[]) => {
+        setPostImages(file);
     };
 
     const handlePost = async () => {
         if (!postValue && !codeValue) return;
 
         const formData = new FormData();
-        formData.append("content", isWritingMode ? postValue : codeValue);
+        formData.append("content", postValue);
 
-        formData.append("postType", isWritingMode ? "writing" : "code");
+        if (codeValue) {
+            formData.append("codeContent", codeValue);
+            formData.append("codeLanguage", codeLanguage);
+            formData.append("codeTheme", theme ? "light" : "dark");
+        }
 
         if (githubApiUrl) {
             formData.append("githubApiUrl", githubApiUrl);
@@ -139,22 +148,26 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
         }
     };
 
-    const handleDeleteImage = (index: number) => {
-        const updatedImages = [...postImages];
-        updatedImages.splice(index, 1);
-        setPostImages(updatedImages);
+    const handleDeleteImage = () => {
+        setPostImages([]);
     };
 
-    const addEmoji = (emoji: any) => {
+    const addEmoji = (emoji: { native: string }) => {
         if (quillRef.current) {
             const editor = quillRef.current.getEditor();
-            const cursorPosition = range ? range.index : 0;
+            const cursorPosition = range ?? 0;
             editor.insertText(cursorPosition, emoji.native);
-            setRange({
-                index: cursorPosition + emoji.native.length,
-                length: 0,
-            });
+            setRange(cursorPosition + emoji.native.length);
             editor.setSelection(cursorPosition + emoji.native.length, 0);
+        }
+    };
+
+    const handleCodeConet = () => {
+        if (!(postImages.length > 0 || githubApiUrl)) {
+            setIsCode(!isCode);
+            setCodeValue("");
+            setTheme(true);
+            setCodeLanguage("code");
         }
     };
 
@@ -174,17 +187,20 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                 <div>
                     <div className="px-2 mb-2 py-2 h-96 overflow-auto">
                         <div className="mb-2">
-                            {isWritingMode ? (
-                                <WritingText
-                                    postValue={postValue}
-                                    handleInput={handleInput}
-                                    quillRef={quillRef}
-                                    setRange={setRange}
-                                />
-                            ) : (
+                            <WritingText
+                                handleInput={handleInput}
+                                quillRef={quillRef}
+                                setRange={setRange}
+                            />
+
+                            {isCode && (
                                 <WritingCode
                                     codeValue={codeValue}
                                     handleInput={handleCodeInput}
+                                    handleCodeLanguage={handleCodeLanguage}
+                                    codeLanguage={codeLanguage}
+                                    handleTheme={handleTheme}
+                                    theme={theme}
                                 />
                             )}
                         </div>
@@ -193,6 +209,7 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                                 <GithubUserView
                                     user={githubUser}
                                     button={false}
+                                    handleGithubDelete={handleGithubDelete}
                                 />
                             )}
 
@@ -200,76 +217,86 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                                 <GithubRepoView
                                     repo={githubRepo}
                                     button={false}
+                                    handleGithubDelete={handleGithubDelete}
                                 />
                             )}
                         </div>
                         <div className="px-4 py-4">
                             <ImageGrid
-                                handleDeleteImage={handleDeleteImage}
                                 postImages={postImages}
+                                handleDeleteImage={handleDeleteImage}
+                                handleOpenPhotoModal={handleOpenPhotoModal}
                             />
                         </div>
                     </div>
                 </div>
-                <div className="px-6 mb-2 flex justify-between items-center">
-                    <div className="flex gap-3.5">
-                        <EmojiPickerModal
-                            onEmojiSelectFunc={addEmoji}
-                            isWritingMode={isWritingMode}
-                        />
-
-                        {postImages.length > 3 ? (
-                            <div className="cursor-pointer hover:bg-gray-200 p-2.5 transition rounded-full">
-                                <TbPhotoCircle className="w-7 h-7" />
-                            </div>
-                        ) : (
-                            <label>
-                                <div className="cursor-pointer hover:bg-gray-200 p-2.5 transition rounded-full">
-                                    <TbPhotoCircle className="w-7 h-7" />
+                <div className="px-6 mb-2">
+                    <div className="flex gap-3.5 justify-between">
+                        <EmojiPickerModal onEmojiSelectFunc={addEmoji} />
+                        <div className="flex gap-4">
+                            {postImages.length > 3 || isCode || githubApiUrl ? (
+                                <div className="p-2.5 transition rounded-full">
+                                    <TbPhotoCircle className="w-7 h-7 text-gray-400" />
                                 </div>
-                                <input
-                                    id="dropzone-file"
-                                    type="file"
-                                    onChange={onImageChange}
-                                    className="hidden"
-                                />
-                            </label>
-                        )}
-                        <button
-                            type="button"
-                            onClick={handleOpenGithubModal}
-                            className="cursor-pointer p-2.5 hover:bg-gray-200 transition rounded-full"
-                        >
-                            <FaGithub className="w-7 h-7" />
-                        </button>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={handleToggle}
-                        className="cursor-pointer flex items-center justify-center border p-1.5 rounded-md relative w-10 h-10"
-                    >
-                        <motion.span
-                            key={isWritingMode ? "writing" : "code"}
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.5 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute"
-                        >
-                            {isWritingMode ? (
-                                <TbAlignJustified className="text-xl" />
                             ) : (
-                                <TbCode className="text-xl" />
+                                <button
+                                    type="button"
+                                    onClick={() => handleOpenPhotoModal()}
+                                    className="cursor-pointer hover:bg-gray-200 p-2.5 transition rounded-full"
+                                >
+                                    <TbPhotoCircle className="w-7 h-7" />
+                                </button>
                             )}
-                        </motion.span>
-                    </button>
+
+                            {postImages.length > 0 || isCode || githubApiUrl ? (
+                                <div className="p-2.5 transition rounded-full">
+                                    <FaGithub className="w-7 h-7 text-gray-400" />
+                                </div>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={handleOpenGithubModal}
+                                    className="cursor-pointer p-2.5 hover:bg-gray-200 transition rounded-full"
+                                >
+                                    <FaGithub className="w-7 h-7" />
+                                </button>
+                            )}
+
+                            <button
+                                type="button"
+                                onClick={() => handleCodeConet()}
+                                className={`flex items-center justify-center border p-1.5 rounded-full relative w-10 h-10 ${
+                                    !(postImages.length > 0 || githubApiUrl) &&
+                                    "cursor-pointer"
+                                }`}
+                            >
+                                <motion.span
+                                    key={isCode.toString()}
+                                    initial={{ opacity: 0, scale: 0.5 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.5 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="absolute"
+                                >
+                                    {isCode ? (
+                                        <TbCode className="text-xl" />
+                                    ) : (
+                                        <TbCodeOff
+                                            className={`text-xl ${
+                                                (postImages.length > 0 ||
+                                                    githubApiUrl) &&
+                                                "text-gray-400"
+                                            }`}
+                                        />
+                                    )}
+                                </motion.span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div className="bg-white py-3 px-6 flex gap-2 justify-end border-t rounded-b-xl">
                     <Button
-                        disabled={
-                            (isWritingMode ? postValue : codeValue) === "" ||
-                            isLoading
-                        }
+                        disabled={postValue === "" || isLoading}
                         type="submit"
                         className="bg-blue-600 text-white focus:ring-blue-500 hover:bg-blue-700 active:bg-blue-800"
                     >
@@ -277,6 +304,12 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                     </Button>
                 </div>
             </form>
+            <PhotoModal
+                isOpen={photoModal}
+                onClose={handleClosePhotoModal}
+                images={postImages}
+                setImages={imageUpdate}
+            />
             <GitHubRepoFetcher
                 isOpen={isModalGithubOpen}
                 onClose={handleCloseGithubModal}

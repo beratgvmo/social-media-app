@@ -5,16 +5,13 @@ import { MdOutlineEmojiEmotions } from "react-icons/md";
 
 interface EmojiPickerModalProps {
     onEmojiSelectFunc: (emoji: any) => void;
-    isWritingMode: boolean;
 }
 
 const EmojiPickerModal = forwardRef<HTMLDivElement, EmojiPickerModalProps>(
-    ({ onEmojiSelectFunc, isWritingMode }, ref) => {
+    ({ onEmojiSelectFunc }, ref) => {
         const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
         const pickerRef = useRef<HTMLDivElement>(null);
         const buttonRef = useRef<HTMLButtonElement>(null);
-
-        console.log(isWritingMode);
 
         useEffect(() => {
             function handleClickOutside(event: MouseEvent) {
@@ -39,22 +36,17 @@ const EmojiPickerModal = forwardRef<HTMLDivElement, EmojiPickerModalProps>(
 
         return (
             <div className="relative" ref={ref}>
-                {isWritingMode ? (
-                    <button
-                        type="button"
-                        ref={buttonRef}
-                        onClick={() => setIsEmojiPickerOpen((prev) => !prev)}
-                        className={`cursor-pointer hover:bg-gray-200 p-2.5 transition rounded-full ${
-                            isEmojiPickerOpen && "bg-gray-200"
-                        }`}
-                    >
-                        <MdOutlineEmojiEmotions className="w-7 h-7" />
-                    </button>
-                ) : (
-                    <div className={` p-2.5 transition rounded-full`}>
-                        <MdOutlineEmojiEmotions className="w-7 h-7 text-gray-500" />
-                    </div>
-                )}
+                <button
+                    type="button"
+                    ref={buttonRef}
+                    onClick={() => setIsEmojiPickerOpen((prev) => !prev)}
+                    className={`cursor-pointer hover:bg-gray-200 p-2.5 transition rounded-full ${
+                        isEmojiPickerOpen && "bg-gray-200"
+                    }`}
+                >
+                    <MdOutlineEmojiEmotions className="w-7 h-7" />
+                </button>
+
                 {isEmojiPickerOpen && (
                     <div
                         ref={pickerRef}

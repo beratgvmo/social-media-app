@@ -2,7 +2,7 @@ import classNames from "classnames";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     children: React.ReactNode;
-    variant?: "blue" | "gray" | "red" | "outline" | "rounded";
+    variant?: "blue" | "gray" | "red" | "outline" | "rounded" | "roundedRed";
     size?: "normal" | "small";
 }
 
@@ -27,6 +27,8 @@ const Button: React.FC<ButtonProps> = ({
             "border-2 border-gray-500 bg-transparent text-gray-500 rounded-3xl hover:border-gray-800 hover:text-gray-800 transition",
         rounded:
             "bg-blue-500 border-2 border-transparent hover:bg-blue-600 active:bg-blue-700 rounded-3xl text-white",
+        roundedRed:
+            "bg-red-500 border-2 border-transparent hover:bg-red-600 active:bg-red-700 rounded-3xl text-white",
     }[variant];
 
     const sizeStyles = {

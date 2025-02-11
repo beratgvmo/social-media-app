@@ -6,7 +6,7 @@ interface ModalProps {
     onClose: () => void;
     title: string;
     children: React.ReactNode;
-    maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl";
+    maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "5xl";
 }
 
 const Modal: FC<ModalProps> = ({
@@ -34,13 +34,14 @@ const Modal: FC<ModalProps> = ({
         lg: "sm:max-w-lg",
         xl: "sm:max-w-xl",
         "2xl": "sm:max-w-2xl",
+        "5xl": "sm:max-w-5xl",
     }[maxWidth];
 
     if (!isOpen) return null;
 
     return (
         <div
-            className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50"
+            className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center mt-10 justify-center z-50"
             onClick={onClose}
         >
             <div

@@ -7,10 +7,27 @@ import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { randomUUID } from 'crypto';
 import { User } from './user.entity';
-
+import { Like } from '../like/like.entity';
+import { Post } from '../post/post.entity';
+import { Comment } from '../comment/comment.entity';
+import { Message } from '../chat/message.entity';
+import { Follower } from '../follower/follower.entity';
+import { ChatRoom } from '../chat/chat-room.entity';
+import { PostImage } from 'src/post-images/post-images.entity';
+import { PostSaved } from 'src/post-saved/post-saved.entity';
 @Module({
     imports: [
-        TypeOrmModule.forFeature([User]),
+        TypeOrmModule.forFeature([
+            User,
+            Like,
+            Post,
+            Comment,
+            Message,
+            Follower,
+            ChatRoom,
+            PostImage,
+            PostSaved,
+        ]),
         MulterModule.register({
             storage: diskStorage({
                 destination: (req, file, cb) => {

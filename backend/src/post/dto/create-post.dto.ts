@@ -1,13 +1,22 @@
 import { IsString, MaxLength, IsEnum, IsOptional } from 'class-validator';
-import { GithubType, PostType } from '../post.entity';
+import { CodeTheme, GithubType } from '../post.entity';
 
 export class CreatePostDto {
     @IsString()
-    @MaxLength(10000, { message: 'İçerik en fazla 5000 karakter olabilir.' })
+    @MaxLength(10000, { message: 'İçerik en fazla 10000 karakter olabilir.' })
     content: string;
 
-    @IsEnum(PostType)
-    postType: PostType;
+    @IsEnum(CodeTheme)
+    @IsOptional()
+    codeTheme: CodeTheme;
+
+    @IsString()
+    @IsOptional()
+    codeContent?: string;
+
+    @IsString()
+    @IsOptional()
+    codeLanguage?: string;
 
     @IsEnum(GithubType)
     @IsOptional()

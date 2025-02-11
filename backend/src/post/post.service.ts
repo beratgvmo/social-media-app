@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GithubType, Post, PostType } from './post.entity';
+import { CodeTheme, GithubType, Post } from './post.entity';
 import { Repository } from 'typeorm';
 import { PostImage } from '../post-images/post-images.entity';
 import { User } from 'src/user/user.entity';
@@ -18,7 +18,9 @@ export class PostService {
 
     async createPost(
         content: string,
-        postType: PostType,
+        codeContent: string,
+        codeLanguage: string,
+        codeTheme: CodeTheme,
         githubApiUrl: string,
         githubType: GithubType,
         imageUrls: string[] = [],
@@ -32,9 +34,11 @@ export class PostService {
 
         const post = this.postRepository.create({
             content,
-            postType,
-            githubType: githubType || null,
-            githubApiUrl: githubApiUrl || null,
+            codeContent,
+            codeLanguage,
+            codeTheme,
+            githubType,
+            githubApiUrl,
             user,
         });
 

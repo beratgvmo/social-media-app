@@ -17,9 +17,6 @@ export class Comment {
     @Column()
     content: string;
 
-    @ManyToOne(() => User, (user) => user.comments, { onDelete: 'CASCADE' })
-    user: User;
-
     @ManyToOne(() => Comment, (comment) => comment.replies, {
         nullable: true,
         onDelete: 'CASCADE',
@@ -29,12 +26,15 @@ export class Comment {
     @Column({ default: 0 })
     likeCount: number;
 
-    @OneToMany(() => Comment, (comment) => comment.parentComment)
-    replies: Comment[];
+    @OneToMany(() => Like, (like) => like.comment, { cascade: true })
+    likes: Like[];
+
+    @ManyToOne(() => User, (user) => user.comments, { onDelete: 'CASCADE' })
+    user: User;
 
     @ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })
     post: Post;
 
-    @OneToMany(() => Like, (like) => like.comment, { cascade: true })
-    likes: Like[];
+    @OneToMany(() => Comment, (comment) => comment.parentComment)
+    replies: Comment[];
 }

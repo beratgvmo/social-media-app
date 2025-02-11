@@ -18,10 +18,9 @@ import axiosDefulat from "axios";
 import PostImageGrid from "@/components/PostImageGrid";
 import TimeAgo from "@/components/TimeAgo";
 import PostComment from "@/components/post/PostComment";
-import { createTheme } from "@uiw/codemirror-themes";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
-import { githubLight } from "@uiw/codemirror-theme-github";
+import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { GithubRepoView, GithubUserView } from "../postModel/githubRepoView";
 import { GitHubRepo, GitHubUser } from "@/types";
 
@@ -29,14 +28,16 @@ interface PostProps {
     id: number;
     content: string;
     likeCount: number;
-    commetCount: number;
+    commentCount: number;
     images: PostImage[];
     createdAt: string;
     user: User;
-    border: boolean;
-    postType: string;
-    githubApiUrl: string;
-    githubType: string;
+    border?: boolean;
+    githubApiUrl?: string;
+    githubType?: string;
+    codeContent?: string;
+    codeLanguage?: string;
+    codeTheme?: string;
 }
 
 interface User {
@@ -58,10 +59,12 @@ const Post: React.FC<PostProps> = ({
     user,
     border,
     likeCount,
-    commetCount,
-    postType,
+    commentCount,
     githubApiUrl,
     githubType,
+    codeContent,
+    codeLanguage,
+    codeTheme,
 }) => {
     const [isLike, setIsLike] = useState(false);
     const [isSave, setIsSave] = useState(false);
@@ -69,13 +72,16 @@ const Post: React.FC<PostProps> = ({
     const [isBubble, setIsBubble] = useState(false);
     const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
     const bubbleRef = useRef<HTMLDivElement | null>(null);
-    const [currentCommentCount, setCurrentCommentCount] = useState(commetCount);
+    const [currentCommentCount, setCurrentCommentCount] =
+        useState(commentCount);
     const [expanded, setExpanded] = useState(false);
+    const [codeExpanded, setCodeExpanded] = useState(false);
     const [githubUser, setGithubUser] = useState<GitHubUser | null>(null);
     const [githubRepo, setGithubRepo] = useState<GitHubRepo | null>(null);
     const [loading, setLoading] = useState(false);
 
     const toggleExpanded = () => setExpanded(!expanded);
+    const toggleCodeExpanded = () => setCodeExpanded(!codeExpanded);
 
     const incrementCommentCount = () => {
         setCurrentCommentCount((prevCount) => prevCount + 1);
@@ -177,7 +183,7 @@ const Post: React.FC<PostProps> = ({
         try {
             await navigator.clipboard.writeText(content);
             setCopied(true);
-            setTimeout(() => setCopied(false), 1500); // 1.5 saniye sonra geri dön
+            setTimeout(() => setCopied(false), 1500);
         } catch (err) {
             console.error("Kopyalama hatası:", err);
         }
@@ -240,28 +246,25 @@ const Post: React.FC<PostProps> = ({
                 </div>
             </div>
             <div className="mt-2.5 px-4">
-                {postType == "writing" ? (
-                    <div className="text-base">
-                        <div
-                            dangerouslySetInnerHTML={{
-                                __html: expanded
-                                    ? content
-                                    : content.slice(0, 600),
-                            }}
-                        />
-                        {content.length > 600 && (
-                            <span
-                                onClick={toggleExpanded}
-                                className="text-gray-400 text-xs cursor-pointer"
-                            >
-                                {expanded || "Devamını Oku"}
-                            </span>
-                        )}
-                    </div>
-                ) : (
-                    <div className="border rounded p-2 mt-3 bg-gray-50">
+                <div className="text-base">
+                    <p className="whitespace-pre-line">
+                        {expanded ? content : content.slice(0, 100)}
+                    </p>
+                    {content.length > 100 && (
+                        <span
+                            onClick={toggleExpanded}
+                            className="text-gray-400 text-xs cursor-pointer"
+                        >
+                            {expanded || "Devamını Oku"}
+                        </span>
+                    )}
+                </div>
+                {codeContent && (
+                    <div className="border rounded p-2 mt-1.5 ">
                         <div className="flex justify-between mx-2 mt-1 mb-2.5">
-                            <p className="text-xs text-gray-700">React</p>
+                            <p className="text-xs text-gray-700">
+                                {codeLanguage}
+                            </p>
                             <button onClick={handleCopy} className="">
                                 {copied ? (
                                     <div className="flex items-center justify-center gap-0.5 text-xs text-gray-700">
@@ -277,7 +280,11 @@ const Post: React.FC<PostProps> = ({
                             </button>
                         </div>
                         <CodeMirror
-                            value={expanded ? content : content.slice(0, 600)}
+                            value={
+                                codeExpanded
+                                    ? codeContent
+                                    : codeContent.slice(0, 500)
+                            }
                             basicSetup={{
                                 lineNumbers: false,
                                 foldGutter: false,
@@ -286,18 +293,18 @@ const Post: React.FC<PostProps> = ({
                             extensions={[
                                 javascript({ jsx: true, typescript: true }),
                             ]}
-                            theme={githubLight}
+                            theme={codeTheme ? githubLight : githubDark}
                             readOnly={true}
                             editable={false}
                             className="custom-scrollbar ͼ1 text-sm"
                         />
-                        {content.length > 600 && (
+                        {codeContent.length > 500 && (
                             <div className="flex justify-end mt-2">
                                 <button
-                                    onClick={toggleExpanded}
+                                    onClick={toggleCodeExpanded}
                                     className="text-gray-400 hover:text-gray-500 transition mx-1 items-end text-xs cursor-pointer"
                                 >
-                                    {expanded || "Devamını Oku"}
+                                    {codeExpanded || "Devamını Oku"}
                                 </button>
                             </div>
                         )}
@@ -305,13 +312,25 @@ const Post: React.FC<PostProps> = ({
                 )}
             </div>
             {loading || (
-                <div className="p-4">
+                <div>
                     {githubUser && githubType == "user" && (
-                        <GithubUserView user={githubUser} button={false} />
+                        <div className="p-4">
+                            <GithubUserView
+                                user={githubUser}
+                                button={false}
+                                deleteBtn={false}
+                            />
+                        </div>
                     )}
 
                     {githubRepo && githubType == "repo" && (
-                        <GithubRepoView repo={githubRepo} button={false} />
+                        <div className="p-4">
+                            <GithubRepoView
+                                repo={githubRepo}
+                                button={false}
+                                deleteBtn={false}
+                            />
+                        </div>
                     )}
                 </div>
             )}

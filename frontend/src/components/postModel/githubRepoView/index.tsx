@@ -6,6 +6,7 @@ import {
     TbFile,
     TbStar,
     TbClipboardPlus,
+    TbX,
 } from "react-icons/tb";
 
 export const GithubUserView: React.FC<{
@@ -13,7 +14,16 @@ export const GithubUserView: React.FC<{
     handleGithub?: (value: GitHubUser | null, type: string) => void;
     handleGithubApi?: (value: string) => void;
     button?: boolean;
-}> = ({ user, handleGithub, handleGithubApi, button = true }) => (
+    handleGithubDelete?: () => void;
+    deleteBtn?: boolean;
+}> = ({
+    user,
+    handleGithub,
+    handleGithubApi,
+    button = true,
+    handleGithubDelete,
+    deleteBtn = true,
+}) => (
     <div className="border p-4 rounded bg-white flex justify-between">
         <div className="flex gap-4">
             <div>
@@ -62,6 +72,17 @@ export const GithubUserView: React.FC<{
                     </button>
                 </div>
             )}
+            {deleteBtn && (
+                <div>
+                    <button
+                        onClick={() => {
+                            handleGithubDelete();
+                        }}
+                    >
+                        <TbX className="text-3xl p-1 rounded-md transition hover:bg-gray-200 text-red-500 hover:text-red-600" />
+                    </button>
+                </div>
+            )}
             <a
                 href={user.html_url}
                 target="_blank"
@@ -78,8 +99,17 @@ export const GithubRepoView: React.FC<{
     repo: GitHubRepo;
     handleGithub?: (value: GitHubRepo | null, type: string) => void;
     handleGithubApi?: (value: string) => void;
+    handleGithubDelete?: () => void;
     button?: boolean;
-}> = ({ repo, handleGithub, handleGithubApi, button = true }) => (
+    deleteBtn?: boolean;
+}> = ({
+    repo,
+    handleGithub,
+    handleGithubApi,
+    button = true,
+    deleteBtn = true,
+    handleGithubDelete,
+}) => (
     <div className="border px-4 py-3 rounded bg-white mx-1 flex justify-between">
         <div>
             <div className="flex items-center gap-1.5">
@@ -117,6 +147,17 @@ export const GithubRepoView: React.FC<{
                         }}
                     >
                         <TbClipboardPlus className="text-3xl p-1 rounded-md transition hover:bg-gray-200 text-orange-500 hover:text-orange-600" />
+                    </button>
+                </div>
+            )}
+            {deleteBtn && (
+                <div>
+                    <button
+                        onClick={() => {
+                            handleGithubDelete();
+                        }}
+                    >
+                        <TbX className="text-3xl p-1 rounded-md transition hover:bg-gray-200 text-red-500 hover:text-red-600" />
                     </button>
                 </div>
             )}

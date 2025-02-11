@@ -3,6 +3,8 @@ import {
     Controller,
     Delete,
     Get,
+    HttpException,
+    HttpStatus,
     Param,
     Patch,
     Post,
@@ -19,6 +21,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { deleteFileIfExists } from '../utils/file.helper';
 import { User } from './user.entity';
+import * as bcrypt from 'bcryptjs';
 
 @Controller('user')
 export class UserController {
@@ -114,6 +117,29 @@ export class UserController {
 
         await this.userService.updateProfileImage(userId, null);
         return res.json({ message: 'Profil resmi başarıyla silindi.' });
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete('profile/delete')
+    async deleteUser(@Req() req: Request, @Body('password') password: string) {
+        const userId = req.user['sub'];
+        const user = await this.userService.findUserByPassword(userId);
+
+        if (!user) {
+            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            throw new HttpException(
+                'Incorrect password',
+                HttpStatus.UNAUTHORIZED,
+            );
+        }
+
+        await this.userService.removeUserRelations(userId);
+
+        return { message: 'User deleted successfully' };
     }
 
     private async handleImageUpload(

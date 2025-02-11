@@ -31,25 +31,21 @@ export class PostController {
         @UploadedFiles() files: Express.Multer.File[],
         @Req() req: Request,
     ) {
-        if (!createPostDto.content || !createPostDto.postType) {
-            throw new BadRequestException('İçerik ve postType zorunludur.');
-        }
-
-        if (files.length > 4) {
-            throw new BadRequestException(
-                'En fazla 4 resim yükleyebilirsiniz.',
-            );
+        if (!createPostDto.content) {
+            throw new BadRequestException('İçerik zorunludur.');
         }
 
         const userId = req.user['sub'];
-        const imageUrls: string[] = files.map(
+        const imageUrls = files.map(
             (file) => `http://localhost:3000/${file.path}`,
         );
 
         const post = await this.postService.createPost(
             createPostDto.content,
-            createPostDto.postType,
-            createPostDto?.githubApiUrl,
+            createPostDto.codeContent,
+            createPostDto.codeLanguage,
+            createPostDto.codeTheme,
+            createPostDto.githubApiUrl,
             createPostDto.githubType,
             imageUrls,
             userId,
