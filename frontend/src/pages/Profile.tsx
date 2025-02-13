@@ -14,6 +14,7 @@ import { CgSpinner } from "react-icons/cg";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import { Link } from "react-router-dom";
 import Button from "@/components/button";
+import FollowerBtn from "@/components/followerBtn";
 
 interface UserProfile {
     id: number;
@@ -32,7 +33,7 @@ interface Post {
     postImages: PostImage[];
     user: User;
     likeCount: number;
-    commetCount: number;
+    commentCount: number;
 }
 
 interface PostImage {
@@ -159,22 +160,22 @@ const Profile: React.FC = () => {
                                 Bilgisayar mühendisi
                             </div>
                             <div className="flex gap-2 text-sm">
-                                <Link to={"/mynetwork/follower"}>
-                                    <p className="font-medium text-blue-500 transition hover:underline cursor-pointer">
-                                        {profile?.followerCount} takipçi
-                                    </p>
-                                </Link>
-                                <p className="font-medium text-blue-500">•</p>
-                                <Link to={"/mynetwork/follower"}>
-                                    <p className="font-medium text-blue-500 transition hover:underline cursor-pointer">
-                                        {profile?.followingCount} takip
-                                    </p>
-                                </Link>
+                                {/* <Link to={"/mynetwork/follower"}> */}
+                                <p className="font-medium text-gray-600 transition">
+                                    {profile?.followerCount} takipçi
+                                </p>
+                                {/* </Link> */}
+                                <p className="font-medium text-gray-600">•</p>
+                                {/* <Link to={"/mynetwork/follower"}> */}
+                                <p className="font-medium text-gray-600 transition">
+                                    {profile?.followingCount} takip
+                                </p>
+                                {/* </Link> */}
                             </div>
                         </div>
 
                         <div className="mt-3 flex items-start">
-                            <Button variant="rounded">Takip Et</Button>
+                            <FollowerBtn id={profile.id} />
                         </div>
                     </div>
                 </div>
@@ -189,7 +190,7 @@ const Profile: React.FC = () => {
                                 createdAt={post.createdAt}
                                 images={post.postImages}
                                 key={post.id}
-                                commetCount={post.commetCount}
+                                commentCount={post.commentCount}
                                 user={post.user}
                                 border={false}
                             />

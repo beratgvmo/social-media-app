@@ -82,34 +82,39 @@ export class UserService {
         });
     }
 
-    async removeUserRelations(userId: number) {
-        // PostImage ve Post ilişkilerinin silinmesi
-        await this.postImageRepository.delete({
-            post: { user: { id: userId } },
-        });
-        await this.postRepository.delete({ user: { id: userId } });
+    // async removeUserRelations(userId: number): Promise<void> {
+    //     // PostImage ve Post ilişkilerinin silinmesi
+    //     await this.postImageRepository.delete({
+    //         post: { user: { id: userId } },
+    //     });
+    //     await this.postRepository.delete({ user: { id: userId } });
 
-        // Kullanıcının kaydettiği postları silme
-        await this.postSavedRepository.delete({ user: { id: userId } });
+    //     // Kullanıcının kaydettiği postları silme
+    //     await this.postSavedRepository.delete({ user: { id: userId } });
 
-        // Kullanıcının yaptığı beğenileri silme (hem post hem yorum için)
-        await this.likeRepository.delete({ user: { id: userId } });
+    //     // Kullanıcının yaptığı beğenileri silme (hem post hem yorum için)
+    //     await this.likeRepository.delete({ user: { id: userId } });
 
-        // Yorumları silme (hem yorumun kendisini hem de yorumla ilişkilendirilmiş olan beğenileri)
-        await this.commentRepository.delete({ user: { id: userId } });
+    //     // Yorumları silme (hem yorumun kendisini hem de yorumla ilişkilendirilmiş olan beğenileri)
+    //     await this.commentRepository.delete({ user: { id: userId } });
 
-        // Kullanıcının gönderdiği mesajları silme
-        await this.messageRepository.delete({ sender: { id: userId } });
+    //     // Kullanıcının gönderdiği mesajları silme
+    //     await this.messageRepository.delete({ sender: { id: userId } });
 
-        // ChatRoom'da kullanıcıyla ilişkili odaları silme
-        await this.chatRoomRepository.delete({ user1: { id: userId } });
-        await this.chatRoomRepository.delete({ user2: { id: userId } });
+    //     // ChatRoom'da kullanıcıyla ilişkili odaları silme
+    //     await this.chatRoomRepository.delete({ user1: { id: userId } });
+    //     await this.chatRoomRepository.delete({ user2: { id: userId } });
 
-        // Takipçi ve takip edilen ilişkilerini silme
-        await this.followerRepository.delete({ following: { id: userId } });
-        await this.followerRepository.delete({ follower: { id: userId } });
+    //     // Takipçi ve takip edilen ilişkilerini silme
+    //     await this.followerRepository.delete({ following: { id: userId } });
+    //     await this.followerRepository.delete({ follower: { id: userId } });
+    // }
 
-        // Son olarak kullanıcıyı silme
+    async deleteUser(userId: number): Promise<void> {
+        // // Kullanıcının ilişkili verilerini sil
+        // await this.removeUserRelations(userId);
+
+        // Son olarak kullanıcıyı sil
         await this.userRepository.delete({ id: userId });
     }
 

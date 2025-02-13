@@ -57,9 +57,7 @@ const MyNetwork: React.FC = () => {
 
     const handleRespond = async (followerId: number, isAccepted: boolean) => {
         try {
-            await axios.post(`follower/${followerId}/respond`, {
-                isAccepted,
-            });
+            await axios.post(`follower/${followerId}/accept`, { isAccepted });
 
             setRequests((prevRequests) =>
                 prevRequests.filter(

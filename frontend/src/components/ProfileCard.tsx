@@ -4,6 +4,7 @@ import Button from "./button";
 import { TbUser } from "react-icons/tb";
 import { Link } from "react-router-dom";
 import { CgSpinner } from "react-icons/cg";
+import FollowerBtn from "./followerBtn";
 
 interface Friend {
     id: number;
@@ -20,43 +21,6 @@ const ProfileCard: React.FC<Friend> = ({
     slug,
     bio,
 }) => {
-    const [loading, setLoading] = useState(true);
-    const [isFollowing, setIsFollowing] = useState<string | null>(null);
-
-    const checkFollowingStatus = async () => {
-        try {
-            setLoading(true);
-            const response = await axios.get(`/follower/status/${id}`);
-            setIsFollowing(response.data.isFollowing);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const onFollow = async () => {
-        try {
-            await axios.post(`/follower/follow/${id}`);
-            checkFollowingStatus();
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const onUnfollow = async () => {
-        try {
-            await axios.delete(`/follower/unfollow/${id}`);
-            checkFollowingStatus();
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    useEffect(() => {
-        checkFollowingStatus();
-    }, []);
-
     return (
         <div className="flex gap-3 mt-3 border-b pb-4 w-full">
             <Link to={`/profile/${slug}`}>
@@ -77,37 +41,9 @@ const ProfileCard: React.FC<Friend> = ({
                         {bio ? bio : "bio"}
                     </p>
                 </Link>
-                {loading ? (
-                    <Button
-                        variant="outline"
-                        className="w-20 flex items-center justify-center"
-                    >
-                        <CgSpinner
-                            size={20}
-                            className="animate-spin text-blue-600"
-                        />
-                    </Button>
-                ) : (
-                    <div>
-                        {isFollowing === null && (
-                            <Button onClick={onFollow} variant="rounded">
-                                Takip Et
-                            </Button>
-                        )}
-
-                        {isFollowing === "accepted" && (
-                            <Button onClick={onUnfollow} variant="outline">
-                                Takibi Bırak
-                            </Button>
-                        )}
-
-                        {isFollowing === "pending" && (
-                            <Button onClick={onUnfollow} variant="outline">
-                                İstek Gönderildi
-                            </Button>
-                        )}
-                    </div>
-                )}
+                <div>
+                    <FollowerBtn id={id} />
+                </div>
             </div>
         </div>
     );

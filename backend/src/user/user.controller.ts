@@ -122,24 +122,40 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @Delete('profile/delete')
     async deleteUser(@Req() req: Request, @Body('password') password: string) {
-        const userId = req.user['sub'];
-        const user = await this.userService.findUserByPassword(userId);
+        try {
+            const userId = req.user['sub'];
+            console.log('Silinen kullanıcı ID:', userId);
 
-        if (!user) {
-            throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-        }
+            const user = await this.userService.findUserByPassword(userId);
+            if (!user) {
+                console.error('Kullanıcı bulunamadı!');
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
+            console.log(user); //
+
+            const isPasswordValid = await bcrypt.compare(
+                password,
+                user.password,
+            );
+            console.log(isPasswordValid);
+            if (!isPasswordValid) {
+                console.error('Yanlış şifre girildi!');
+                throw new HttpException(
+                    'Incorrect password',
+                    HttpStatus.UNAUTHORIZED,
+                );
+            }
+
+            await this.userService.deleteUser(userId);
+            return { message: 'User deleted successfully' };
+        } catch (error) {
+            console.error('Kullanıcı silme hatası:', error);
             throw new HttpException(
-                'Incorrect password',
-                HttpStatus.UNAUTHORIZED,
+                'Internal Server Error',
+                HttpStatus.INTERNAL_SERVER_ERROR,
             );
         }
-
-        await this.userService.removeUserRelations(userId);
-
-        return { message: 'User deleted successfully' };
     }
 
     private async handleImageUpload(

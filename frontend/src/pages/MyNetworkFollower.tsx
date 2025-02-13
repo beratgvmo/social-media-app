@@ -44,8 +44,8 @@ const MyNetworkFollower: React.FC = () => {
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
     const [tab, setTab] = useState(true);
-    const { user } = useAuthStore();
     const limit = 10;
+    const { logout, user, setUser } = useAuthStore();
 
     const fetchData = useCallback(async () => {
         if (loading || !hasMore) return;
@@ -71,7 +71,7 @@ const MyNetworkFollower: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    }, [user.id, page, tab, hasMore, loading, limit]);
+    }, [page, tab]);
 
     useEffect(() => {
         fetchData();
@@ -98,10 +98,54 @@ const MyNetworkFollower: React.FC = () => {
     }, [hasMore, loading]);
 
     const switchTab = (isFollowers: boolean) => {
-        setTab(isFollowers);
-        setPage(1);
-        setHasMore(true);
-        isFollowers ? setFollowers([]) : setFollowings([]);
+        if (tab != isFollowers) {
+            setTab(isFollowers);
+            fetchProfile();
+            setPage(1);
+            setHasMore(true);
+            isFollowers ? setFollowers([]) : setFollowings([]);
+        }
+    };
+
+    const unfollow = async (id: number) => {
+        try {
+            console.log(id);
+            await axios.delete(`/follower/unfollow/${id}`);
+
+            setFollowings((prev) => prev.filter((user) => user.id !== id));
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const removeFollower = async (id: number) => {
+        try {
+            await axios.delete(`/follower/remove-follower/${id}`);
+            setFollowers((prev) =>
+                prev.filter((follower) => follower.id !== id)
+            );
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const fetchProfile = async () => {
+        try {
+            const response = await axios.get("/user/profile");
+            setUser(response.data);
+        } catch (error) {
+            console.error("Profil yüklenirken bir hata oluştu", error);
+            logout();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const uniqueList = (list: UserFollow[]) => {
+        return list.filter(
+            (user, index, self) =>
+                index === self.findIndex((u) => u.id === user.id)
+        );
     };
 
     const renderUserList = (list: UserFollow[]) =>
@@ -132,7 +176,21 @@ const MyNetworkFollower: React.FC = () => {
                     </div>
                     <div className="flex gap-2.5">
                         <Button variant="outline">Mesaj</Button>
-                        <Button variant="rounded">Takip Çıkar</Button>
+                        {switchTab ? (
+                            <Button
+                                variant="rounded"
+                                onClick={() => removeFollower(user.id)}
+                            >
+                                Takip Çıkar
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="rounded"
+                                onClick={() => unfollow(user.id)}
+                            >
+                                Takip Çıkar
+                            </Button>
+                        )}
                     </div>
                 </div>
             ))
@@ -171,8 +229,8 @@ const MyNetworkFollower: React.FC = () => {
                     </div>
                     <div>
                         {tab
-                            ? renderUserList(followers)
-                            : renderUserList(followings)}
+                            ? renderUserList(uniqueList(followers))
+                            : renderUserList(uniqueList(followings))}
                         {loading && <SkeletonList count={5} />}
                     </div>
                 </div>

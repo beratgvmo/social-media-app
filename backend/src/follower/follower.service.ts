@@ -1,4 +1,6 @@
 import {
+    BadRequestException,
+    ConflictException,
     HttpException,
     HttpStatus,
     Injectable,
@@ -20,110 +22,145 @@ export class FollowerService {
     ) {}
 
     async follow(followerId: number, followingId: number): Promise<void> {
-        const follower = await this.userRepository.findOne({
-            where: { id: followerId },
-        });
-        const following = await this.userRepository.findOne({
-            where: { id: followingId },
-        });
+        if (followerId === followingId) {
+            throw new BadRequestException('Kendi kendinizi takip edemezsiniz.');
+        }
+
+        const [follower, following] = await Promise.all([
+            this.userRepository.findOne({ where: { id: followerId } }),
+            this.userRepository.findOne({ where: { id: followingId } }),
+        ]);
 
         if (!follower || !following) {
-            throw new NotFoundException('Kullanıcı bulunamadı');
+            throw new NotFoundException(
+                'Takip edilecek veya takip eden kullanıcı bulunamadı.',
+            );
         }
 
-        if (follower.id === following.id) {
-            throw new Error('Kullanıcı kendini takip edemez');
-        }
-
-        const existingFollow = await this.followerRepository
-            .createQueryBuilder('follower')
-            .where('follower.followerId = :followerId', {
-                followerId: follower.id,
-            })
-            .andWhere('follower.followingId = :followingId', {
-                followingId: following.id,
-            })
-            .getOne();
+        const existingFollow = await this.followerRepository.findOne({
+            where: {
+                follower: { id: followerId },
+                following: { id: followingId },
+            },
+        });
 
         if (existingFollow) {
-            throw new Error('Zaten takip ediliyor');
+            throw new ConflictException(
+                'Bu kullanıcıyı zaten takip ediyorsunuz.',
+            );
         }
 
-        let newFollowStatus: FollowStatus.PENDING | FollowStatus.ACCEPTED =
-            FollowStatus.ACCEPTED;
-        if (!following.isPrivate) {
-            newFollowStatus = FollowStatus.ACCEPTED;
-        }
+        const newFollowStatus = following.isPrivate
+            ? FollowStatus.PENDING
+            : FollowStatus.ACCEPTED;
 
         const newFollow = this.followerRepository.create({
-            follower: follower,
-            following: following,
+            follower,
+            following,
             status: newFollowStatus,
         });
 
         await this.followerRepository.save(newFollow);
 
-        if (!following.isPrivate) {
-            follower.followingCount += 1;
-            following.followerCount += 1;
-            await this.userRepository.save(follower);
-            await this.userRepository.save(following);
+        if (newFollowStatus === FollowStatus.ACCEPTED) {
+            follower.followingCount++;
+            following.followerCount++;
+            await this.userRepository.save([follower, following]);
+        }
+    }
+
+    async removeFollower(userId: number, followerId: number): Promise<void> {
+        const follow = await this.followerRepository.findOne({
+            where: {
+                follower: { id: followerId },
+                following: { id: userId },
+            },
+        });
+
+        if (!follow) {
+            throw new NotFoundException('Bu kullanıcı seni takip etmiyor.');
+        }
+
+        await this.followerRepository.delete({ id: follow.id });
+
+        if (follow.status === FollowStatus.ACCEPTED) {
+            await Promise.all([
+                this.userRepository.increment(
+                    { id: followerId },
+                    'followingCount',
+                    -1,
+                ),
+                this.userRepository.increment(
+                    { id: userId },
+                    'followerCount',
+                    -1,
+                ),
+            ]);
         }
     }
 
     async unfollow(followerId: number, followingId: number): Promise<void> {
-        const follower = await this.userRepository.findOne({
-            where: { id: followerId },
-        });
-        const following = await this.userRepository.findOne({
-            where: { id: followingId },
+        const follow = await this.followerRepository.findOne({
+            where: {
+                follower: { id: followerId },
+                following: { id: followingId },
+            },
         });
 
-        if (!follower || !following) {
-            throw new NotFoundException('Kullanıcı bulunamadı');
+        if (!follow) {
+            throw new NotFoundException('Bu kullanıcıyı takip etmiyorsunuz.');
         }
 
-        const followRecord = await this.followerRepository
-            .createQueryBuilder('follower')
-            .where('follower.followerId = :followerId', {
-                followerId: follower.id,
-            })
-            .andWhere('follower.followingId = :followingId', {
-                followingId: following.id,
-            })
-            .getOne();
+        await this.followerRepository.delete({ id: follow.id });
 
-        if (!followRecord) {
-            throw new NotFoundException('Takip kaydı bulunamadı');
-        }
-
-        await this.followerRepository.remove(followRecord);
-
-        if (followRecord.status === 'accepted') {
-            follower.followingCount -= 1;
-            following.followerCount -= 1;
-            await this.userRepository.save(follower);
-            await this.userRepository.save(following);
+        if (follow.status === FollowStatus.ACCEPTED) {
+            await Promise.all([
+                this.userRepository.increment(
+                    { id: followerId },
+                    'followingCount',
+                    -1,
+                ),
+                this.userRepository.increment(
+                    { id: followingId },
+                    'followerCount',
+                    -1,
+                ),
+            ]);
         }
     }
 
-    async respondToFollowRequest(
+    async acceptFollowRequest(
         followerId: number,
+        userId: number,
         isAccepted: boolean,
     ): Promise<void> {
-        const followRequest = await this.followerRepository
-            .createQueryBuilder('follower')
-            .where('follower.followerId = :followerId', { followerId })
-            .andWhere('follower.status = :status', { status: 'pending' })
-            .getOne();
+        const followRequest = await this.followerRepository.findOne({
+            where: {
+                follower: { id: followerId },
+                following: { id: userId },
+                status: FollowStatus.PENDING,
+            },
+            relations: ['follower', 'following'],
+        });
 
         if (!followRequest) {
-            throw new NotFoundException('Takip isteği bulunamadı');
+            throw new NotFoundException('Takip isteği bulunamadı.');
         }
 
         if (isAccepted) {
             followRequest.status = FollowStatus.ACCEPTED;
             await this.followerRepository.save(followRequest);
+
+            await this.userRepository.increment(
+                { id: userId },
+                'followerCount',
+                1,
+            );
+            await this.userRepository.increment(
+                { id: followerId },
+                'followingCount',
+                1,
+            );
         } else {
             await this.followerRepository.remove(followRequest);
         }

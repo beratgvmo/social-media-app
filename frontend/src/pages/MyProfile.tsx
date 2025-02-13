@@ -71,21 +71,21 @@ const MyProfile: React.FC = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, [profileHasMore, profileLoading]);
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const response = await axios.get("/user/profile");
-                setUser(response.data);
-            } catch (error) {
-                console.error("Profil yüklenirken bir hata oluştu", error);
-                logout();
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchProfile = async () => {
+        try {
+            const response = await axios.get("/user/profile");
+            setUser(response.data);
+        } catch (error) {
+            console.error("Profil yüklenirken bir hata oluştu", error);
+            logout();
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchProfile();
-    }, [setUser, logout]);
+    }, []);
 
     const handleImageUpload = async () => {
         if (!croppedImage) return;
@@ -356,7 +356,6 @@ const MyProfile: React.FC = () => {
                                     key={post.id}
                                     user={post.user}
                                     id={post.id}
-                                    postType={post.postType}
                                     githubApiUrl={post.githubApiUrl}
                                     githubType={post.githubType}
                                     codeContent={post.codeContent}

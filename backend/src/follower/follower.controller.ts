@@ -22,7 +22,7 @@ export class FollowerController {
     async follow(@Param('userId') userId: number, @Req() req: Request) {
         const followerId = req.user['sub'];
         await this.followerService.follow(followerId, userId);
-        return { message: 'Takip isteği gönderildi.' };
+        return { message: 'Takip isteği .' };
     }
 
     @UseGuards(JwtAuthGuard)
@@ -33,13 +33,28 @@ export class FollowerController {
         return { message: 'Takipten çıkarıldı.' };
     }
 
-    @Post(':followerId/respond')
+    @UseGuards(JwtAuthGuard)
+    @Delete('remove-follower/:followerId')
+    async removeFollower(
+        @Param('followerId') followerId: number,
+        @Req() req: Request,
+    ) {
+        const userId = req.user['sub'];
+        await this.followerService.removeFollower(userId, followerId);
+        return { message: 'Takip eden kaldırıldı.' };
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post(':followerId/accept')
     async respondToFollowRequest(
         @Param('followerId') followerId: number,
         @Body('isAccepted') isAccepted: boolean,
+        @Req() req: Request,
     ) {
-        return this.followerService.respondToFollowRequest(
+        const userId = req.user['sub'];
+        return this.followerService.acceptFollowRequest(
             followerId,
+            userId,
             isAccepted,
         );
     }

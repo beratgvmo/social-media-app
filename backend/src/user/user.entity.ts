@@ -16,6 +16,7 @@ import { Notification } from '../notification/notification.entity';
 import { Message } from 'src/chat/message.entity';
 import { ChatRoom } from 'src/chat/chat-room.entity';
 import { PostSaved } from 'src/post-saved/post-saved.entity';
+
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
@@ -57,28 +58,40 @@ export class User {
     @UpdateDateColumn({ select: false })
     updatedAt: Date;
 
-    @OneToMany(() => Message, (message) => message.sender)
+    @OneToMany(() => Message, (message) => message.sender, {
+        onDelete: 'CASCADE',
+    })
     messages: Message[];
 
-    @OneToMany(() => Post, (post) => post.user)
+    @OneToMany(() => Post, (post) => post.user, { onDelete: 'CASCADE' })
     posts: Post[];
 
-    @OneToMany(() => PostSaved, (postSaved) => postSaved.user)
+    @OneToMany(() => PostSaved, (postSaved) => postSaved.user, {
+        onDelete: 'CASCADE',
+    })
     savedPosts: PostSaved[];
 
-    @OneToMany(() => Comment, (comment) => comment.user)
+    @OneToMany(() => Comment, (comment) => comment.user, {
+        onDelete: 'CASCADE',
+    })
     comments: Comment[];
 
-    @OneToMany(() => Like, (like) => like.user)
+    @OneToMany(() => Like, (like) => like.user, { onDelete: 'CASCADE' })
     likes: Like[];
 
-    @OneToMany(() => Follower, (follower) => follower.following)
+    @OneToMany(() => Follower, (follower) => follower.following, {
+        onDelete: 'CASCADE',
+    })
     followers: Follower[];
 
-    @OneToMany(() => Follower, (follower) => follower.follower)
+    @OneToMany(() => Follower, (follower) => follower.follower, {
+        onDelete: 'CASCADE',
+    })
     following: Follower[];
 
-    @OneToMany(() => Notification, (notification) => notification.user)
+    @OneToMany(() => Notification, (notification) => notification.user, {
+        onDelete: 'CASCADE',
+    })
     notifications: Notification[];
 
     @BeforeInsert()
