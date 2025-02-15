@@ -30,7 +30,9 @@ const HomeUserNull: React.FC = () => {
             const profile = await axios.get("/user/profile");
             setUser(profile.data);
             navigate("/");
-        } catch (error: any) {}
+        } catch (error) {
+            setErrorMessage("Hatalı e-posta veya şifre. Yeniden deneyin");
+        }
     };
 
     useEffect(() => {
@@ -87,7 +89,8 @@ const HomeUserNull: React.FC = () => {
                             className="mt-1"
                         />
                     </div>
-                    <div className="mt-6">
+                    <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
+                    <div className="mt-5">
                         <button className="w-full py-2.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200 font-semibold">
                             Giriş Yap
                         </button>

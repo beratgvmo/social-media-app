@@ -115,6 +115,8 @@ const MyNetworkFollower: React.FC = () => {
             setFollowings((prev) => prev.filter((user) => user.id !== id));
         } catch (error) {
             console.error(error);
+        } finally {
+            fetchProfile();
         }
     };
 
@@ -126,6 +128,8 @@ const MyNetworkFollower: React.FC = () => {
             );
         } catch (error) {
             console.error(error);
+        } finally {
+            fetchProfile();
         }
     };
 
@@ -176,7 +180,7 @@ const MyNetworkFollower: React.FC = () => {
                     </div>
                     <div className="flex gap-2.5">
                         <Button variant="outline">Mesaj</Button>
-                        {switchTab ? (
+                        {tab ? (
                             <Button
                                 variant="rounded"
                                 onClick={() => removeFollower(user.id)}
@@ -231,7 +235,24 @@ const MyNetworkFollower: React.FC = () => {
                         {tab
                             ? renderUserList(uniqueList(followers))
                             : renderUserList(uniqueList(followings))}
-                        {loading && <SkeletonList count={5} />}
+                        {/* {loading && !tab && user.followingCount > 0 && (
+                            <SkeletonList
+                                count={
+                                    user.followingCount > 4
+                                        ? 5
+                                        : user.followingCount
+                                }
+                            />
+                        )}
+                        {loading && tab && user.followerCount > 0 && (
+                            <SkeletonList
+                                count={
+                                    user.followerCount > 4
+                                        ? 5
+                                        : user.followerCount
+                                }
+                            />
+                        )} */}
                     </div>
                 </div>
             </div>

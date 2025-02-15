@@ -103,8 +103,15 @@ export class AuthService {
             accessToken,
             user: {
                 id: user.id,
+                bio: user.bio,
                 name: user.name,
                 email: user.email,
+                slug: user.slug,
+                isPrivate: user.isPrivate,
+                profileImage: user.profileImage,
+                bannerImage: user.bannerImage,
+                followerCount: user.followerCount,
+                followingCount: user.followingCount,
             },
         });
     }

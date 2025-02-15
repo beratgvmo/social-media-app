@@ -7,12 +7,13 @@ import TimeAgo from "@/components/TimeAgo";
 
 interface FollowerRequest {
     id: number;
-    createdAt: string;
+    createdAt: Date;
     status: string;
     isRead: boolean;
     follower: {
         id: number;
         name: string;
+        bio: string;
         email: string;
         slug: string;
         profileImage: string | null;
@@ -95,9 +96,12 @@ const MyNetwork: React.FC = () => {
                                         ) : (
                                             <TbUser className="w-14 h-14 p-2 flex items-center border rounded-full text-blue-500" />
                                         )}
-                                        <div className="flex flex-col gap-1">
+                                        <div>
                                             <p className="font-medium text-gray-800">
                                                 {request.follower.name}
+                                            </p>
+                                            <p className="text-xs text-gray-600 mb-0.5">
+                                                {request.follower.bio}
                                             </p>
                                             <p className="text-xs text-gray-700">
                                                 <TimeAgo

@@ -33,7 +33,7 @@ const Register: React.FC = () => {
             setUser(profile.data);
             navigate("/");
         } catch (error) {
-            setErrorMessage("Kayıt başarısız: Bu email zaten kullanılıyor.");
+            setErrorMessage("Hatalı e-posta veya şifre. Yeniden deneyin");
         }
     };
 
@@ -113,6 +113,7 @@ const Register: React.FC = () => {
                         className="mt-1"
                     />
                 </div>
+                <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
 
                 <div className="mt-5">
                     <button className="w-full py-2.5 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200 font-semibold">
@@ -121,10 +122,7 @@ const Register: React.FC = () => {
 
                     <p className="text-center text-sm text-gray-600 mt-1.5">
                         Zaten bir hesabın var{" "}
-                        <a
-                            href="/login"
-                            className="text-blue-500 hover:underline"
-                        >
+                        <a href="/" className="text-blue-500 hover:underline">
                             Giriş yap
                         </a>
                     </p>

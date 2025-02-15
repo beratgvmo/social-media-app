@@ -2,19 +2,20 @@ import axios from "@/utils/axiosInstance";
 import { create } from "zustand";
 
 interface Post {
-    id: number;
-    content: string;
-    createdAt: string;
-    postImages: PostImage[];
     user: User;
+    id: number;
     likeCount: number;
     commentCount: number;
-    postType: string;
+    createdAt: Date;
+    postUser: User;
+    border?: boolean;
+    content: string;
+    postImages: PostImage[];
     githubApiUrl?: string;
-    githubType?: string;
+    githubType?: "user" | "repo";
     codeContent?: string;
     codeLanguage?: string;
-    codeTheme?: string;
+    codeTheme?: boolean;
 }
 
 interface PostImage {

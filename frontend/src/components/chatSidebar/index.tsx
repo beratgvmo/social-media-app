@@ -91,59 +91,63 @@ const ChatSidebar: FC<ChatSidebarProps> = ({
     };
 
     return (
-        <div className="w-full h-full bg-white py-4 px-1 border-r">
-            <div className="flex mb-3 mt-1 ml-2 px-3 justify-between items-center">
-                <p className="text-xl font-medium">Sohbetler</p>
-                <div
-                    className="hover:bg-blue-100 p-2 rounded-full transition cursor-pointer"
-                    onClick={handleModalOpen}
-                >
-                    <TbLibraryPlus className="text-xl" />
+        <>
+            <div className="w-full h-full bg-white py-4 px-1 border-r">
+                <div className="flex mb-3 mt-1 ml-2 px-3 justify-between items-center">
+                    <p className="text-xl font-medium">Sohbetler</p>
+                    <div
+                        className="hover:bg-blue-100 p-2 rounded-full transition cursor-pointer"
+                        onClick={handleModalOpen}
+                    >
+                        <TbLibraryPlus className="text-xl" />
+                    </div>
                 </div>
-            </div>
-            <div className="pl-3 pr-2">
-                <div
-                    onClick={handleInputClick}
-                    className="w-full flex items-center px-2 border-2 mb-3 border-gray-300 rounded-md focus-within:border-blue-500 cursor-pointer"
-                >
-                    <TbSearch className="text-gray-500 text-lg" />
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        className="w-full p-1.5 text-sm outline-none"
-                        placeholder="Aratın veya yeni sohbet başlatın"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                <div className="pl-3 pr-2">
+                    <div
+                        onClick={handleInputClick}
+                        className="w-full flex items-center px-2 border-2 mb-3 border-gray-300 rounded-md focus-within:border-blue-500 cursor-pointer"
+                    >
+                        <TbSearch className="text-gray-500 text-lg" />
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            className="w-full p-1.5 text-sm outline-none"
+                            placeholder="Aratın veya yeni sohbet başlatın"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
                 </div>
-            </div>
-            <div className="flex flex-col overflow-scroll scrollbar-transition h-[86%] pl-3 pr-1">
-                {filteredChatRooms.length === 0 ? (
-                    <p className="text-gray-500 text-center mt-4">
-                        Sonuç bulunamadı
-                    </p>
-                ) : (
-                    filteredChatRooms.map((room) => {
-                        const chatUser =
-                            room.user1.id === user.id ? room.user2 : room.user1;
-                        return (
-                            <ChatUserItem
-                                key={room.id}
-                                chatUser={chatUser}
-                                lastMessageDate={room.lastMessageDate}
-                                thisRoom={thisRoom}
-                                roomId={room.id}
-                                onClick={() => {
-                                    setThisRoom(room.id);
-                                    setOpenModalId(room.id);
-                                }}
-                                formatMessageDate={formatMessageDate}
-                                openModalId={openModalId}
-                                setOpenModalId={setOpenModalId}
-                            />
-                        );
-                    })
-                )}
+                <div className="flex flex-col overflow-scroll scrollbar-transition h-[86%] pl-3 pr-1">
+                    {filteredChatRooms.length === 0 ? (
+                        <p className="text-gray-500 text-center mt-4">
+                            Sonuç bulunamadı
+                        </p>
+                    ) : (
+                        filteredChatRooms.map((room) => {
+                            const chatUser =
+                                room.user1.id === user.id
+                                    ? room.user2
+                                    : room.user1;
+                            return (
+                                <ChatUserItem
+                                    key={room.id}
+                                    chatUser={chatUser}
+                                    lastMessageDate={room.lastMessageDate}
+                                    thisRoom={thisRoom}
+                                    roomId={room.id}
+                                    onClick={() => {
+                                        setThisRoom(room.id);
+                                        setOpenModalId(room.id);
+                                    }}
+                                    formatMessageDate={formatMessageDate}
+                                    openModalId={openModalId}
+                                    setOpenModalId={setOpenModalId}
+                                />
+                            );
+                        })
+                    )}
+                </div>
             </div>
             <Modal
                 maxWidth="md"
@@ -169,7 +173,7 @@ const ChatSidebar: FC<ChatSidebarProps> = ({
                     </div>
                 )}
             </Modal>
-        </div>
+        </>
     );
 };
 

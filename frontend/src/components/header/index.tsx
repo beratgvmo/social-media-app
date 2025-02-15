@@ -27,7 +27,7 @@ interface Notification {
     id: number;
     type: "like" | "comment" | "follow";
     isRead: boolean;
-    createdAt: string;
+    createdAt: Date;
     fromUser: User;
 }
 
@@ -49,13 +49,14 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
     const [followerCount, setFollowerCount] = useState<number>(0);
     const [notificationCount, setNotificationCount] = useState<number>(0);
     const [notifications, setNotifications] = useState<Notification[]>([]);
+
     const fetchFollowerRequests = async () => {
         try {
             const response = await axios.get<FollowerRequest[]>(
-                "follower/pending-requests"
+                "/follower/pending-requests"
             );
             const unreadCount = response.data.filter(
-                (followerRequest) => !followerRequest.isRead
+                (request) => !request.isRead
             ).length;
             setFollowerCount(unreadCount);
         } catch (error) {
@@ -64,13 +65,7 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
     };
 
     useEffect(() => {
-        if (location.pathname === "/mynetwork") {
-            const delayFetch = setTimeout(() => {
-                fetchFollowerRequests();
-            }, 100);
-
-            return () => clearTimeout(delayFetch);
-        }
+        fetchFollowerRequests();
     }, [location.pathname]);
 
     useEffect(() => {

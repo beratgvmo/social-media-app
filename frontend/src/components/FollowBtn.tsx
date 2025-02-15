@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "../utils/axiosInstance";
-import Button from "./Button";
+import Button from "./button";
 
 interface FollowProps {
     userId: number;

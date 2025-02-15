@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Modal from "@/components/Modal";
 import ImageGrid from "@/components/ImageGridUser";
 import axios from "@/utils/axiosInstance";
@@ -16,6 +16,8 @@ import WritingCode from "@/components/postModel/writingCode";
 import { GitHubRepo, GitHubUser } from "@/types";
 import { GithubRepoView, GithubUserView } from "./githubRepoView";
 import PhotoModal from "./photoModal";
+import PostImageGrid from "../PostImageGrid";
+import axiosDefulat from "axios";
 
 interface PostFormInputs {
     content: string;
@@ -25,29 +27,78 @@ interface PostFormInputs {
 interface PostModelProps {
     isOpen: boolean;
     onClose: () => void;
+    content?: string;
+    images?: PostImage[];
+    postGithubApiUrl?: string;
+    postGithubType?: "user" | "repo";
+    postCodeContent?: string;
+    postCodeLanguage?: string;
+    postCodeTheme?: boolean;
+    variant?: "edit" | null;
+    postId?: number;
 }
 
-const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
-    const [postValue, setPostValue] = useState<string>("");
+interface PostImage {
+    url: string;
+}
+
+const PostModel: React.FC<PostModelProps> = ({
+    isOpen,
+    onClose,
+    content = "",
+    images = [],
+    postGithubApiUrl = "",
+    postGithubType = null,
+    postCodeContent = "",
+    postCodeLanguage = "code",
+    postCodeTheme = false,
+    variant,
+    postId,
+}) => {
+    const [postValue, setPostValue] = useState<string>(content);
+    const [postSaveImages, setPostSaveImages] = useState<PostImage[]>(images);
     const [postImages, setPostImages] = useState<File[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const { reset } = useForm<PostFormInputs>();
     const { setProfilePosts } = usePostStore();
-    const [isCode, setIsCode] = useState(false);
     const [isModalGithubOpen, setIsModalGithubOpen] = useState<boolean>(false);
     const quillRef = useRef<ReactQuill | null>(null);
     const [range, setRange] = useState<number | null>(null);
-
-    const [photoModal, setPhotoModal] = useState(false);
-
+    const [githubType, setGithubType] = useState<"user" | "repo" | null>(
+        postGithubType
+    );
     const [githubUser, setGithubUser] = useState<GitHubUser | null>(null);
     const [githubRepo, setGithubRepo] = useState<GitHubRepo | null>(null);
-    const [githubType, setGithubType] = useState<"user" | "repo" | null>(null);
-    const [githubApiUrl, setGithubApiUrl] = useState<string>("");
+    const [githubApiUrl, setGithubApiUrl] = useState<string>(postGithubApiUrl);
+    const [photoModal, setPhotoModal] = useState(false);
+    const [codeLanguage, setCodeLanguage] = useState(postCodeLanguage);
+    const [codeValue, setCodeValue] = useState<string>(postCodeContent);
+    const [theme, setTheme] = useState<boolean>(!!postCodeTheme);
+    const [isCode, setIsCode] = useState(false);
 
-    const [codeValue, setCodeValue] = useState<string>("");
-    const [theme, setTheme] = useState(true);
-    const [codeLanguage, setCodeLanguage] = useState("code");
+    const githubFetcher = async () => {
+        try {
+            if (githubType == "user") {
+                const response = await axiosDefulat.get(githubApiUrl);
+                setGithubUser(response.data);
+            } else if (githubType == "repo") {
+                const response = await axiosDefulat.get(githubApiUrl);
+                setGithubRepo(response.data);
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    useEffect(() => {
+        if (githubType && githubApiUrl) {
+            githubFetcher();
+        }
+    }, []);
+
+    useEffect(() => {
+        setPostValue(content);
+    }, [isOpen]);
 
     const handleTheme = () => {
         setTheme(!theme);
@@ -108,15 +159,15 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
         setPostImages(file);
     };
 
-    const handlePost = async () => {
-        if (!postValue && !codeValue) return;
+    const handlePostAction = async () => {
+        if (!postValue) return;
 
         const formData = new FormData();
         formData.append("content", postValue);
 
         if (codeValue) {
             formData.append("codeContent", codeValue);
-            formData.append("codeLanguage", codeLanguage);
+            formData.append("codeLanguage", codeLanguage || "code");
             formData.append("codeTheme", theme ? "light" : "dark");
         }
 
@@ -132,9 +183,17 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
         setIsLoading(true);
 
         try {
-            const response = await axios.post("/post/create", formData, {
+            const url =
+                variant === "edit" ? `/post/edit/${postId}` : "/post/create";
+            const method = variant === "edit" ? "put" : "post";
+
+            const response = await axios({
+                method,
+                url,
+                data: formData,
                 headers: { "Content-Type": "multipart/form-data" },
             });
+
             setProfilePosts([response.data.post]);
             reset();
             handleCloseModal();
@@ -163,7 +222,13 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
     };
 
     const handleCodeConet = () => {
-        if (!(postImages.length > 0 || githubApiUrl)) {
+        if (
+            !(
+                postImages.length > 0 ||
+                githubApiUrl ||
+                postSaveImages.length > 0
+            )
+        ) {
             setIsCode(!isCode);
             setCodeValue("");
             setTheme(true);
@@ -181,13 +246,14 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
-                    handlePost();
+                    handlePostAction();
                 }}
             >
                 <div>
                     <div className="px-2 mb-2 py-2 h-96 overflow-auto">
                         <div className="mb-2">
                             <WritingText
+                                postValue={postValue}
                                 handleInput={handleInput}
                                 quillRef={quillRef}
                                 setRange={setRange}
@@ -227,6 +293,13 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                                 handleDeleteImage={handleDeleteImage}
                                 handleOpenPhotoModal={handleOpenPhotoModal}
                             />
+                            <PostImageGrid
+                                handleDeleteImage={() => setPostSaveImages([])}
+                                postImages={
+                                    postSaveImages?.map((image) => image.url) ||
+                                    []
+                                }
+                            />
                         </div>
                     </div>
                 </div>
@@ -234,7 +307,10 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                     <div className="flex gap-3.5 justify-between">
                         <EmojiPickerModal onEmojiSelectFunc={addEmoji} />
                         <div className="flex gap-4">
-                            {postImages.length > 3 || isCode || githubApiUrl ? (
+                            {postImages.length > 3 ||
+                            isCode ||
+                            postSaveImages.length > 0 ||
+                            githubApiUrl ? (
                                 <div className="p-2.5 transition rounded-full">
                                     <TbPhotoCircle className="w-7 h-7 text-gray-400" />
                                 </div>
@@ -248,7 +324,10 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                                 </button>
                             )}
 
-                            {postImages.length > 0 || isCode || githubApiUrl ? (
+                            {postImages.length > 0 ||
+                            postSaveImages.length > 0 ||
+                            isCode ||
+                            githubApiUrl ? (
                                 <div className="p-2.5 transition rounded-full">
                                     <FaGithub className="w-7 h-7 text-gray-400" />
                                 </div>
@@ -266,8 +345,11 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                                 type="button"
                                 onClick={() => handleCodeConet()}
                                 className={`flex items-center justify-center border p-1.5 rounded-full relative w-10 h-10 ${
-                                    !(postImages.length > 0 || githubApiUrl) &&
-                                    "cursor-pointer"
+                                    !(
+                                        postImages.length > 0 ||
+                                        githubApiUrl ||
+                                        postSaveImages.length > 0
+                                    ) && "cursor-pointer"
                                 }`}
                             >
                                 <motion.span
@@ -284,7 +366,9 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                                         <TbCodeOff
                                             className={`text-xl ${
                                                 (postImages.length > 0 ||
-                                                    githubApiUrl) &&
+                                                    githubApiUrl ||
+                                                    postSaveImages.length >
+                                                        0) &&
                                                 "text-gray-400"
                                             }`}
                                         />
@@ -300,7 +384,11 @@ const PostModel: React.FC<PostModelProps> = ({ isOpen, onClose }) => {
                         type="submit"
                         className="bg-blue-600 text-white focus:ring-blue-500 hover:bg-blue-700 active:bg-blue-800"
                     >
-                        {isLoading ? "Yükleniyor..." : "Paylaş"}
+                        {isLoading
+                            ? "Yükleniyor..."
+                            : variant === "edit"
+                            ? "Kaydet"
+                            : "Paylaş"}
                     </Button>
                 </div>
             </form>

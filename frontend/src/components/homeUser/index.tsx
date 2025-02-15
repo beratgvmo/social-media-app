@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import usePostStore from "@/store/usePostStore";
-import { TbCode, TbPhotoCircle, TbUser, TbUserHeart } from "react-icons/tb";
-import { MdOutlineEmojiEmotions } from "react-icons/md";
-import { HiOutlinePhoto } from "react-icons/hi2";
+import { TbCode, TbPhotoCircle, TbUser } from "react-icons/tb";
 import ProfileSidebar from "@/components/ProfileSidebar";
 import RightbarFollow from "@/components/RightbarFollow";
 import Post from "@/components/post";
@@ -126,7 +124,7 @@ const HomeUser: React.FC = () => {
                                 images={post.postImages}
                                 commentCount={post.commentCount}
                                 key={post.id}
-                                user={post.user}
+                                postUser={post.user}
                                 id={post.id}
                                 border={true}
                                 githubApiUrl={post.githubApiUrl}

@@ -71,7 +71,7 @@ const SearchComponent: FC<SearchProps> = ({
                             return res.data;
                         })
                     );
-                    setResultSave(users);
+                    setResultSave(users); // Sonuçları doğrudan state'e kaydet
                 } catch (err) {
                     console.error(
                         "Kullanıcı bilgileri alınırken hata oluştu:",

@@ -1,5 +1,5 @@
-const TimeAgo = ({ createdAt }: { createdAt: string }) => {
-    const timeDifference = (createdAt: string) => {
+const TimeAgo = ({ createdAt }: { createdAt: Date }) => {
+    const timeDifference = (createdAt: Date) => {
         const now = new Date();
         const createdDate = new Date(createdAt);
         const diffInMs = now.getTime() - createdDate.getTime();

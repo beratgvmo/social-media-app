@@ -354,7 +354,7 @@ const MyProfile: React.FC = () => {
                                     images={post.postImages}
                                     commentCount={post.commentCount}
                                     key={post.id}
-                                    user={post.user}
+                                    postUser={post.user}
                                     id={post.id}
                                     githubApiUrl={post.githubApiUrl}
                                     githubType={post.githubType}

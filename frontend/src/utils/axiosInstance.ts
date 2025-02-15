@@ -28,8 +28,10 @@ apiClient.interceptors.response.use(
                 error.config.headers[
                     "Authorization"
                 ] = `Bearer ${newAccessToken}`;
-                return apiClient(error.config);
+                return apiClient(error.config); // Yeniden istek gönder
             } catch (refreshError) {
+                console.error("Token yenileme başarısız", refreshError);
+                // Kullanıcıyı giriş sayfasına yönlendirme veya hata mesajı gösterme
                 return Promise.reject(refreshError);
             }
         }

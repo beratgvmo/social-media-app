@@ -79,8 +79,13 @@ const PostSaved: React.FC = () => {
                             likeCount,
                             createdAt,
                             postImages,
-                            commetCount,
+                            commentCount,
                             user,
+                            codeContent,
+                            codeLanguage,
+                            codeTheme,
+                            githubApiUrl,
+                            githubType,
                         } = item.post || {};
                         return (
                             <Post
@@ -90,9 +95,14 @@ const PostSaved: React.FC = () => {
                                 createdAt={createdAt}
                                 images={postImages || []}
                                 key={item.id}
-                                commentCount={commetCount}
+                                commentCount={commentCount}
                                 user={user}
                                 border={true}
+                                codeContent={codeContent}
+                                codeLanguage={codeLanguage}
+                                codeTheme={codeTheme}
+                                githubApiUrl={githubApiUrl}
+                                githubType={githubType}
                             />
                         );
                     })

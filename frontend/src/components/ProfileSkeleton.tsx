@@ -3,7 +3,7 @@ import ProfileSidebar from "./ProfileSidebar";
 
 const ProfileSkeleton: React.FC = () => {
     return (
-        <div className="flex gap-5 mt-6">
+        <div className="flex gap-5">
             <div>
                 <div className="w-[230px] bg-white px-4 py-3 rounded-lg space-y-4 border border-gray-200 divide-y divide-gray-200 shadow animate-pulse dark:divide-gray-700 md:p-6 dark:border-gray-700">
                     <div className="flex items-center justify-between">

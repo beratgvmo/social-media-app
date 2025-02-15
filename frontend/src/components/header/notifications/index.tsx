@@ -13,7 +13,7 @@ interface Notification {
     id: number;
     type: "like" | "comment" | "follow";
     isRead: boolean;
-    createdAt: string;
+    createdAt: Date;
     fromUser: User;
 }
 

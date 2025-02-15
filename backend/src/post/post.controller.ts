@@ -11,6 +11,7 @@ import {
     BadRequestException,
     Param,
     Delete,
+    Put,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -54,6 +55,42 @@ export class PostController {
         return {
             message: 'Post başarıyla oluşturuldu.',
             post,
+        };
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Put('/edit/:postId')
+    @UseInterceptors(FilesInterceptor('images', 4))
+    async editPost(
+        @Param('postId') postId: number,
+        @Body() updatePostDto: CreatePostDto,
+        @UploadedFiles() files: Express.Multer.File[],
+        @Req() req: Request,
+    ) {
+        if (!updatePostDto.content) {
+            throw new BadRequestException('İçerik zorunludur.');
+        }
+
+        const userId = req.user['sub'];
+        const imageUrls = files.map(
+            (file) => `http://localhost:3000/${file.path}`,
+        );
+
+        const updatedPost = await this.postService.updatePost(
+            postId,
+            updatePostDto.content,
+            updatePostDto.codeContent,
+            updatePostDto.codeLanguage,
+            updatePostDto.codeTheme,
+            updatePostDto.githubApiUrl,
+            updatePostDto.githubType,
+            imageUrls,
+            userId,
+        );
+
+        return {
+            message: 'Post başarıyla güncellendi.',
+            updatedPost,
         };
     }
 
