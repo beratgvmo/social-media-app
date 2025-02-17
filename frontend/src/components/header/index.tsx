@@ -14,7 +14,9 @@ import { useEffect, useRef, useState } from "react";
 import axios from "@/utils/axiosInstance";
 import Notifications from "@/components/header/notifications";
 import SearchComponent from "../SearchComponent";
+import { io, Socket } from "socket.io-client";
 
+let socket: Socket;
 interface User {
     name: string;
     profileImage: string | null;
@@ -55,40 +57,45 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
             const response = await axios.get<FollowerRequest[]>(
                 "/follower/pending-requests"
             );
-            const unreadCount = response.data.filter(
-                (request) => !request.isRead
-            ).length;
-            setFollowerCount(unreadCount);
+
+            setFollowerCount(
+                response.data.filter((request) => !request.isRead).length
+            );
         } catch (error) {
             console.error("Takipçi istekleri alınırken hata oluştu", error);
+        } finally {
         }
     };
 
-    useEffect(() => {
-        fetchFollowerRequests();
-    }, [location.pathname]);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
-        fetchFollowerRequests();
-    }, []);
+        if (!socket) {
+            socket = io("http://localhost:3000");
+        }
 
-    useEffect(() => {
-        const fetchNotifications = async () => {
-            try {
-                const response = await axios.get<Notification[]>(
-                    `/notification/${user?.slug}`
-                );
-                const unreadCount = response.data.filter(
-                    (notification) => !notification.isRead
-                ).length;
-                setNotifications(response.data);
-                setNotificationCount(unreadCount);
-            } catch (error) {
-                console.error("Bildirimler alınırken hata oluştu", error);
-            }
+        socket.emit("joinRoom", user.id);
+
+        socket.on("notification", (data) => {
+            console.log("Bildirim geldi:", data);
+            setUnreadCount(data.unreadCount);
+        });
+
+        return () => {
+            socket.off("notification");
+            socket.disconnect();
         };
-        fetchNotifications();
-    }, [isBubble]);
+    }, [user?.id]);
+
+    console.log(unreadCount);
+
+    useEffect(() => {
+        if (location.pathname !== "/mynetwork") {
+            fetchFollowerRequests();
+        } else {
+            setFollowerCount(0);
+        }
+    }, [location.pathname, user?.slug, isBubble]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -106,106 +113,99 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
     }, []);
 
     return (
-        user && (
-            <header className="h-16 p-1 top-0 z-50 sticky flex items-center bg-white border-b border-gray-300">
-                <div className="w-[1100px] mx-auto flex justify-between items-center">
-                    <div className="flex gap-4 items-center">
-                        <Link to="/">
-                            <TbChessFilled
-                                size={40}
-                                className="text-blue-600"
-                            />
-                        </Link>
-                        <div className="flex items-center gap-4">
-                            <SearchComponent
-                                isInputFocused={isInputFocused}
-                                setInputFocus={setInputFocus}
-                            />
-                            <NavLink
-                                to="/"
-                                className={({ isActive }) =>
-                                    `rounded-full w-10 h-10 p-2 flex items-center justify-center transition-colors ${
-                                        isActive
-                                            ? "bg-blue-200 text-blue-600"
-                                            : "bg-gray-100 text-gray-600 hover:bg-blue-200 hover:text-blue-600"
-                                    }`
-                                }
-                            >
-                                <HiOutlineHome className="w-full h-full" />
-                            </NavLink>
-                            <NavLink
-                                to="/mynetwork"
-                                className={({ isActive }) =>
-                                    `rounded-full w-10 h-10 flex items-center justify-center transition-colors ${
-                                        isActive
-                                            ? "bg-blue-200 text-blue-600"
-                                            : "bg-gray-100 text-gray-600 hover:bg-blue-200 hover:text-blue-600"
-                                    }`
-                                }
-                            >
-                                <div className="flex items-center justify-center relative">
-                                    <GoPeople className="w-full h-full text-xl" />
-                                    {followerCount > 0 && (
-                                        <span className="absolute -top-2 -right-3 flex items-center justify-center text-xs rounded-full h-4 w-4 bg-red-500">
-                                            <p className="text-gray-100 font-medium">
-                                                {followerCount < 9
-                                                    ? followerCount
-                                                    : "+9"}
-                                            </p>
-                                        </span>
-                                    )}
-                                </div>
-                            </NavLink>
-                        </div>
-                    </div>
-                    <div className="flex gap-2 items-center">
-                        <div className="relative" ref={bubbleRef}>
-                            <button
-                                onClick={() => setIsBubble(!isBubble)}
-                                className="hover:bg-gray-100 transition relative p-2 rounded-full"
-                            >
-                                <TbBell size={24} className="text-blue-500" />
-                                {notificationCount > 0 && (
-                                    <span className="absolute top-0.5 right-0.5 flex items-center justify-center text-xs rounded-full h-4 w-4 bg-red-500 text-gray-100 font-medium">
-                                        {notificationCount < 9
-                                            ? notificationCount
-                                            : "+9"}
-                                    </span>
-                                )}
-                            </button>
-                            {isBubble && (
-                                <Notifications notifications={notifications} />
-                            )}
-                        </div>
-
+        <header className="h-16 p-1 top-0 z-50 sticky flex items-center bg-white border-b border-gray-300">
+            <div className="w-[1100px] mx-auto flex justify-between items-center">
+                <div className="flex gap-4 items-center">
+                    <Link to="/">
+                        <TbChessFilled size={40} className="text-blue-600" />
+                    </Link>
+                    <div className="flex items-center gap-4">
+                        <SearchComponent
+                            isInputFocused={isInputFocused}
+                            setInputFocus={setInputFocus}
+                        />
                         <NavLink
+                            to="/"
                             className={({ isActive }) =>
-                                `transition p-2 rounded-full ${
+                                `rounded-full w-10 h-10 p-2 flex items-center justify-center transition-colors ${
                                     isActive
-                                        ? "bg-gray-200"
-                                        : "hover:bg-gray-200"
+                                        ? "bg-blue-200 text-blue-600"
+                                        : "bg-gray-100 text-gray-600 hover:bg-blue-200 hover:text-blue-600"
                                 }`
                             }
-                            to="/chat"
                         >
-                            <TbMessage size={24} className="text-blue-500" />
+                            <HiOutlineHome className="w-full h-full" />
                         </NavLink>
-
-                        <Link to={`/profile/${user.slug}`}>
-                            {user?.profileImage ? (
-                                <img
-                                    src={user.profileImage}
-                                    alt="Profil Resmi"
-                                    className="w-10 h-10 ml-1 rounded-full border bg-white"
-                                />
-                            ) : (
-                                <TbUser className="w-10 h-10 p-2 flex items-center border rounded-full text-blue-500" />
-                            )}
-                        </Link>
+                        <NavLink
+                            to="/mynetwork"
+                            className={({ isActive }) =>
+                                `rounded-full w-10 h-10 flex items-center justify-center transition-colors ${
+                                    isActive
+                                        ? "bg-blue-200 text-blue-600"
+                                        : "bg-gray-100 text-gray-600 hover:bg-blue-200 hover:text-blue-600"
+                                }`
+                            }
+                        >
+                            <div className="flex items-center justify-center relative">
+                                <GoPeople className="w-full h-full text-xl" />
+                                {followerCount > 0 && (
+                                    <span className="absolute -top-2 -right-3 flex items-center justify-center text-xs rounded-full h-4 w-4 bg-red-500">
+                                        <p className="text-gray-100 font-medium">
+                                            {followerCount < 9
+                                                ? followerCount
+                                                : "+9"}
+                                        </p>
+                                    </span>
+                                )}
+                            </div>
+                        </NavLink>
                     </div>
                 </div>
-            </header>
-        )
+                <div className="flex gap-2 items-center">
+                    <div className="relative" ref={bubbleRef}>
+                        <button
+                            onClick={() => setIsBubble(!isBubble)}
+                            className="hover:bg-gray-100 transition relative p-2 rounded-full"
+                        >
+                            <TbBell size={24} className="text-blue-500" />
+                            {notificationCount > 0 && (
+                                <span className="absolute top-0.5 right-0.5 flex items-center justify-center text-xs rounded-full h-4 w-4 bg-red-500 text-gray-100 font-medium">
+                                    {notificationCount < 9
+                                        ? notificationCount
+                                        : "+9"}
+                                </span>
+                            )}
+                        </button>
+                        {isBubble && (
+                            <Notifications notifications={notifications} />
+                        )}
+                    </div>
+
+                    <NavLink
+                        to="/chat"
+                        className={({ isActive }) =>
+                            `transition p-2 rounded-full ${
+                                isActive ? "bg-gray-200" : "hover:bg-gray-200"
+                            }`
+                        }
+                    >
+                        <TbMessage size={24} className="text-blue-500" />
+                    </NavLink>
+
+                    <Link to={`/profile/${user.slug}`}>
+                        {user?.profileImage ? (
+                            <img
+                                src={user.profileImage}
+                                alt="Profil Resmi"
+                                className="w-10 h-10 ml-1 rounded-full border bg-white"
+                            />
+                        ) : (
+                            <TbUser className="w-10 h-10 p-2 flex items-center border rounded-full text-blue-500" />
+                        )}
+                    </Link>
+                </div>
+            </div>
+        </header>
     );
 };
 

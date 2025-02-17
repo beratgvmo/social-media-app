@@ -1,9 +1,11 @@
 import { Outlet } from "react-router-dom";
 import Header from "@/components/header";
 import { useState } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const MainLayout: React.FC = () => {
     const [isInputFocused, setIsInputFocused] = useState(false);
+    const { user } = useAuthStore();
 
     const handleOverlayClick = () => {
         setIsInputFocused(false);
@@ -11,10 +13,12 @@ const MainLayout: React.FC = () => {
 
     return (
         <div className="relative bg-amber-950/5 min-h-screen">
-            <Header
-                setInputFocus={setIsInputFocused}
-                isInputFocused={isInputFocused}
-            />
+            {user && (
+                <Header
+                    setInputFocus={setIsInputFocused}
+                    isInputFocused={isInputFocused}
+                />
+            )}
             {isInputFocused && (
                 <div
                     className="fixed inset-0 bg-black/50 z-10"

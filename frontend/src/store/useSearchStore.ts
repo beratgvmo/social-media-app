@@ -1,24 +1,11 @@
 import { create } from "zustand";
-import { persist, PersistStorage } from "zustand/middleware";
+import { persist } from "zustand/middleware";
 
 interface SearchState {
     recentSearches: string[];
     addSearch: (search: string) => void;
     clearSearches: () => void;
 }
-
-const localStoragePersist: PersistStorage<SearchState> = {
-    getItem: (name) => {
-        const value = localStorage.getItem(name);
-        return value ? JSON.parse(value) : null;
-    },
-    setItem: (name, value) => {
-        localStorage.setItem(name, JSON.stringify(value));
-    },
-    removeItem: (name) => {
-        localStorage.removeItem(name);
-    },
-};
 
 export const useSearchStore = create<SearchState>()(
     persist(
@@ -35,7 +22,18 @@ export const useSearchStore = create<SearchState>()(
         }),
         {
             name: "recent-searches",
-            storage: localStoragePersist,
+            storage: {
+                getItem: (name) => {
+                    const value = localStorage.getItem(name);
+                    return value ? JSON.parse(value) : null;
+                },
+                setItem: (name, value) => {
+                    localStorage.setItem(name, JSON.stringify(value));
+                },
+                removeItem: (name) => {
+                    localStorage.removeItem(name);
+                },
+            },
         }
     )
 );

@@ -6,6 +6,8 @@ import ChatSidebar from "@/components/chatSidebar";
 import ChatWelcome from "@/components/chatWelcome";
 import ChatHeader from "@/components/chatHeader";
 import MessageInput from "@/components/messageInput";
+import Modal from "@/components/Modal";
+import FriendItem from "@/components/chatSidebar/friendItem";
 
 interface RoomChat {
     id: number;
@@ -23,13 +25,14 @@ interface User {
 const Chat: React.FC = () => {
     const [chatRooms, setChatRooms] = useState<RoomChat[]>([]);
     const [thisRoom, setThisRoom] = useState<number | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [mutualFriends, setMutualFriends] = useState<User[]>([]);
     const { user } = useAuthStore();
 
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const handleInputClick = () => {
-        inputRef.current?.focus();
-    };
+    const handleModalOpen = () => setIsModalOpen(true);
+    const handleModalClose = () => setIsModalOpen(false);
 
     const fetchRooms = async () => {
         try {
@@ -40,58 +43,100 @@ const Chat: React.FC = () => {
         }
     };
 
+    const fetchMutualFriends = async () => {
+        try {
+            const response = await axios.get(`chat/new/friends`);
+            setMutualFriends(response.data);
+        } catch (error) {
+            console.error("Arkadaşları alırken hata oluştu:", error);
+        }
+    };
+
     useEffect(() => {
-        fetchRooms();
-    }, [user.id]);
+        if (user?.id) {
+            fetchRooms();
+            fetchMutualFriends();
+        }
+    }, [user?.id]);
+
+    const handleInputClick = () => {
+        inputRef.current?.focus();
+    };
 
     return (
-        <div className="flex w-full h-full">
-            <div className="w-2/6 min-w-[300px] h-full bg-white">
-                <ChatSidebar
-                    user={user}
-                    chatRooms={chatRooms}
-                    thisRoom={thisRoom}
-                    setThisRoom={setThisRoom}
-                    handleInputClick={handleInputClick}
-                    inputRef={inputRef}
-                    fetchRooms={fetchRooms}
-                />
+        <>
+            <div className="flex w-full h-full">
+                <div className="w-2/6 min-w-[300px] h-full bg-white">
+                    <ChatSidebar
+                        user={user}
+                        chatRooms={chatRooms}
+                        thisRoom={thisRoom}
+                        setThisRoom={setThisRoom}
+                        handleInputClick={handleInputClick}
+                        inputRef={inputRef}
+                        handleModalOpen={handleModalOpen}
+                    />
+                </div>
+
+                <div className="flex flex-1 flex-col h-full w-4/6 bg-white">
+                    {!thisRoom && <ChatWelcome />}
+                    {thisRoom && (
+                        <div className="flex flex-col h-full">
+                            <div>
+                                {chatRooms.map(
+                                    (room) =>
+                                        room.id === thisRoom && (
+                                            <ChatHeader
+                                                key={room.id}
+                                                room={room}
+                                                user={user}
+                                            />
+                                        )
+                                )}
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto mr-0.5">
+                                <ChatMessage
+                                    chatRoomId={thisRoom}
+                                    userId={user.id}
+                                />
+                            </div>
+
+                            <div>
+                                <MessageInput
+                                    chatRoomId={thisRoom}
+                                    userId={user.id}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
-
-            <div className="flex flex-1 flex-col h-full w-4/6 bg-white">
-                {!thisRoom && <ChatWelcome />}
-                {thisRoom && (
-                    <div className="flex flex-col h-full">
-                        <div>
-                            {chatRooms.map(
-                                (room) =>
-                                    room.id === thisRoom && (
-                                        <ChatHeader
-                                            key={room.id}
-                                            room={room}
-                                            user={user}
-                                        />
-                                    )
-                            )}
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto mr-0.5">
-                            <ChatMessage
-                                chatRoomId={thisRoom}
-                                userId={user.id}
+            <Modal
+                maxWidth="md"
+                isOpen={isModalOpen}
+                onClose={handleModalClose}
+                title="Yeni Sohbet Başlat"
+            >
+                {mutualFriends.length > 0 ? (
+                    <div className="p-4">
+                        {mutualFriends.map((friend) => (
+                            <FriendItem
+                                handleModalClose={handleModalClose}
+                                key={friend.id}
+                                fetchRooms={fetchRooms}
+                                friend={friend}
+                                setThisRoom={setThisRoom}
                             />
-                        </div>
-
-                        <div>
-                            <MessageInput
-                                chatRoomId={thisRoom}
-                                userId={user.id}
-                            />
-                        </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="py-6 flex justify-center items-center">
+                        <p className="text-sm text-gray-800">Arkadaşın yok</p>
                     </div>
                 )}
-            </div>
-        </div>
+            </Modal>
+        </>
     );
 };
 

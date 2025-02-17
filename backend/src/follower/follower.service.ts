@@ -10,12 +10,16 @@ import { Follower, FollowStatus } from './follower.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
+import { Notification } from 'src/notification/notification.entity';
 
 @Injectable()
 export class FollowerService {
     constructor(
         @InjectRepository(Follower)
         private followerRepository: Repository<Follower>,
+
+        @InjectRepository(Notification)
+        private notificationRepository: Repository<Notification>,
 
         @InjectRepository(User)
         private userRepository: Repository<User>,
@@ -61,6 +65,16 @@ export class FollowerService {
         });
 
         await this.followerRepository.save(newFollow);
+
+        if (newFollowStatus === FollowStatus.PENDING) {
+            const notification = this.notificationRepository.create({
+                fromUser: following,
+                type: 'follow',
+                user: follower,
+            });
+
+            await this.notificationRepository.save(notification);
+        }
 
         if (newFollowStatus === FollowStatus.ACCEPTED) {
             follower.followingCount++;

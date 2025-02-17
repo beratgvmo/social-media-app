@@ -33,7 +33,7 @@ interface PostModelProps {
     postGithubType?: "user" | "repo";
     postCodeContent?: string;
     postCodeLanguage?: string;
-    postCodeTheme?: boolean;
+    postCodeTheme?: "light" | "dark";
     variant?: "edit" | null;
     postId?: number;
 }
@@ -51,7 +51,7 @@ const PostModel: React.FC<PostModelProps> = ({
     postGithubType = null,
     postCodeContent = "",
     postCodeLanguage = "code",
-    postCodeTheme = false,
+    postCodeTheme = "light",
     variant,
     postId,
 }) => {
@@ -73,7 +73,7 @@ const PostModel: React.FC<PostModelProps> = ({
     const [photoModal, setPhotoModal] = useState(false);
     const [codeLanguage, setCodeLanguage] = useState(postCodeLanguage);
     const [codeValue, setCodeValue] = useState<string>(postCodeContent);
-    const [theme, setTheme] = useState<boolean>(!!postCodeTheme);
+    const [theme, setTheme] = useState<"light" | "dark">(postCodeTheme);
     const [isCode, setIsCode] = useState(false);
 
     const githubFetcher = async () => {
@@ -101,7 +101,7 @@ const PostModel: React.FC<PostModelProps> = ({
     }, [isOpen]);
 
     const handleTheme = () => {
-        setTheme(!theme);
+        setTheme(theme === "light" ? "dark" : "light");
     };
 
     const handleClosePhotoModal = () => {
@@ -221,7 +221,7 @@ const PostModel: React.FC<PostModelProps> = ({
         }
     };
 
-    const handleCodeConet = () => {
+    const handleCodeContent = () => {
         if (
             !(
                 postImages.length > 0 ||
@@ -231,7 +231,7 @@ const PostModel: React.FC<PostModelProps> = ({
         ) {
             setIsCode(!isCode);
             setCodeValue("");
-            setTheme(true);
+            setTheme("light"); // Varsayılan olarak light başlatılıyor.
             setCodeLanguage("code");
         }
     };
@@ -343,7 +343,7 @@ const PostModel: React.FC<PostModelProps> = ({
 
                             <button
                                 type="button"
-                                onClick={() => handleCodeConet()}
+                                onClick={() => handleCodeContent()}
                                 className={`flex items-center justify-center border p-1.5 rounded-full relative w-10 h-10 ${
                                     !(
                                         postImages.length > 0 ||

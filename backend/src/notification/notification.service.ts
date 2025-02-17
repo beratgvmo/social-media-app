@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Notification } from './notification.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/user.entity';
-import { Post } from 'src/post/post.entity';
 
 @Injectable()
 export class NotificationService {
@@ -11,22 +9,6 @@ export class NotificationService {
         @InjectRepository(Notification)
         private notificationRepository: Repository<Notification>,
     ) {}
-
-    async createNotification(
-        user: User,
-        type: 'comment' | 'like' | 'followRequest',
-        fromUser: User,
-        post?: Post,
-    ): Promise<Notification> {
-        const notification = this.notificationRepository.create({
-            user,
-            type,
-            fromUser,
-            post,
-        });
-
-        return this.notificationRepository.save(notification);
-    }
 
     async getNotifications(userSlug: string): Promise<Notification[]> {
         return this.notificationRepository.find({
@@ -36,27 +18,21 @@ export class NotificationService {
         });
     }
 
+    async countUnreadNotifications(userId: number): Promise<number> {
+        console.log('Sorgulanan userId:', userId); // userId doğru mu?
+        const unreadCount = await this.notificationRepository.count({
+            where: {
+                user: { id: userId },
+                isRead: false,
+            },
+        });
+        console.log('Veritabanı sorgusu sonucu:', unreadCount); // Sorgu sonucu
+        return unreadCount;
+    }
+
     async markAsRead(notificationId: number): Promise<void> {
         await this.notificationRepository.update(notificationId, {
             isRead: true,
-        });
-    }
-
-    async removeNotification(
-        userId: number,
-        postId: number,
-        PostUserId: number,
-        type: 'like',
-    ): Promise<void> {
-        this.notificationRepository.findOne({
-            where: { user: { id: userId }, post: { id: postId } },
-        });
-
-        await this.notificationRepository.delete({
-            user: { id: PostUserId },
-            post: { id: postId },
-            fromUser: { id: userId },
-            type,
         });
     }
 }

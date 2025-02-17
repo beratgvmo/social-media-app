@@ -96,7 +96,7 @@ const PostSaved: React.FC = () => {
                                 images={postImages || []}
                                 key={item.id}
                                 commentCount={commentCount}
-                                user={user}
+                                postUser={user}
                                 border={true}
                                 codeContent={codeContent}
                                 codeLanguage={codeLanguage}

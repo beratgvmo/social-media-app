@@ -1,4 +1,3 @@
-import { Post } from 'src/post/post.entity';
 import { User } from '../user/user.entity';
 import {
     Column,
@@ -13,16 +12,15 @@ export class Notification {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => User, (user) => user.notifications)
+    @ManyToOne(() => User, (user) => user.notifications, {
+        onDelete: 'CASCADE',
+    })
     user: User;
 
     @Column()
-    type: 'comment' | 'like' | 'followRequest';
+    type: 'comment' | 'like' | 'follow' | 'post';
 
-    @ManyToOne(() => Post, { nullable: true })
-    post: Post;
-
-    @ManyToOne(() => User, { nullable: true })
+    @ManyToOne(() => User, { nullable: true, onDelete: 'CASCADE' })
     fromUser: User;
 
     @Column({ default: false })

@@ -6,7 +6,7 @@ export class NotificationController {
     constructor(private readonly notificationService: NotificationService) {}
 
     @Get(':userSlug')
-    async getNotification(@Param('userId') userSlug: string) {
+    async getNotification(@Param('userSlug') userSlug: string) {
         return this.notificationService.getNotifications(userSlug);
     }
 

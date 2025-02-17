@@ -10,7 +10,7 @@ interface WritingCodeProps {
     handleCodeLanguage: (e: string) => void;
     codeLanguage: string;
     handleTheme: () => void;
-    theme: boolean;
+    theme: "light" | "dark";
 }
 
 export default function WritingCode({
@@ -26,12 +26,12 @@ export default function WritingCode({
             <div className="rounded-lg min-h-7 mt-2.5 mx-4 mb-5 overflow-hidden border">
                 <div
                     className={`flex justify-between px-2 py-1 ${
-                        theme || "bg-[#0d1117]"
+                        theme === "light" ? "bg-gray-100" : "bg-[#0d1117]"
                     }`}
                 >
                     <input
-                        className={`text-xs my-0.5 bg-transparent blod outline-none ${
-                            theme ? "text-gray-600" : "text-gray-50"
+                        className={`text-xs my-0.5 bg-transparent outline-none ${
+                            theme === "light" ? "text-gray-600" : "text-gray-50"
                         }`}
                         maxLength={12}
                         value={codeLanguage}
@@ -42,18 +42,18 @@ export default function WritingCode({
                     />
                     <button
                         type="button"
-                        onClick={() => handleTheme()}
+                        onClick={handleTheme}
                         className="cursor-pointer flex items-center justify-center rounded-md relative w-6 h-6"
                     >
                         <motion.span
-                            key={theme.toString()}
+                            key={theme}
                             initial={{ opacity: 0, scale: 0.5 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.5 }}
                             transition={{ duration: 0.2 }}
                             className="absolute"
                         >
-                            {theme ? (
+                            {theme === "light" ? (
                                 <TbSun className="text-gray-600" />
                             ) : (
                                 <TbMoon className="text-gray-50" />
@@ -64,9 +64,9 @@ export default function WritingCode({
                 <div className="border-b"></div>
                 <CodeMirror
                     value={codeValue}
-                    height="w-full"
+                    height="100%"
                     extensions={[javascript({ jsx: true, typescript: true })]}
-                    theme={theme ? githubLight : githubDark}
+                    theme={theme === "light" ? githubLight : githubDark}
                     onChange={(value) => handleInput(value)}
                     className="custom-scrollbar"
                 />

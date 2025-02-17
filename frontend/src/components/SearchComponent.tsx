@@ -65,13 +65,31 @@ const SearchComponent: FC<SearchProps> = ({
                 try {
                     const users = await Promise.all(
                         recentSearches.map(async (search) => {
-                            const res = await axios.get(
-                                `/user/profile/${search}`
-                            );
-                            return res.data;
+                            try {
+                                const res = await axios.get(
+                                    `/user/profile/${search}`
+                                );
+                                return res.data;
+                            } catch (err) {
+                                if (err.response?.status === 404) {
+                                    const updatedSearches =
+                                        recentSearches.filter(
+                                            (s) => s !== search
+                                        );
+                                    localStorage.setItem(
+                                        "recent-searches",
+                                        JSON.stringify(updatedSearches)
+                                    );
+
+                                    return null;
+                                }
+                                throw err;
+                            }
                         })
                     );
-                    setResultSave(users); // Sonuçları doğrudan state'e kaydet
+
+                    const validUsers = users.filter((user) => user !== null);
+                    setResultSave(validUsers);
                 } catch (err) {
                     console.error(
                         "Kullanıcı bilgileri alınırken hata oluştu:",

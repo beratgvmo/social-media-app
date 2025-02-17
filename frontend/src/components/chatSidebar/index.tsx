@@ -12,7 +12,7 @@ interface ChatSidebarProps {
     handleInputClick: () => void;
     inputRef: RefObject<HTMLInputElement>;
     user: User;
-    fetchRooms: () => void;
+    handleModalOpen: () => void;
 }
 
 interface RoomChat {
@@ -36,33 +36,15 @@ const ChatSidebar: FC<ChatSidebarProps> = ({
     handleInputClick,
     inputRef,
     user,
-    fetchRooms,
+    handleModalOpen,
 }) => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [mutualFriends, setMutualFriends] = useState<User[]>([]);
     const [openModalId, setOpenModalId] = useState<number | null>(null);
 
     const filteredChatRooms = chatRooms.filter((room) => {
         const chatUser = room.user1.id === user.id ? room.user2 : room.user1;
         return chatUser.name.toLowerCase().includes(searchQuery.toLowerCase());
     });
-
-    const handleModalOpen = () => setIsModalOpen(true);
-    const handleModalClose = () => setIsModalOpen(false);
-
-    useEffect(() => {
-        const fetchRooms = async () => {
-            try {
-                const response = await axios.get(`chat/new/friends`);
-                setMutualFriends(response.data);
-            } catch (error) {
-                console.error("Mesajları alırken hata oluştu:", error);
-            }
-        };
-
-        fetchRooms();
-    }, []);
 
     const formatMessageDate = (date: string) => {
         const messageDate = new Date(date);
@@ -149,30 +131,6 @@ const ChatSidebar: FC<ChatSidebarProps> = ({
                     )}
                 </div>
             </div>
-            <Modal
-                maxWidth="md"
-                isOpen={isModalOpen}
-                onClose={handleModalClose}
-                title="Yeni Sohbet Başlat"
-            >
-                {mutualFriends.length > 0 ? (
-                    <div className="p-4">
-                        {mutualFriends.map((friend) => (
-                            <FriendItem
-                                handleModalClose={handleModalClose}
-                                key={friend.id}
-                                fetchRooms={fetchRooms}
-                                friend={friend}
-                                setThisRoom={setThisRoom}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="py-6 flex justify-center items-center">
-                        <p className="text-sm text-gray-800">Arkadaşın yok</p>
-                    </div>
-                )}
-            </Modal>
         </>
     );
 };

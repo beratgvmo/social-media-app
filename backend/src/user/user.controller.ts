@@ -5,6 +5,7 @@ import {
     Get,
     HttpException,
     HttpStatus,
+    NotFoundException,
     Param,
     Patch,
     Post,
@@ -32,7 +33,17 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @Get('/profile/:slug')
     async getProfileOthers(@Param('slug') slug: string) {
-        return await this.userService.getProfileBySlug(slug);
+        try {
+            const userProfile = await this.userService.getProfileBySlug(slug);
+
+            if (!userProfile) {
+                throw new NotFoundException('Kullanıcı bulunamadı');
+            }
+
+            return userProfile;
+        } catch (error) {
+            throw error; // Hata varsa, hatayı dışarıya gönder
+        }
     }
 
     @Get('friend-search')
@@ -121,26 +132,33 @@ export class UserController {
 
     @UseGuards(JwtAuthGuard)
     @Delete('profile/delete')
-    async deleteUser(@Req() req: Request, @Body('password') password: string) {
+    async deleteUser(
+        @Req() req: Request,
+        @Res() res: Response,
+        @Body('password') password: string,
+    ) {
         try {
             const userId = req.user['sub'];
-            console.log('Silinen kullanıcı ID:', userId);
 
-            const user = await this.userService.findUserByPassword(userId);
-            if (!user) {
-                console.error('Kullanıcı bulunamadı!');
-                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            if (!userId) {
+                console.error('Token içinden userId alınamadı!');
+                throw new HttpException(
+                    'Unauthorized',
+                    HttpStatus.UNAUTHORIZED,
+                );
             }
 
-            console.log(user); //
+            const user = await this.userService.findUserByPassword(userId);
+
+            if (!user || !user.password) {
+                throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+            }
 
             const isPasswordValid = await bcrypt.compare(
                 password,
                 user.password,
             );
-            console.log(isPasswordValid);
             if (!isPasswordValid) {
-                console.error('Yanlış şifre girildi!');
                 throw new HttpException(
                     'Incorrect password',
                     HttpStatus.UNAUTHORIZED,
@@ -148,9 +166,15 @@ export class UserController {
             }
 
             await this.userService.deleteUser(userId);
-            return { message: 'User deleted successfully' };
+
+            res.clearCookie('refreshToken');
+
+            return res
+                .status(HttpStatus.OK)
+                .json({ message: 'User deleted successfully' });
         } catch (error) {
             console.error('Kullanıcı silme hatası:', error);
+
             throw new HttpException(
                 'Internal Server Error',
                 HttpStatus.INTERNAL_SERVER_ERROR,

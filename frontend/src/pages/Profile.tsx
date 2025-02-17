@@ -134,9 +134,9 @@ const Profile: React.FC = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, [pageLoading, hasMore]);
 
-    if (loading) {
-        return <ProfileSkeleton />;
-    }
+    // if (loading) {
+    //     return <ProfileSkeleton />;
+    // }
 
     return (
         <div className="flex gap-5">
@@ -160,11 +160,13 @@ const Profile: React.FC = () => {
                             </div>
                         )}
                         {loading ? (
-                            <div className="flex justify-center items-center w-full h-full bg-gray-200 rounded-full border-4 border-white">
-                                <TbUser
-                                    size={90}
-                                    className="text-gray-500 p-1"
-                                />
+                            <div className="absolute -bottom-14 w-32 h-32 bg-white rounded-full left-5 group">
+                                <div className="flex justify-center items-center w-full h-full bg-gray-200 rounded-full border-4 border-white">
+                                    <TbUser
+                                        size={80}
+                                        className="text-gray-600"
+                                    />
+                                </div>
                             </div>
                         ) : (
                             <div className="absolute -bottom-14 w-32 h-32 bg-white rounded-full left-5 group">
@@ -176,7 +178,10 @@ const Profile: React.FC = () => {
                                     />
                                 ) : (
                                     <div className="flex justify-center items-center w-full h-full bg-gray-200 rounded-full border-4 border-white">
-                                        <TbUser size={90} />
+                                        <TbUser
+                                            size={80}
+                                            className="text-gray-600"
+                                        />
                                     </div>
                                 )}
                             </div>
@@ -185,35 +190,54 @@ const Profile: React.FC = () => {
 
                     <div className="flex px-5  justify-between">
                         <div className="mt-9 py-6">
-                            <p className="text-2xl font-medium mb-0.5">
-                                {profile?.name}
-                            </p>
-
-                            <div className="text-sm mb-1.5 text-gray-600">
-                                {profile?.bio}
-                            </div>
-                            <div className="flex gap-2 text-sm">
-                                {/* <Link to={"/mynetwork/follower"}> */}
-                                <p className="font-medium text-gray-600 transition">
-                                    {profile?.followerCount} takipçi
+                            {loading ? (
+                                <div className="h-3 bg-gray-200 rounded-full w-40 mb-3.5 mt-2"></div>
+                            ) : (
+                                <p className="text-2xl font-medium mb-0.5">
+                                    {profile?.name}
                                 </p>
-                                {/* </Link> */}
-                                <p className="font-medium text-gray-600">•</p>
-                                {/* <Link to={"/mynetwork/follower"}> */}
-                                <p className="font-medium text-gray-600 transition">
-                                    {profile?.followingCount} takip
-                                </p>
-                                {/* </Link> */}
-                            </div>
+                            )}
+                            {loading ? (
+                                <div className="h-2.5 bg-gray-200 rounded-full w-64 mb-3.5"></div>
+                            ) : (
+                                <div className="text-sm mb-1.5 text-gray-600">
+                                    {profile?.bio}
+                                </div>
+                            )}
+                            {loading ? (
+                                <div className="h-2.5 bg-gray-200 rounded-full  w-48"></div>
+                            ) : (
+                                <div className="flex gap-2 text-sm">
+                                    {/* <Link to={"/mynetwork/follower"}> */}
+                                    <p className="font-medium text-gray-600 transition">
+                                        {profile?.followerCount} takipçi
+                                    </p>
+                                    {/* </Link> */}
+                                    <p className="font-medium text-gray-600">
+                                        •
+                                    </p>
+                                    {/* <Link to={"/mynetwork/follower"}> */}
+                                    <p className="font-medium text-gray-600 transition">
+                                        {profile?.followingCount} takip
+                                    </p>
+                                    {/* </Link> */}
+                                </div>
+                            )}
                         </div>
 
-                        <div className="mt-3 flex items-start">
-                            <FollowerBtn id={profile.id} />
-                        </div>
+                        {loading ? (
+                            <div className="mt-2">
+                                <div className="h-9 bg-gray-200 rounded-full w-20"></div>
+                            </div>
+                        ) : (
+                            <div className="mt-2 flex items-start">
+                                <FollowerBtn id={profile.id} />
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {profilePosts.length > 0 ? (
+                {(loading || profilePosts.length > 0) && (
                     <div className="w-full mt-6 mb-4 bg-white border border-b-0 rounded-t-lg">
                         {profilePosts.map((post) => (
                             <Post
@@ -234,7 +258,9 @@ const Profile: React.FC = () => {
                             />
                         ))}
                     </div>
-                ) : (
+                )}
+
+                {profilePosts.length > 0 || loading || (
                     <div className="flex items-center justify-center flex-col mt-8">
                         <TbMessage2 className="text-5xl bg-white p-2.5 rounded-full border-2 border-gray-800 text-gray-800 mb-2" />
                         <p className="text-gray-800 font-medium text-lg">
@@ -243,7 +269,7 @@ const Profile: React.FC = () => {
                     </div>
                 )}
 
-                {pageLoading && (
+                {(pageLoading || loading) && (
                     <div className="w-full flex justify-center items-center h-20">
                         <CgSpinner
                             className="animate-spin text-blue-600"

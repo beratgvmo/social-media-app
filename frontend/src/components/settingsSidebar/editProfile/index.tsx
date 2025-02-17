@@ -23,7 +23,7 @@ const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => {
         formState: { errors },
     } = useForm<FormData>();
 
-    const { user, setUser } = useAuthStore();
+    const { user, setUser, logout } = useAuthStore();
     const [isChecked, setIsChecked] = useState(user.isPrivate);
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -75,9 +75,10 @@ const EditProfile: React.FC<EditProfileProps> = ({ isOpen, onClose }) => {
                 data: { password },
             });
 
+            logout();
             return <Navigate to="/" />;
         } catch (error) {
-            setError(error.response?.data?.message || "An error occurred");
+            setError("Yanlış şifre veya kullanıcı bulunamadı!");
         }
     };
 

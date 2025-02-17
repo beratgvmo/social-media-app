@@ -5,7 +5,7 @@ import {
     HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like as ILike } from 'typeorm';
+import { Repository, Like as ILike, In } from 'typeorm';
 import { User } from './user.entity';
 import { Like } from 'src/like/like.entity';
 import { Post } from 'src/post/post.entity';
@@ -75,47 +75,67 @@ export class UserService {
     }
 
     async findUserByPassword(userId: number) {
-        // Şifresini kontrol etmek için yalnızca password döndürmek yerine, tüm kullanıcıyı döndürüyoruz
         return this.userRepository.findOne({
             where: { id: userId },
-            select: ['id', 'password'], // Şifreyi döndürüyoruz
+            select: ['id', 'password'],
         });
     }
 
-    // async removeUserRelations(userId: number): Promise<void> {
-    //     // PostImage ve Post ilişkilerinin silinmesi
-    //     await this.postImageRepository.delete({
-    //         post: { user: { id: userId } },
-    //     });
-    //     await this.postRepository.delete({ user: { id: userId } });
+    async removeUserRelations(userId: number): Promise<void> {
+        const userPosts = await this.postRepository.find({
+            where: { user: { id: userId } },
+            select: ['id'],
+        });
 
-    //     // Kullanıcının kaydettiği postları silme
-    //     await this.postSavedRepository.delete({ user: { id: userId } });
+        const postIds = userPosts.map((post) => post.id);
 
-    //     // Kullanıcının yaptığı beğenileri silme (hem post hem yorum için)
-    //     await this.likeRepository.delete({ user: { id: userId } });
+        const userComments = await this.commentRepository.find({
+            where: { user: { id: userId } },
+            select: ['id'],
+        });
 
-    //     // Yorumları silme (hem yorumun kendisini hem de yorumla ilişkilendirilmiş olan beğenileri)
-    //     await this.commentRepository.delete({ user: { id: userId } });
+        const commentIds = userComments.map((comment) => comment.id);
 
-    //     // Kullanıcının gönderdiği mesajları silme
-    //     await this.messageRepository.delete({ sender: { id: userId } });
+        if (postIds.length > 0) {
+            await this.likeRepository.delete({ post: In(postIds) });
+        }
+        if (commentIds.length > 0) {
+            await this.likeRepository.delete({ comment: In(commentIds) });
+        }
 
-    //     // ChatRoom'da kullanıcıyla ilişkili odaları silme
-    //     await this.chatRoomRepository.delete({ user1: { id: userId } });
-    //     await this.chatRoomRepository.delete({ user2: { id: userId } });
+        if (postIds.length > 0) {
+            await this.commentRepository.delete({ post: In(postIds) });
+        }
 
-    //     // Takipçi ve takip edilen ilişkilerini silme
-    //     await this.followerRepository.delete({ following: { id: userId } });
-    //     await this.followerRepository.delete({ follower: { id: userId } });
-    // }
+        if (commentIds.length > 0) {
+            await this.commentRepository.delete({ id: In(commentIds) });
+        }
 
-    async deleteUser(userId: number): Promise<void> {
-        // // Kullanıcının ilişkili verilerini sil
-        // await this.removeUserRelations(userId);
+        if (postIds.length > 0) {
+            await this.postSavedRepository.delete({ post: In(postIds) });
+        }
 
-        // Son olarak kullanıcıyı sil
-        await this.userRepository.delete({ id: userId });
+        if (postIds.length > 0) {
+            await this.postImageRepository.delete({ post: In(postIds) });
+        }
+
+        if (postIds.length > 0) {
+            await this.postRepository.delete({ id: In(postIds) });
+        }
+
+        await this.likeRepository.delete({ user: { id: userId } });
+
+        await this.messageRepository.delete({ sender: { id: userId } });
+        await this.chatRoomRepository.delete({ user1: { id: userId } });
+        await this.chatRoomRepository.delete({ user2: { id: userId } });
+
+        await this.followerRepository.delete({ following: { id: userId } });
+        await this.followerRepository.delete({ follower: { id: userId } });
+    }
+
+    async deleteUser(userId: number) {
+        await this.removeUserRelations(userId);
+        await this.userRepository.delete(userId);
     }
 
     async getProfile(userId: number): Promise<{

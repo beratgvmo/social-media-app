@@ -39,7 +39,7 @@ interface PostProps {
     githubType?: "user" | "repo";
     codeContent?: string;
     codeLanguage?: string;
-    codeTheme?: boolean;
+    codeTheme?: "light" | "dark";
 }
 
 interface User {
@@ -144,9 +144,9 @@ const Post: React.FC<PostProps> = ({
         checkPostStatus();
         checkSavePostStatus();
 
-        if (githubType && githubApiUrl) {
-            githubFetcher();
-        }
+        // if (githubType && githubApiUrl) {
+        //     githubFetcher();
+        // }
     }, []);
 
     const githubFetcher = async () => {
@@ -277,15 +277,17 @@ const Post: React.FC<PostProps> = ({
                     {codeContent && (
                         <div
                             className={`border rounded p-2 mt-1.5 ${
-                                codeTheme && "bg-[#0d1117]"
+                                codeTheme === "light"
+                                    ? "bg-[#fff]"
+                                    : "bg-[#0d1117]"
                             }`}
                         >
                             <div className="flex justify-between mx-2 mt-1 mb-2.5">
                                 <p
                                     className={`text-xs ${
-                                        codeTheme
-                                            ? "text-gray-50"
-                                            : " text-gray-600"
+                                        codeTheme === "light"
+                                            ? " text-gray-600"
+                                            : " text-gray-100"
                                     }`}
                                 >
                                     {codeLanguage}
@@ -294,9 +296,9 @@ const Post: React.FC<PostProps> = ({
                                     {copied ? (
                                         <div
                                             className={`flex items-center justify-center gap-0.5 text-xs ${
-                                                codeTheme
-                                                    ? "text-gray-300"
-                                                    : " text-gray-600"
+                                                codeTheme === "light"
+                                                    ? " text-gray-600"
+                                                    : " text-gray-100"
                                             }`}
                                         >
                                             <TbCheck />
@@ -305,9 +307,9 @@ const Post: React.FC<PostProps> = ({
                                     ) : (
                                         <div
                                             className={`flex items-center justify-center gap-0.5 text-xs ${
-                                                codeTheme
-                                                    ? "text-gray-300"
-                                                    : " text-gray-600"
+                                                codeTheme === "light"
+                                                    ? " text-gray-600"
+                                                    : " text-gray-100"
                                             }`}
                                         >
                                             <TbCopy />
@@ -330,7 +332,11 @@ const Post: React.FC<PostProps> = ({
                                 extensions={[
                                     javascript({ jsx: true, typescript: true }),
                                 ]}
-                                theme={codeTheme ? githubDark : githubLight}
+                                theme={
+                                    codeTheme === "light"
+                                        ? githubLight
+                                        : githubDark
+                                }
                                 readOnly={true}
                                 editable={false}
                                 className="custom-scrollbar ͼ1 text-sm"

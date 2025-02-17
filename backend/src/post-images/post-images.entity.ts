@@ -9,6 +9,6 @@ export class PostImage {
     @Column()
     url: string;
 
-    @ManyToOne(() => Post, (post) => post.postImages)
+    @ManyToOne(() => Post, (post) => post.postImages, { onDelete: 'CASCADE' })
     post: Post;
 }

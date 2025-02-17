@@ -12,9 +12,8 @@ const App: React.FC = () => {
     const checkLoginStatus = async () => {
         await new Promise((resolve) => setTimeout(resolve, 400));
         try {
-            await axios.post("/auth/refresh");
-            const response = await axios.get("/user/profile");
-            setUser(response.data);
+            const response = await axios.post("/auth/refresh");
+            setUser(response.data.user);
         } catch (error) {
             console.error("Failed to refresh token", error);
             logout();

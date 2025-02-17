@@ -17,10 +17,10 @@ export class Follower {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(() => User, (user) => user.following)
+    @ManyToOne(() => User, (user) => user.following, { onDelete: 'CASCADE' })
     follower: User;
 
-    @ManyToOne(() => User, (user) => user.followers)
+    @ManyToOne(() => User, (user) => user.followers, { onDelete: 'CASCADE' })
     following: User;
 
     @Column({

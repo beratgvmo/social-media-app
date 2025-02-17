@@ -15,7 +15,7 @@ interface Post {
     githubType?: "user" | "repo";
     codeContent?: string;
     codeLanguage?: string;
-    codeTheme?: boolean;
+    codeTheme?: "light" | "dark";
 }
 
 interface PostImage {
