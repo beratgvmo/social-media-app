@@ -6,6 +6,7 @@ interface ChatUserItemProps {
         id: number;
         name: string;
         profileImage: string;
+        bio: string;
     };
     lastMessageDate: string | undefined;
     thisRoom: number | null;
@@ -78,9 +79,7 @@ const ChatUserItem: FC<ChatUserItemProps> = ({
                         <p className="font-medium text-sm text-gray-800">
                             {chatUser.name}
                         </p>
-                        <p className="text-sm text-gray-600">
-                            Son mesaj içeriği
-                        </p>
+                        <p className="text-sm text-gray-600">{chatUser.bio}</p>
                     </div>
                 </div>
 

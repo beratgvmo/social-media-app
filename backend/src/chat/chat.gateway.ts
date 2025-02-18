@@ -56,4 +56,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             client.emit('error', { message: 'Mesaj gönderilemedi.' });
         }
     }
+
+    @SubscribeMessage('deleteRoom')
+    async handleDeleteRoom(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() chatRoomId: number,
+    ) {
+        try {
+            await this.chatService.deleteRoom(chatRoomId);
+            console.log(chatRoomId);
+
+            this.server
+                .to(chatRoomId.toString())
+                .emit('roomDeleted', { chatRoomId });
+        } catch (error) {
+            client.emit('error', { message: error.message });
+        }
+    }
 }

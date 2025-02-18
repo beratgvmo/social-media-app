@@ -20,6 +20,7 @@ interface User {
     name: string;
     profileImage: string;
     slug: string;
+    bio: string;
 }
 
 const Chat: React.FC = () => {

@@ -2,11 +2,10 @@ import axios from "axios";
 import { useAuthStore } from "@/store/useAuthStore";
 
 const apiClient = axios.create({
-    baseURL: "http://localhost:3000",
+    baseURL: "http://localhost:3000/api",
     withCredentials: true,
 });
 
-// İstek gönderirken güncel accessToken'ı almak
 apiClient.interceptors.request.use((config) => {
     const { accessToken } = useAuthStore.getState();
     if (accessToken) {

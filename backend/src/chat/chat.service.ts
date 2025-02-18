@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Message } from './message.entity';
 import { ChatRoom } from './chat-room.entity';
 
@@ -77,5 +81,17 @@ export class ChatService {
         });
 
         return existingRoom || null;
+    }
+
+    async deleteRoom(chatRoomId: number): Promise<void> {
+        const chatRoom = await this.chatRoomRepository.findOne({
+            where: { id: chatRoomId },
+            relations: ['user1', 'user2'],
+        });
+
+        if (!chatRoom) {
+            throw new NotFoundException('Chat odası bulunamadı.');
+        }
+        await this.chatRoomRepository.delete(chatRoomId);
     }
 }

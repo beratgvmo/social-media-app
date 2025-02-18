@@ -53,6 +53,11 @@
         background: transparent;
     }
 
+    .thin-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #e3e3e3 #ffffff00;
+    }
+
     .custom-scrollbar .cm-scroller {
         /* scrollbar-width: thin; */
         scrollbar-color: #e3e3e3 #f9f9f9;

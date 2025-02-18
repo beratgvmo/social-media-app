@@ -18,32 +18,43 @@ export class NotificationGateway
 
     constructor(private notificationService: NotificationService) {}
 
-    handleConnection(client: Socket): void {
-        console.log('Yeni f bağlantı:', client.id);
+    handleConnection(client: Socket) {
+        console.log(`Client connected: ${client.id}`);
     }
 
-    handleDisconnect(client: Socket): void {
-        console.log('Bağlantı f kesildi:', client.id);
+    handleDisconnect(client: Socket) {
+        console.log(`Client disconnected: ${client.id}`);
     }
 
-    @SubscribeMessage('joinRoom')
+    @SubscribeMessage('userId')
     handleJoinRoom(
         @ConnectedSocket() client: Socket,
         @MessageBody() userId: number,
-    ): void {
-        console.log(`Kullanıcı ${userId} bildirim odasına katıldı.`); // Burada userId'yi yazdıralım.
+    ) {
         client.join(userId.toString());
-        console.log(`Client ${client.id} joined room ${userId}`);
+        console.log(`user ${userId}`);
     }
 
-    @SubscribeMessage('notification')
-    async sendNotification(
+    @SubscribeMessage('sendNotification')
+    async handleMessage(
         @ConnectedSocket() client: Socket,
         @MessageBody() userId: number,
-    ): Promise<void> {
-        const unreadCount =
-            await this.notificationService.countUnreadNotifications(userId);
-        console.log('Bildirim sayısı:', unreadCount);
-        this.server.to(userId.toString()).emit('notification', { unreadCount });
+    ) {
+        if (!userId) {
+            return console.error('userId is undefined');
+        }
+
+        try {
+            const notificationCount =
+                await this.notificationService.getUnreadNotificationCount(
+                    userId,
+                );
+            this.server
+                .to(userId.toString())
+                .emit('notification', notificationCount);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            client.emit('error', { message: 'Notification error.' });
+        }
     }
 }

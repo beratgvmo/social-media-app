@@ -14,9 +14,11 @@ import { useEffect, useRef, useState } from "react";
 import axios from "@/utils/axiosInstance";
 import Notifications from "@/components/header/notifications";
 import SearchComponent from "../SearchComponent";
+
 import { io, Socket } from "socket.io-client";
 
 let socket: Socket;
+
 interface User {
     name: string;
     profileImage: string | null;
@@ -49,8 +51,7 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
     const [isBubble, setIsBubble] = useState(false);
     const bubbleRef = useRef<HTMLDivElement | null>(null);
     const [followerCount, setFollowerCount] = useState<number>(0);
-    const [notificationCount, setNotificationCount] = useState<number>(0);
-    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [notificationCount, setNotificationCount] = useState(0);
 
     const fetchFollowerRequests = async () => {
         try {
@@ -67,27 +68,26 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
         }
     };
 
-    const [unreadCount, setUnreadCount] = useState(0);
-
     useEffect(() => {
         if (!socket) {
             socket = io("http://localhost:3000");
         }
 
-        socket.emit("joinRoom", user.id);
+        socket.emit("userId", user.id);
 
-        socket.on("notification", (data) => {
-            console.log("Bildirim geldi:", data);
-            setUnreadCount(data.unreadCount);
-        });
+        socket.emit("sendNotification", user.id);
+
+        const handleNewMessage = (notificationCount: number) => {
+            setNotificationCount(notificationCount);
+            console.log("notificationCount:", notificationCount);
+        };
+
+        socket.on("notification", handleNewMessage);
 
         return () => {
-            socket.off("notification");
-            socket.disconnect();
+            socket.off("notification", handleNewMessage);
         };
-    }, [user?.id]);
-
-    console.log(unreadCount);
+    }, [user.id]);
 
     useEffect(() => {
         if (location.pathname !== "/mynetwork") {
@@ -169,16 +169,14 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
                         >
                             <TbBell size={24} className="text-blue-500" />
                             {notificationCount > 0 && (
-                                <span className="absolute top-0.5 right-0.5 flex items-center justify-center text-xs rounded-full h-4 w-4 bg-red-500 text-gray-100 font-medium">
+                                <span className="absolute top-0.5 right-0.5 flex items-center justify-center text-xs rounded-full h-5 w-5 bg-red-500 text-gray-100 font-medium">
                                     {notificationCount < 9
                                         ? notificationCount
                                         : "+9"}
                                 </span>
                             )}
                         </button>
-                        {isBubble && (
-                            <Notifications notifications={notifications} />
-                        )}
+                        {isBubble && <Notifications />}
                     </div>
 
                     <NavLink

@@ -1,17 +1,16 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Request } from 'express';
 
 @Controller('notification')
 export class NotificationController {
     constructor(private readonly notificationService: NotificationService) {}
 
-    @Get(':userSlug')
-    async getNotification(@Param('userSlug') userSlug: string) {
-        return this.notificationService.getNotifications(userSlug);
-    }
-
-    @Post('read/:notificationId')
-    async markAsRead(@Param('notificationId') notificationId: string) {
-        return this.notificationService.markAsRead(Number(notificationId));
+    @UseGuards(JwtAuthGuard)
+    @Get()
+    async getNotification(@Req() req: Request) {
+        const userId = req.user['sub'];
+        return this.notificationService.getNotifications(userId);
     }
 }

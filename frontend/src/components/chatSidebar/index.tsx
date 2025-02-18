@@ -27,6 +27,7 @@ interface User {
     name: string;
     profileImage: string;
     slug: string;
+    bio: string;
 }
 
 const ChatSidebar: FC<ChatSidebarProps> = ({

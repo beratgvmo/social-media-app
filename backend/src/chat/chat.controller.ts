@@ -8,6 +8,7 @@ import {
     UseGuards,
     Post,
     BadRequestException,
+    Delete,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Message } from './message.entity';
@@ -119,5 +120,15 @@ export class ChatController {
             .getMany();
 
         return mutualFriends.map((f) => f.following);
+    }
+
+    @Delete('delete/:chatRoomId')
+    @UseGuards(JwtAuthGuard)
+    async deleteChatRoom(
+        @Param('chatRoomId') chatRoomId: number,
+        @Req() req: Request,
+    ): Promise<{ message: string }> {
+        await this.chatService.deleteRoom(chatRoomId);
+        return { message: 'Chat odası başarıyla silindi' };
     }
 }

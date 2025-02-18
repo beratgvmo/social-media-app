@@ -1,3 +1,4 @@
+import { Post } from 'src/post/post.entity';
 import { User } from '../user/user.entity';
 import {
     Column,
@@ -14,14 +15,18 @@ export class Notification {
 
     @ManyToOne(() => User, (user) => user.notifications, {
         onDelete: 'CASCADE',
+        eager: true,
     })
     user: User;
 
-    @Column()
+    @Column({ type: 'enum', enum: ['comment', 'like', 'follow', 'post'] })
     type: 'comment' | 'like' | 'follow' | 'post';
 
-    @ManyToOne(() => User, { nullable: true, onDelete: 'CASCADE' })
-    fromUser: User;
+    @ManyToOne(() => User, { nullable: true, onDelete: 'CASCADE', eager: true })
+    fromUser?: User;
+
+    @ManyToOne(() => Post, { nullable: true, onDelete: 'CASCADE', eager: true })
+    post?: Post;
 
     @Column({ default: false })
     isRead: boolean;

@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
 import { Notification } from 'src/notification/notification.entity';
+import { NotificationGateway } from 'src/notification/notification.gateway';
 
 @Injectable()
 export class FollowerService {
@@ -23,6 +24,8 @@ export class FollowerService {
 
         @InjectRepository(User)
         private userRepository: Repository<User>,
+
+        private readonly notificationGateway: NotificationGateway,
     ) {}
 
     async follow(followerId: number, followingId: number): Promise<void> {
@@ -68,12 +71,14 @@ export class FollowerService {
 
         if (newFollowStatus === FollowStatus.PENDING) {
             const notification = this.notificationRepository.create({
-                fromUser: following,
+                fromUser: follower,
                 type: 'follow',
-                user: follower,
+                user: following,
             });
 
             await this.notificationRepository.save(notification);
+
+            this.notificationGateway.handleMessage(null, following.id);
         }
 
         if (newFollowStatus === FollowStatus.ACCEPTED) {
@@ -96,6 +101,13 @@ export class FollowerService {
         }
 
         await this.followerRepository.delete({ id: follow.id });
+
+        await this.notificationRepository.delete({
+            user: { id: userId },
+            fromUser: { id: followerId },
+        });
+
+        this.notificationGateway.handleMessage(null, userId);
 
         if (follow.status === FollowStatus.ACCEPTED) {
             await Promise.all([
@@ -126,6 +138,13 @@ export class FollowerService {
         }
 
         await this.followerRepository.delete({ id: follow.id });
+
+        await this.notificationRepository.delete({
+            user: { id: followingId },
+            fromUser: { id: followerId },
+        });
+
+        this.notificationGateway.handleMessage(null, followingId);
 
         if (follow.status === FollowStatus.ACCEPTED) {
             await Promise.all([
