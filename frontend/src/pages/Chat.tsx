@@ -8,6 +8,9 @@ import ChatHeader from "@/components/chatHeader";
 import MessageInput from "@/components/messageInput";
 import Modal from "@/components/Modal";
 import FriendItem from "@/components/chatSidebar/friendItem";
+import { io, Socket } from "socket.io-client";
+
+let socket: Socket;
 
 interface RoomChat {
     id: number;
@@ -54,11 +57,43 @@ const Chat: React.FC = () => {
     };
 
     useEffect(() => {
+        if (!socket) {
+            socket = io("http://localhost:3000");
+        }
+
+        fetchRooms();
+
+        socket.on("roomDeleted", (chatRoomId) => {
+            setChatRooms((prevRooms) =>
+                prevRooms.filter((room) => room.id !== chatRoomId)
+            );
+            setThisRoom(null);
+        });
+
+        socket.on("chatRoom", ({ data }) => {
+            setChatRooms(data);
+            setThisRoom(null);
+        });
+
+        socket.emit("getUserRooms", { userId: user.id });
+
+        return () => {
+            socket.off("roomDeleted");
+            socket.off("chatRoom");
+        };
+    }, [user.id]);
+
+    useEffect(() => {
         if (user?.id) {
-            fetchRooms();
             fetchMutualFriends();
         }
     }, [user?.id]);
+
+    useEffect(() => {
+        if (thisRoom) {
+            socket.emit("joinRoom", thisRoom);
+        }
+    }, [thisRoom]);
 
     const handleInputClick = () => {
         inputRef.current?.focus();

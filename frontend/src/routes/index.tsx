@@ -14,6 +14,7 @@ import Chat from "@/pages/Chat";
 import ChatLayout from "@/layouts/chat";
 import MyNetworkFollower from "@/pages/MyNetworkFollower";
 import PostSaved from "@/pages/PostSaved";
+import PostDetail from "@/pages/PostDetail";
 
 const routes = createBrowserRouter([
     {
@@ -26,6 +27,14 @@ const routes = createBrowserRouter([
                 element: (
                     <PrivateRouteAuthenticated>
                         <PrivateRouteProfile />
+                    </PrivateRouteAuthenticated>
+                ),
+            },
+            {
+                path: "/profile/:slug/:postId",
+                element: (
+                    <PrivateRouteAuthenticated>
+                        <PostDetail />
                     </PrivateRouteAuthenticated>
                 ),
             },

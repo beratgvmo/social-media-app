@@ -169,7 +169,7 @@ const MyNetworkFollower: React.FC = () => {
                         ) : (
                             <TbUser className="w-14 h-14 p-2 flex items-center border rounded-full text-blue-500" />
                         )}
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col">
                             <p className="font-medium text-gray-800">
                                 {user.name}
                             </p>
@@ -179,7 +179,7 @@ const MyNetworkFollower: React.FC = () => {
                         </div>
                     </div>
                     <div className="flex gap-2.5">
-                        <Button variant="outline">Mesaj</Button>
+                        {/* <Button variant="outline">Mesaj</Button> */}
                         {tab ? (
                             <Button
                                 variant="rounded"

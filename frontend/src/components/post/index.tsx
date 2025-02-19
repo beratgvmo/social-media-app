@@ -40,6 +40,7 @@ interface PostProps {
     codeContent?: string;
     codeLanguage?: string;
     codeTheme?: "light" | "dark";
+    isCommentBool?: boolean;
 }
 
 interface User {
@@ -69,10 +70,11 @@ const Post: React.FC<PostProps> = ({
     codeContent,
     codeLanguage,
     codeTheme,
+    isCommentBool = false,
 }) => {
     const [isLike, setIsLike] = useState(false);
     const [isSave, setIsSave] = useState(false);
-    const [isComment, setIsComment] = useState(false);
+    const [isComment, setIsComment] = useState<boolean>(isCommentBool);
     const [isBubble, setIsBubble] = useState(false);
     const [currentLikeCount, setCurrentLikeCount] = useState(likeCount);
     const bubbleRef = useRef<HTMLDivElement | null>(null);

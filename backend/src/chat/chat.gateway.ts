@@ -9,6 +9,9 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
+import { Req, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Request } from 'express';
 
 @WebSocketGateway({ cors: true })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -57,20 +60,44 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
     }
 
-    @SubscribeMessage('deleteRoom')
-    async handleDeleteRoom(
+    @SubscribeMessage('createRoom')
+    async handleCreateRoom(
         @ConnectedSocket() client: Socket,
-        @MessageBody() chatRoomId: number,
+        @MessageBody() payload: { currentUserId: number; userId: number },
     ) {
         try {
-            await this.chatService.deleteRoom(chatRoomId);
-            console.log(chatRoomId);
+            const room = await this.chatService.createRoom(
+                payload.currentUserId,
+                payload.userId,
+            );
+
+            this.server.to(room.id.toString()).emit('room', room.id);
+
+            client.emit('chatRoom', room);
+        } catch (error) {
+            console.error('Error creating room:', error);
+            client.emit('error', { message: 'Room creation failed.' });
+        }
+    }
+
+    @SubscribeMessage('sendDeleteRoom')
+    async handleDeleteRoom(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() payload: { chatRoomId: number; userId: number },
+    ) {
+        try {
+            await this.chatService.deleteRoom(payload.chatRoomId);
+
+            const data = await this.chatService.getUserRooms(payload.userId);
 
             this.server
-                .to(chatRoomId.toString())
-                .emit('roomDeleted', { chatRoomId });
+                .to(payload.chatRoomId.toString())
+                .emit('roomDeleted', payload.chatRoomId);
+
+            client.emit('chatRoom', data);
         } catch (error) {
-            client.emit('error', { message: error.message });
+            console.error('Error deleting room:', error);
+            client.emit('error', { message: 'Room deletion failed.' });
         }
     }
 }

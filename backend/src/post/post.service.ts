@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CodeTheme, GithubType, Post } from './post.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { PostImage } from '../post-images/post-images.entity';
 import { User } from 'src/user/user.entity';
 
@@ -153,14 +153,25 @@ export class PostService {
         });
     }
 
-    async findAllPosts(page: number, limit: number): Promise<Post[]> {
+    async findAllPosts(
+        page: number,
+        limit: number,
+        userId: number,
+    ): Promise<Post[]> {
         const skip = (page - 1) * limit;
 
         return this.postRepository.find({
+            where: {
+                user: {
+                    id: Not(userId),
+                },
+            },
             relations: ['postImages', 'user'],
             skip,
             take: limit,
             order: {
+                likeCount: 'DESC',
+                commentCount: 'DESC',
                 createdAt: 'DESC',
             },
         });
@@ -186,6 +197,20 @@ export class PostService {
                 createdAt: 'DESC',
             },
         });
+    }
+
+    async findPostByIdAndSlug(postId: number, slug: string): Promise<Post> {
+        const post = await this.postRepository.findOne({
+            where: { id: postId },
+            relations: ['user'],
+        });
+
+        console.log(post);
+
+        if (!post || post.user.slug !== slug) {
+            throw new NotFoundException('Post not found');
+        }
+        return post;
     }
 
     async deletePost(postId: number, userId: number): Promise<void> {

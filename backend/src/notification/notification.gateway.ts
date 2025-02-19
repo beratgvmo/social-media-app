@@ -35,6 +35,29 @@ export class NotificationGateway
         console.log(`user ${userId}`);
     }
 
+    @SubscribeMessage('createRoom')
+    async createRoom(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() userId: number,
+    ) {
+        if (!userId) {
+            return console.error('userId is undefined');
+        }
+
+        try {
+            const notificationCount =
+                await this.notificationService.getUnreadNotificationCount(
+                    userId,
+                );
+            this.server
+                .to(userId.toString())
+                .emit('notification', notificationCount);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            client.emit('error', { message: 'Notification error.' });
+        }
+    }
+
     @SubscribeMessage('sendNotification')
     async handleMessage(
         @ConnectedSocket() client: Socket,

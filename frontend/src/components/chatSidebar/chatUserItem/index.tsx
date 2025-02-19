@@ -1,5 +1,9 @@
-import { FC, useRef, useEffect } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
+import { FC, useRef, useEffect, useState } from "react";
 import { TbUser, TbChevronDown } from "react-icons/tb";
+import { io, Socket } from "socket.io-client";
+
+let socket: Socket;
 
 interface ChatUserItemProps {
     chatUser: {
@@ -17,6 +21,19 @@ interface ChatUserItemProps {
     setOpenModalId: (id: number | null) => void;
 }
 
+interface Message {
+    id: number;
+    content: string;
+    createdAt: string;
+    sender: User;
+}
+
+interface User {
+    id: number;
+    name: string;
+    profileImage: string;
+}
+
 const ChatUserItem: FC<ChatUserItemProps> = ({
     chatUser,
     lastMessageDate,
@@ -28,6 +45,7 @@ const ChatUserItem: FC<ChatUserItemProps> = ({
     setOpenModalId,
 }) => {
     const modalRef = useRef<HTMLDivElement>(null);
+    const { user } = useAuthStore();
 
     const toggleModal = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -38,6 +56,24 @@ const ChatUserItem: FC<ChatUserItemProps> = ({
         if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
             setOpenModalId(null);
         }
+    };
+
+    useEffect(() => {
+        if (!socket) {
+            socket = io("http://localhost:3000");
+        }
+
+        socket.emit("joinRoom", roomId);
+
+        return () => {
+            socket.off("roomDeleted");
+            socket.off("chatRoom");
+            socket.emit("leaveRoom");
+        };
+    }, [user.id]);
+
+    const handleDeleteRoom = (chatRoomId: number) => {
+        socket.emit("sendDeleteRoom", { chatRoomId, userId: user.id });
     };
 
     useEffect(() => {
@@ -79,7 +115,11 @@ const ChatUserItem: FC<ChatUserItemProps> = ({
                         <p className="font-medium text-sm text-gray-800">
                             {chatUser.name}
                         </p>
-                        <p className="text-sm text-gray-600">{chatUser.bio}</p>
+                        <p className="text-sm text-gray-600">
+                            {chatUser.bio.length > 32
+                                ? `${chatUser.bio.substring(0, 32)}...`
+                                : chatUser.bio}
+                        </p>
                     </div>
                 </div>
 
@@ -100,12 +140,18 @@ const ChatUserItem: FC<ChatUserItemProps> = ({
                             ref={modalRef}
                             className="absolute top-12 bg-white border border-gray-300 py-2 z-10 divide-gray-100 rounded-lg shadow w-32"
                         >
-                            <p className="text-sm text-gray-700 cursor-pointer px-4 py-2 hover:bg-gray-100">
+                            <button
+                                onClick={() => handleDeleteRoom(roomId)}
+                                className="text-sm w-full text-gray-700 cursor-pointer px-4 py-2 hover:bg-gray-100"
+                            >
                                 Sohbeti sil
-                            </p>
-                            <p className="text-sm text-gray-700 cursor-pointer px-4 py-2 hover:bg-gray-100">
+                            </button>
+                            <button
+                                onClick={() => handleDeleteRoom(roomId)}
+                                className="text-sm sm w-full text-gray-700 cursor-pointer px-4 py-2 hover:bg-gray-100"
+                            >
                                 Engelle
-                            </p>
+                            </button>
                         </div>
                     )}
                 </div>

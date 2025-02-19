@@ -87,7 +87,7 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
         return () => {
             socket.off("notification", handleNewMessage);
         };
-    }, [user.id]);
+    }, [user.id, isBubble]);
 
     useEffect(() => {
         if (location.pathname !== "/mynetwork") {
@@ -165,7 +165,9 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
                     <div className="relative" ref={bubbleRef}>
                         <button
                             onClick={() => setIsBubble(!isBubble)}
-                            className="hover:bg-gray-100 transition relative p-2 rounded-full"
+                            className={`hover:bg-gray-100 transition relative p-2 rounded-full ${
+                                isBubble && "bg-gray-100"
+                            }`}
                         >
                             <TbBell size={24} className="text-blue-500" />
                             {notificationCount > 0 && (
@@ -189,7 +191,6 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
                     >
                         <TbMessage size={24} className="text-blue-500" />
                     </NavLink>
-
                     <Link to={`/profile/${user.slug}`}>
                         {user?.profileImage ? (
                             <img

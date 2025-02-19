@@ -74,7 +74,7 @@ const PostModel: React.FC<PostModelProps> = ({
     const [codeLanguage, setCodeLanguage] = useState(postCodeLanguage);
     const [codeValue, setCodeValue] = useState<string>(postCodeContent);
     const [theme, setTheme] = useState<"light" | "dark">(postCodeTheme);
-    const [isCode, setIsCode] = useState(false);
+    const [isCode, setIsCode] = useState(!!postCodeContent);
 
     const githubFetcher = async () => {
         try {
@@ -94,11 +94,13 @@ const PostModel: React.FC<PostModelProps> = ({
         if (githubType && githubApiUrl) {
             githubFetcher();
         }
-    }, []);
+    }, [githubType, githubApiUrl]);
 
     useEffect(() => {
         setPostValue(content);
-    }, [isOpen]);
+        setCodeValue(postCodeContent);
+        setIsCode(!!postCodeContent);
+    }, [isOpen, content, postCodeContent]);
 
     const handleTheme = () => {
         setTheme(theme === "light" ? "dark" : "light");
@@ -231,7 +233,7 @@ const PostModel: React.FC<PostModelProps> = ({
         ) {
             setIsCode(!isCode);
             setCodeValue("");
-            setTheme("light"); // Varsayılan olarak light başlatılıyor.
+            setTheme("light");
             setCodeLanguage("code");
         }
     };

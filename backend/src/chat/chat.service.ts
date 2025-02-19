@@ -7,6 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Message } from './message.entity';
 import { ChatRoom } from './chat-room.entity';
+import { Follower } from 'src/follower/follower.entity';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class ChatService {
@@ -15,6 +17,12 @@ export class ChatService {
         private messageRepository: Repository<Message>,
         @InjectRepository(ChatRoom)
         private chatRoomRepository: Repository<ChatRoom>,
+
+        @InjectRepository(Follower)
+        private readonly followerRepository: Repository<Follower>,
+
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>,
     ) {}
 
     async createMessage(
@@ -51,6 +59,39 @@ export class ChatService {
     }
 
     async createRoom(currentUserId: number, userId: number): Promise<ChatRoom> {
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+        });
+        if (!user) throw new NotFoundException('Kullanıcı bulunamadı');
+
+        const mutualFollowExists = await this.followerRepository
+            .createQueryBuilder('follower')
+            .where('follower.followerId = :currentUserId', { currentUserId })
+            .andWhere('follower.followingId = :userId', { userId })
+            .andWhere('follower.status = :status', { status: 'accepted' })
+            .andWhere((qb) => {
+                const subQuery = qb
+                    .subQuery()
+                    .select('1')
+                    .from(Follower, 'subFollower')
+                    .where('subFollower.followerId = :userId')
+                    .andWhere('subFollower.followingId = :currentUserId')
+                    .andWhere('subFollower.status = :status')
+                    .getQuery();
+                return `EXISTS ${subQuery}`;
+            })
+            .setParameter('status', 'accepted')
+            .getOne();
+
+        if (!mutualFollowExists) {
+            throw new BadRequestException(
+                'Kullanıcılar karşılıklı arkadaş değil.',
+            );
+        }
+
+        const existingRoom = await this.findExistingRoom(currentUserId, userId);
+        if (existingRoom) return existingRoom;
+
         const room = this.chatRoomRepository.create({
             user1: { id: currentUserId },
             user2: { id: userId },

@@ -105,12 +105,16 @@ export class PostController {
         };
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get()
     async getAllHome(
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 10,
+        @Req() req: Request,
     ): Promise<PostEntity[]> {
-        return this.postService.findAllPosts(page, limit);
+        const userId = req.user['sub'];
+
+        return this.postService.findAllPosts(page, limit, userId);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -121,5 +125,14 @@ export class PostController {
         @Param('userSlug') userSlug: string,
     ) {
         return this.postService.findProfilPosts(page, limit, userSlug);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('/:slug/:postId')
+    async getPost(
+        @Param('postId') postId: number,
+        @Param('slug') slug: string,
+    ) {
+        return this.postService.findPostByIdAndSlug(postId, slug);
     }
 }
