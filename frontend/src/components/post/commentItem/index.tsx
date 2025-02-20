@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useCallback } from "react";
 import Comment from "@/components/post/comment";
 import CommentReply from "@/components/post/commentReply";
 import { TbChevronDown, TbChevronUp, TbSend2, TbUser } from "react-icons/tb";
@@ -9,6 +9,7 @@ interface CommentItemProps {
     comment: CommentType;
     postId: number;
     fetchComments: () => void;
+    handleDeleteComment: (id: number) => void;
 }
 
 interface CommentType {
@@ -29,6 +30,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
     comment,
     postId,
     fetchComments,
+    handleDeleteComment,
 }) => {
     const [repliesInputOpen, setRepliesInputOpen] = useState<boolean>(false);
     const [repliesOpen, setRepliesOpen] = useState<boolean>(false);
@@ -46,7 +48,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
         setContent(target.value);
     };
 
-    const handleAddComment = async () => {
+    const handleAddComment = useCallback(async () => {
         try {
             await axios.post("/comment/add", {
                 content,
@@ -55,30 +57,30 @@ const CommentItem: React.FC<CommentItemProps> = ({
                 parentCommentId: comment.id,
             });
             setContent("");
+            setRepliesInputOpen(false);
             fetchComments();
         } catch (error) {
             console.error("Yorum eklenirken hata oluştu:", error);
         }
-    };
+    }, [content, postId, user?.id, comment.id, fetchComments]);
+
     return (
         <div className="mt-6">
             <Comment
                 content={comment.content}
                 id={comment.id}
-                user={comment.user}
+                commentUser={comment.user}
                 toggleReplies={() => setRepliesInputOpen(!repliesInputOpen)}
-                border={
-                    comment.replies && comment.replies.length > 0 ? true : false
-                }
-                commentReplyCount={comment.replies.length}
+                border={!!comment.replies?.length}
+                commentReplyCount={comment.replies?.length || 0}
+                handleDeleteComment={handleDeleteComment} // Burada handleDeleteComment fonksiyonunu ilettik
             />
-
             {comment.replies && comment.replies.length > 0 && (
                 <div className="flex h-10">
                     <div className="flex w-10 items-center justify-center">
                         <div className="bg-gray-200 h-full border-l-2"></div>
                     </div>
-                    <div className="">
+                    <div>
                         <button
                             onClick={() => setRepliesOpen(!repliesOpen)}
                             className="flex items-end ml-2 mt-3 hover:bg-blue-200 py-1.5 pl-3 pr-3.5 rounded-full"
@@ -95,7 +97,6 @@ const CommentItem: React.FC<CommentItemProps> = ({
                     </div>
                 </div>
             )}
-
             {comment.replies && comment.replies.length > 0 && repliesOpen && (
                 <div className="flex">
                     <div className="flex min-w-10 items-center justify-center min-h-full">
@@ -107,7 +108,8 @@ const CommentItem: React.FC<CommentItemProps> = ({
                                 key={reply.id}
                                 content={reply.content}
                                 id={reply.id}
-                                user={reply.user}
+                                commentUser={reply.user}
+                                handleDeleteComment={handleDeleteComment} // Burada handleDeleteComment fonksiyonunu ilettik
                             />
                         ))}
                     </div>

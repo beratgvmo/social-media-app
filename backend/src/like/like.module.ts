@@ -7,10 +7,11 @@ import { Post } from '../post/post.entity';
 import { Comment } from '../comment/comment.entity';
 import { User } from '../user/user.entity';
 import { NotificationModule } from 'src/notification/notification.module';
+import { Notification } from 'src/notification/notification.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Like, Post, Comment, User]),
+        TypeOrmModule.forFeature([Like, Post, Comment, User, Notification]),
         NotificationModule,
     ],
     controllers: [LikeController],

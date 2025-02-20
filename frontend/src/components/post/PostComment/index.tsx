@@ -74,6 +74,14 @@ const PostComment: React.FC<PostCommentsProps> = ({
         }
     };
 
+    const handleDeleteComment = async (commentId: number) => {
+        try {
+            await axios.delete(`/comment/${commentId}`);
+            fetchComments();
+        } catch (error) {
+            console.error("Yorum silinirken hata oluştu:", error);
+        }
+    };
     return (
         <div>
             {isComment && (
@@ -116,6 +124,7 @@ const PostComment: React.FC<PostCommentsProps> = ({
                                     key={comment.id}
                                     postId={id}
                                     comment={comment}
+                                    handleDeleteComment={handleDeleteComment}
                                     fetchComments={() => fetchComments()}
                                 />
                             ))}

@@ -1,3 +1,4 @@
+//github
 export interface GitHubUser {
     avatar_url: string;
     login: string;
@@ -19,4 +20,40 @@ export interface GitHubRepo {
     stargazers_count: number;
     language: string;
     url: string;
+}
+
+//post
+export interface Post {
+    id: number;
+    likeCount: number;
+    commentCount: number;
+    createdAt: Date;
+    user: User;
+    border?: boolean;
+    content: string;
+    postImages: PostImage[];
+    githubApiUrl?: string;
+    githubType?: "user" | "repo";
+    codeContent?: string;
+    codeLanguage?: string;
+    codeTheme?: "light" | "dark";
+}
+
+export interface PostImage {
+    id: number;
+    url: string;
+}
+
+//user
+export interface User {
+    id: number;
+    name: string;
+    email: string;
+    slug: string;
+    bio: string;
+    isPrivate: boolean;
+    profileImage: string | null;
+    bannerImage: string | null;
+    followerCount: number;
+    followingCount: number;
 }

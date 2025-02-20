@@ -12,14 +12,10 @@ import {
 import { LikeService } from './like.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request } from 'express';
-import { NotificationService } from '../notification/notification.service';
 
 @Controller('like')
 export class LikeController {
-    constructor(
-        private readonly likeService: LikeService,
-        private readonly notificationService: NotificationService,
-    ) {}
+    constructor(private readonly likeService: LikeService) {}
 
     @UseGuards(JwtAuthGuard)
     @Post('post/:postId')
@@ -28,16 +24,6 @@ export class LikeController {
 
         try {
             const likedPost = await this.likeService.likePost(userId, postId);
-
-            const postOwner = likedPost.user;
-            // if (userId !== postOwner.id) {
-            //     await this.notificationService.createNotification(
-            //         postOwner,
-            //         'like',
-            //         userId,
-            //         likedPost,
-            //     );
-            // }
 
             return {
                 success: true,
@@ -62,15 +48,6 @@ export class LikeController {
                 userId,
                 postId,
             );
-
-            // if (userId !== updatedPost.user.id) {
-            //     await this.notificationService.removeNotification(
-            //         userId,
-            //         postId,
-            //         updatedPost.user.id,
-            //         'like',
-            //     );
-            // }
 
             return {
                 success: true,

@@ -3,12 +3,8 @@ import axios from "@/utils/axiosInstance";
 import TimeAgo from "@/components/TimeAgo";
 import { TbUser } from "react-icons/tb";
 import { Link } from "react-router-dom";
-
-interface User {
-    name: string;
-    profileImage: string | null;
-    slug: string;
-}
+import { Post, User } from "@/types";
+import { useAuthStore } from "@/store/useAuthStore";
 
 interface Notification {
     id: number;
@@ -16,10 +12,13 @@ interface Notification {
     isRead: boolean;
     createdAt: Date;
     fromUser: User;
+    post: Post;
 }
 
 const Notifications: React.FC = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    const { user } = useAuthStore();
+
     useEffect(() => {
         const notification = async () => {
             try {
@@ -45,7 +44,7 @@ const Notifications: React.FC = () => {
                         <Link
                             to={
                                 notification.type === "like"
-                                    ? "gönderinizi beğendi."
+                                    ? `profile/${user?.slug}/${notification.post.id}`
                                     : notification.type === "comment"
                                     ? "gönderinize yorum yaptı."
                                     : "/mynetwork"
