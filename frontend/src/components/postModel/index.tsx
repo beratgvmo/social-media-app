@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import Modal from "@/components/Modal";
-import ImageGrid from "@/components/ImageGridUser";
+import Modal from "@/components/modal";
+import ImageGrid from "@/components/postModel/ImageGridUser";
 import axios from "@/utils/axiosInstance";
 import { useForm } from "react-hook-form";
 import usePostStore from "@/store/usePostStore";
@@ -16,7 +16,7 @@ import WritingCode from "@/components/postModel/writingCode";
 import { GitHubRepo, GitHubUser } from "@/types";
 import { GithubRepoView, GithubUserView } from "./githubRepoView";
 import PhotoModal from "./photoModal";
-import PostImageGrid from "../PostImageGrid";
+import PostImageGrid from "@/components/postImageGrid";
 import axiosDefulat from "axios";
 
 interface PostFormInputs {

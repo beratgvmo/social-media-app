@@ -52,7 +52,7 @@ const PrivateRouteProfile: React.FC = () => {
 const PrivateRouteAuthenticated: React.FC<Props> = ({ children }) => {
     const { user } = useAuthStore();
 
-    return user ? <>{children}</> : <Navigate to="/" />;
+    return user ? <>{children}</> : <Navigate to="/login" />;
 };
 
 export { PrivateRouteNullUser, PrivateRouteProfile, PrivateRouteAuthenticated };

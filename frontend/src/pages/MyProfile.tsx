@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "@/utils/axiosInstance";
 import { useAuthStore } from "@/store/useAuthStore";
-import ImageCropper from "@/components/ImageCropper";
+import ImageCropper from "@/components/imageCropper";
 import {
     TbCloudUpload,
     TbMessage2,
@@ -10,10 +10,9 @@ import {
     TbUser,
 } from "react-icons/tb";
 import { CgSpinner } from "react-icons/cg";
-import Modal from "@/components/Modal";
+import Modal from "@/components/modal";
 import Button from "@/components/button";
-import RightbarFollow from "@/components/RightbarFollow";
-import ProfileSkeleton from "@/components/ProfileSkeleton";
+import RightbarFollow from "@/components/rightbarFollow";
 import Post from "@/components/post";
 import SettingsSidebar from "@/components/settingsSidebar";
 import usePostStore from "@/store/usePostStore";
@@ -70,22 +69,6 @@ const MyProfile: React.FC = () => {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, [profileHasMore, profileLoading]);
-
-    const fetchProfile = async () => {
-        try {
-            const response = await axios.get("/user/profile");
-            setUser(response.data);
-        } catch (error) {
-            console.error("Profil yüklenirken bir hata oluştu", error);
-            logout();
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchProfile();
-    }, []);
 
     const handleImageUpload = async () => {
         if (!croppedImage) return;
@@ -170,10 +153,6 @@ const MyProfile: React.FC = () => {
         setIsModalBannerOpen(false);
         setSelectedImage(null);
     };
-
-    if (loading) {
-        return <ProfileSkeleton />;
-    }
 
     return (
         <>
@@ -268,124 +247,113 @@ const MyProfile: React.FC = () => {
                     </Button>
                 </div>
             </Modal>
-            <div className="flex gap-5">
-                <SettingsSidebar />
-                <div className="w-[570px]">
-                    <div className="bg-white rounded-lg border">
-                        <div className="relative">
-                            <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
-                                {user.bannerImage ? (
-                                    <img
-                                        src={user.bannerImage}
-                                        alt="User banner"
-                                        className="absolute inset-0 w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="bg-gray-400 w-full h-full"></div>
-                                )}
+            <div>
+                <div className="bg-white rounded-lg border">
+                    <div className="relative">
+                        <div className="relative w-full h-48 rounded-t-lg overflow-hidden">
+                            {user.bannerImage ? (
+                                <img
+                                    src={user.bannerImage}
+                                    alt="User banner"
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="bg-gray-400 w-full h-full"></div>
+                            )}
 
-                                <button
-                                    onClick={handleOpenBannerModal}
-                                    className="absolute top-4 right-4 w-8 h-8 p-1 bg-white text-blue-500 rounded-full hover:text-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    aria-label="Edit banner"
-                                >
-                                    <TbPhotoSquareRounded className="w-full h-full" />
-                                </button>
-                            </div>
-
-                            <div className="absolute -bottom-12 w-32 h-32 bg-white rounded-full left-5 group">
-                                {user?.profileImage ? (
-                                    <img
-                                        src={user.profileImage}
-                                        alt="Profil Resmi"
-                                        className="w-full h-full rounded-full border-4 bg-white border-white"
-                                    />
-                                ) : (
-                                    <div className="flex justify-center items-center w-full h-full bg-gray-200 rounded-full border-4 border-white">
-                                        <TbUser size={90} />
-                                    </div>
-                                )}
-                                <div
-                                    onClick={handleOpenModal}
-                                    className="absolute cursor-pointer flex group-hover:opacity-100 opacity-0 top-0 justify-center items-center bg-black/50 w-full h-full rounded-full border-white border-4 transition-opacity duration-300"
-                                >
-                                    <TbPhotoEdit
-                                        className="text-white"
-                                        size={25}
-                                    />
-                                </div>
-                            </div>
+                            <button
+                                onClick={handleOpenBannerModal}
+                                className="absolute top-4 right-4 w-8 h-8 p-1 bg-white text-blue-500 rounded-full hover:text-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                aria-label="Edit banner"
+                            >
+                                <TbPhotoSquareRounded className="w-full h-full" />
+                            </button>
                         </div>
-                        <div className="flex px-5 justify-between">
-                            <div className="mt-7 pt-6 pb-4">
-                                <p className="text-2xl font-medium mb-0.5">
-                                    {user?.name}
-                                </p>
 
-                                <div className="text-sm mb-1.5 text-gray-600">
-                                    {user?.bio}
+                        <div className="absolute -bottom-12 w-32 h-32 bg-white rounded-full left-5 group">
+                            {user?.profileImage ? (
+                                <img
+                                    src={user.profileImage}
+                                    alt="Profil Resmi"
+                                    className="w-full h-full rounded-full border-4 bg-white border-white"
+                                />
+                            ) : (
+                                <div className="flex justify-center items-center w-full h-full bg-gray-200 rounded-full border-4 border-white">
+                                    <TbUser size={90} />
                                 </div>
-                                <div className="flex gap-2 text-sm">
-                                    <Link to={"/mynetwork/follower"}>
-                                        <p className="font-medium text-blue-500 transition hover:underline cursor-pointer">
-                                            {user?.followerCount} takipçi
-                                        </p>
-                                    </Link>
-                                    <p className="font-medium text-blue-500">
-                                        •
-                                    </p>
-                                    <Link to={"/mynetwork/follower"}>
-                                        <p className="font-medium text-blue-500 transition hover:underline cursor-pointer">
-                                            {user?.followingCount} takip
-                                        </p>
-                                    </Link>
-                                </div>
+                            )}
+                            <div
+                                onClick={handleOpenModal}
+                                className="absolute cursor-pointer flex group-hover:opacity-100 opacity-0 top-0 justify-center items-center bg-black/50 w-full h-full rounded-full border-white border-4 transition-opacity duration-300"
+                            >
+                                <TbPhotoEdit className="text-white" size={25} />
                             </div>
                         </div>
                     </div>
-
-                    {profilePosts.length > 0 ? (
-                        <div className="w-full mt-6 mb-4 bg-white border border-b-0 rounded-t-lg">
-                            {profilePosts.map((post, index) => (
-                                <Post
-                                    content={post.content}
-                                    likeCount={post.likeCount}
-                                    createdAt={post.createdAt}
-                                    images={post.postImages}
-                                    commentCount={post.commentCount}
-                                    key={post.id}
-                                    postUser={post.user}
-                                    id={post.id}
-                                    githubApiUrl={post.githubApiUrl}
-                                    githubType={post.githubType}
-                                    codeContent={post.codeContent}
-                                    codeLanguage={post.codeLanguage}
-                                    codeTheme={post.codeTheme}
-                                    border={false}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-center flex-col mt-8">
-                            <TbMessage2 className="text-5xl bg-white p-2.5 rounded-full border-2 border-gray-800 text-gray-800 mb-2" />
-                            <p className="text-gray-800 font-medium text-lg">
-                                Gönderi bulunmakta
+                    <div className="flex px-5 justify-between">
+                        <div className="mt-7 pt-6 pb-4">
+                            <p className="text-2xl font-medium mb-0.5">
+                                {user?.name}
                             </p>
-                        </div>
-                    )}
 
-                    {profileLoading && (
-                        <div className="w-full flex justify-center items-center h-20">
-                            <CgSpinner
-                                className="animate-spin text-blue-600"
-                                size={45}
-                            />
+                            <div className="text-sm mb-1.5 text-gray-600">
+                                {user?.bio}
+                            </div>
+                            <div className="flex gap-2 text-sm">
+                                <Link to={"/mynetwork/follower"}>
+                                    <p className="font-medium text-blue-500 transition hover:underline cursor-pointer">
+                                        {user?.followerCount} takipçi
+                                    </p>
+                                </Link>
+                                <p className="font-medium text-blue-500">•</p>
+                                <Link to={"/mynetwork/follower"}>
+                                    <p className="font-medium text-blue-500 transition hover:underline cursor-pointer">
+                                        {user?.followingCount} takip
+                                    </p>
+                                </Link>
+                            </div>
                         </div>
-                    )}
+                    </div>
                 </div>
-                <div className="w-[270px]">
-                    <RightbarFollow />
-                </div>
+
+                {profilePosts.length > 0 ? (
+                    <div className="w-full mt-6 mb-4 bg-white border border-b-0 rounded-t-lg">
+                        {profilePosts.map((post, index) => (
+                            <Post
+                                content={post.content}
+                                likeCount={post.likeCount}
+                                createdAt={post.createdAt}
+                                images={post.postImages}
+                                commentCount={post.commentCount}
+                                key={post.id}
+                                postUser={post.user}
+                                id={post.id}
+                                githubApiUrl={post.githubApiUrl}
+                                githubType={post.githubType}
+                                codeContent={post.codeContent}
+                                codeLanguage={post.codeLanguage}
+                                codeTheme={post.codeTheme}
+                                border={false}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center flex-col mt-8">
+                        <TbMessage2 className="text-5xl bg-white p-2.5 rounded-full border-2 border-gray-800 text-gray-800 mb-2" />
+                        <p className="text-gray-800 font-medium text-lg">
+                            Gönderi bulunmakta
+                        </p>
+                    </div>
+                )}
+
+                {profileLoading && (
+                    <div className="w-full flex justify-center items-center h-20">
+                        <CgSpinner
+                            className="animate-spin text-blue-600"
+                            size={45}
+                        />
+                    </div>
+                )}
             </div>
         </>
     );

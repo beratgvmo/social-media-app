@@ -3,10 +3,10 @@ import { RouterProvider } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import axios from "@/utils/axiosInstance";
 import routes from "@/routes";
-import Loading from "@/components/Loading";
+import Loading from "@/components/loading";
 
 const App: React.FC = () => {
-    const { setUser, logout } = useAuthStore();
+    const { setUser, logout, user } = useAuthStore();
     const [loading, setLoading] = useState(true);
 
     const checkLoginStatus = async () => {
@@ -26,7 +26,7 @@ const App: React.FC = () => {
         checkLoginStatus();
     }, [setUser, logout]);
 
-    if (loading) return <Loading />;
+    if (loading || !user) return <Loading />;
     return <RouterProvider router={routes} />;
 };
 

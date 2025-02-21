@@ -1,14 +1,63 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation, useParams } from "react-router-dom";
 import Header from "@/components/header";
 import { useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
+import ProfileSidebar from "@/components/profileSidebar";
+import RightbarFollow from "@/components/rightbarFollow";
+import SettingsSidebar from "@/components/settingsSidebar";
 
 const MainLayout: React.FC = () => {
     const [isInputFocused, setIsInputFocused] = useState(false);
     const { user } = useAuthStore();
+    const location = useLocation();
+    const { slug } = useParams<{ slug?: string }>();
 
     const handleOverlayClick = () => {
         setIsInputFocused(false);
+    };
+
+    const renderSidebars = () => {
+        switch (true) {
+            case location.pathname === "/":
+                return (
+                    <>
+                        <ProfileSidebar />
+                        <div className="min-w-[570px]">
+                            <Outlet />
+                        </div>
+                        <RightbarFollow />
+                    </>
+                );
+            case location.pathname.startsWith("/mynetwork"):
+                return (
+                    <>
+                        <ProfileSidebar />
+                        <div className="w-full">
+                            <Outlet />
+                        </div>
+                    </>
+                );
+            case location.pathname.startsWith("/profile"):
+                return (
+                    <>
+                        {slug === user?.slug ? (
+                            <SettingsSidebar />
+                        ) : (
+                            <ProfileSidebar />
+                        )}
+                        <div className="min-w-[570px]">
+                            <Outlet />
+                        </div>
+                        <RightbarFollow />
+                    </>
+                );
+            default:
+                return (
+                    <div className="min-w-[570px]">
+                        <Outlet />
+                    </div>
+                );
+        }
     };
 
     return (
@@ -30,7 +79,7 @@ const MainLayout: React.FC = () => {
                     isInputFocused ? "z-0" : "z-10"
                 }`}
             >
-                <Outlet />
+                <div className="flex gap-5">{renderSidebars()}</div>
             </div>
         </div>
     );

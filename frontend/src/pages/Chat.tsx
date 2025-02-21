@@ -6,7 +6,7 @@ import ChatSidebar from "@/components/chatSidebar";
 import ChatWelcome from "@/components/chatWelcome";
 import ChatHeader from "@/components/chatHeader";
 import MessageInput from "@/components/messageInput";
-import Modal from "@/components/Modal";
+import Modal from "@/components/modal";
 import FriendItem from "@/components/chatSidebar/friendItem";
 import { io, Socket } from "socket.io-client";
 

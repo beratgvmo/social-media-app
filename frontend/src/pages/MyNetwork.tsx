@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { TbUser } from "react-icons/tb";
-import ProfileSidebar from "@/components/ProfileSidebar";
 import Button from "@/components/button";
 import axios from "@/utils/axiosInstance";
 import TimeAgo from "@/components/TimeAgo";
@@ -71,80 +70,67 @@ const MyNetwork: React.FC = () => {
     };
 
     return (
-        <div className="flex gap-5">
-            <ProfileSidebar />
-            <div className="w-full">
-                <div className="pt-3 bg-white rounded-lg border w-full">
-                    <p className="px-4 pb-3">Davetler</p>
-                    <div>
-                        {requests.length > 0 ? (
-                            requests.map((request) => (
-                                <div
-                                    key={request.follower.id}
-                                    className="flex px-4 border-t justify-between items-center py-3"
-                                >
-                                    <div className="flex items-center gap-1.5">
-                                        {request.follower?.profileImage ? (
-                                            <img
-                                                src={
-                                                    request.follower
-                                                        .profileImage
-                                                }
-                                                alt="Profil Resmi"
-                                                className="w-14 h-14 rounded-full border-4 bg-white border-white"
-                                            />
-                                        ) : (
-                                            <TbUser className="w-14 h-14 p-2 flex items-center border rounded-full text-blue-500" />
-                                        )}
-                                        <div>
-                                            <p className="font-medium text-gray-800">
-                                                {request.follower.name}
-                                            </p>
-                                            <p className="text-xs text-gray-600 mb-0.5">
-                                                {request.follower.bio}
-                                            </p>
-                                            <p className="text-xs text-gray-700">
-                                                <TimeAgo
-                                                    createdAt={
-                                                        request.createdAt
-                                                    }
-                                                />
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2.5">
-                                        <Button
-                                            variant="outline"
-                                            onClick={() =>
-                                                handleRespond(
-                                                    request.follower.id,
-                                                    false
-                                                )
-                                            }
-                                        >
-                                            Yoksay
-                                        </Button>
-                                        <Button
-                                            variant="rounded"
-                                            onClick={() =>
-                                                handleRespond(
-                                                    request.follower.id,
-                                                    true
-                                                )
-                                            }
-                                        >
-                                            Kabul Et
-                                        </Button>
-                                    </div>
+        <div className="pt-3 bg-white rounded-lg border w-full">
+            <p className="px-4 pb-3">Davetler</p>
+            <div>
+                {requests.length > 0 ? (
+                    requests.map((request) => (
+                        <div
+                            key={request.follower.id}
+                            className="flex px-4 border-t justify-between items-center py-3"
+                        >
+                            <div className="flex items-center gap-1.5">
+                                {request.follower?.profileImage ? (
+                                    <img
+                                        src={request.follower.profileImage}
+                                        alt="Profil Resmi"
+                                        className="w-14 h-14 rounded-full border-4 bg-white border-white"
+                                    />
+                                ) : (
+                                    <TbUser className="w-14 h-14 p-2 flex items-center border rounded-full text-blue-500" />
+                                )}
+                                <div>
+                                    <p className="font-medium text-gray-800">
+                                        {request.follower.name}
+                                    </p>
+                                    <p className="text-xs text-gray-600 mb-0.5">
+                                        {request.follower.bio}
+                                    </p>
+                                    <p className="text-xs text-gray-700">
+                                        <TimeAgo
+                                            createdAt={request.createdAt}
+                                        />
+                                    </p>
                                 </div>
-                            ))
-                        ) : (
-                            <p className="px-4 border-t py-3 text-gray-500">
-                                Bekleyen davet yok.
-                            </p>
-                        )}
-                    </div>
-                </div>
+                            </div>
+                            <div className="flex gap-2.5">
+                                <Button
+                                    variant="outline"
+                                    onClick={() =>
+                                        handleRespond(
+                                            request.follower.id,
+                                            false
+                                        )
+                                    }
+                                >
+                                    Yoksay
+                                </Button>
+                                <Button
+                                    variant="rounded"
+                                    onClick={() =>
+                                        handleRespond(request.follower.id, true)
+                                    }
+                                >
+                                    Kabul Et
+                                </Button>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <p className="px-4 border-t py-3 text-gray-500">
+                        Bekleyen davet yok.
+                    </p>
+                )}
             </div>
         </div>
     );

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import Cropper from "react-easy-crop";
 import { Area } from "react-easy-crop";
-import { getCroppedImg } from "../utils/cropImageUtils";
+import { getCroppedImg } from "@/utils/cropImageUtils";
 
 interface ImageCropperProps {
     imageSrc: string;

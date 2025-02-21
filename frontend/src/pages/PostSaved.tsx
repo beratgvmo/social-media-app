@@ -1,17 +1,18 @@
-import Post from "@/components/post";
-import RightbarFollow from "@/components/RightbarFollow";
-import SettingsSidebar from "@/components/settingsSidebar";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "@/utils/axiosInstance";
-import React, { useEffect, useState } from "react";
+import Post from "@/components/post";
+import RightbarFollow from "@/components/rightbarFollow";
+import SettingsSidebar from "@/components/settingsSidebar";
+import { Post as PostType } from "@/types";
 
 const PostSaved: React.FC = () => {
-    const [postSave, setPostSave] = useState([]);
+    const [postSave, setPostSave] = useState<PostType[]>([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [pageLoading, setPageLoading] = useState(false);
     const limit = 10;
 
-    const fetchPostSaved = async () => {
+    const fetchPostSaved = useCallback(async () => {
         if (!hasMore || pageLoading) return;
 
         try {
@@ -25,18 +26,18 @@ const PostSaved: React.FC = () => {
                 setPostSave((prev) => [...prev, ...newPosts]);
                 if (newPosts.length < limit) setHasMore(false);
             } else {
-                console.error("Beklenmeyen veri formatı:", response.data);
+                console.error("Unexpected data format:", response.data);
             }
         } catch (error) {
-            console.error("Kayıtlı gönderiler alınırken hata oluştu:", error);
+            console.error("Error fetching saved posts:", error);
         } finally {
             setPageLoading(false);
         }
-    };
+    }, [hasMore, pageLoading, page, limit]);
 
     useEffect(() => {
         fetchPostSaved();
-    }, [page]);
+    }, [fetchPostSaved]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -72,40 +73,24 @@ const PostSaved: React.FC = () => {
                     </p>
                 </div>
                 {postSave.length > 0 ? (
-                    postSave.map((item) => {
-                        const {
-                            id,
-                            content,
-                            likeCount,
-                            createdAt,
-                            postImages,
-                            commentCount,
-                            user,
-                            codeContent,
-                            codeLanguage,
-                            codeTheme,
-                            githubApiUrl,
-                            githubType,
-                        } = item.post || {};
-                        return (
-                            <Post
-                                id={id}
-                                content={content}
-                                likeCount={likeCount}
-                                createdAt={createdAt}
-                                images={postImages || []}
-                                key={item.id}
-                                commentCount={commentCount}
-                                postUser={user}
-                                border={true}
-                                codeContent={codeContent}
-                                codeLanguage={codeLanguage}
-                                codeTheme={codeTheme}
-                                githubApiUrl={githubApiUrl}
-                                githubType={githubType}
-                            />
-                        );
-                    })
+                    postSave.map((savedPost) => (
+                        <Post
+                            id={savedPost.id}
+                            content={savedPost.content}
+                            likeCount={savedPost.likeCount}
+                            createdAt={savedPost.createdAt}
+                            images={savedPost.postImages || []}
+                            key={savedPost.id}
+                            commentCount={savedPost.commentCount}
+                            postUser={savedPost.user}
+                            border={true}
+                            codeContent={savedPost.codeContent}
+                            codeLanguage={savedPost.codeLanguage}
+                            codeTheme={savedPost.codeTheme}
+                            githubApiUrl={savedPost.githubApiUrl}
+                            githubType={savedPost.githubType}
+                        />
+                    ))
                 ) : (
                     <p className="text-gray-600 text-center text-sm">
                         Kayıtlı herhangi bir gönderi yok

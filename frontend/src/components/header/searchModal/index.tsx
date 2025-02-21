@@ -17,19 +17,19 @@ interface SearchProps {
     isInputFocused: boolean;
 }
 
-const SearchComponent: FC<SearchProps> = ({
-    setInputFocus,
-    isInputFocused,
-}) => {
+const SearchModal: FC<SearchProps> = ({ setInputFocus, isInputFocused }) => {
     const { recentSearches, addSearch, clearSearches } = useSearchStore();
-    const inputRef = useRef(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const [resultSave, setResultSave] = useState<User[]>([]);
     const [results, setResults] = useState<User[]>([]);
     const [query, setQuery] = useState("");
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (inputRef.current && !inputRef.current.contains(event.target)) {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                inputRef.current &&
+                !inputRef.current.contains(event.target as Node)
+            ) {
                 setInputFocus(false);
             }
         };
@@ -38,7 +38,7 @@ const SearchComponent: FC<SearchProps> = ({
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [inputRef]);
+    }, [setInputFocus]);
 
     useEffect(() => {
         if (query.trim()) {
@@ -60,7 +60,7 @@ const SearchComponent: FC<SearchProps> = ({
     };
 
     useEffect(() => {
-        if (recentSearches.length > 0) {
+        if (recentSearches.length > 0 && isInputFocused) {
             const fetchUsersInOrder = async () => {
                 try {
                     const users = await Promise.all(
@@ -80,7 +80,6 @@ const SearchComponent: FC<SearchProps> = ({
                                         "recent-searches",
                                         JSON.stringify(updatedSearches)
                                     );
-
                                     return null;
                                 }
                                 throw err;
@@ -102,7 +101,7 @@ const SearchComponent: FC<SearchProps> = ({
         } else {
             setResultSave([]);
         }
-    }, [recentSearches]);
+    }, [recentSearches, isInputFocused]);
 
     return (
         <div className="flex items-center gap-4">
@@ -129,7 +128,7 @@ const SearchComponent: FC<SearchProps> = ({
                                         En Yeni
                                     </p>
                                     <button
-                                        onClick={() => clearSearches()}
+                                        onClick={clearSearches}
                                         className="text-sm font-medium"
                                     >
                                         Temizle
@@ -139,7 +138,7 @@ const SearchComponent: FC<SearchProps> = ({
                                     {resultSave.map((searchUser, index) => (
                                         <div
                                             key={index}
-                                            className="flex cursor-pointer w-20 px-1 pt-2 mx-2 hover:bg-gray-200 rounded transition flex-col  items-center justify-center"
+                                            className="flex cursor-pointer w-20 px-1 pt-2 mx-2 hover:bg-gray-200 rounded transition flex-col items-center justify-center"
                                         >
                                             <div className="w-11 h-11">
                                                 {searchUser?.profileImage ? (
@@ -165,40 +164,36 @@ const SearchComponent: FC<SearchProps> = ({
                             </div>
                         )}
                         {results.length > 0 ? (
-                            <>
-                                {results.map((user) => (
-                                    <Link
-                                        to={`/profile/${user.slug}`}
-                                        key={user.id}
-                                        onClick={() => {
-                                            addSearch(user.slug);
-                                        }}
-                                        className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100"
-                                    >
-                                        <div className="w-11 h-11 mr-2">
-                                            {user?.profileImage ? (
-                                                <img
-                                                    src={user.profileImage}
-                                                    alt="Profil Resmi"
-                                                    className="w-full h-full rounded-full border border-gray-300"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full rounded-full border border-gray-300 flex bg-gray-200 items-center justify-center">
-                                                    <TbUser className="w-[60%] h-[60%] text-gray-700" />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <p className="font-medium text-gray-800">
-                                                {user.name}
-                                            </p>
-                                            <p className="text-xs text-gray-500">
-                                                {user.bio}
-                                            </p>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </>
+                            results.map((user) => (
+                                <Link
+                                    to={`/profile/${user.slug}`}
+                                    key={user.id}
+                                    onClick={() => addSearch(user.slug)}
+                                    className="flex items-center px-4 py-2 cursor-pointer hover:bg-gray-100"
+                                >
+                                    <div className="w-11 h-11 mr-2">
+                                        {user?.profileImage ? (
+                                            <img
+                                                src={user.profileImage}
+                                                alt="Profil Resmi"
+                                                className="w-full h-full rounded-full border border-gray-300"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full rounded-full border border-gray-300 flex bg-gray-200 items-center justify-center">
+                                                <TbUser className="w-[60%] h-[60%] text-gray-700" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-gray-800">
+                                            {user.name}
+                                        </p>
+                                        <p className="text-xs text-gray-500">
+                                            {user.bio}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ))
                         ) : query.length > 0 ? (
                             <div className="p-3 flex items-center justify-center w-full gap-1.5">
                                 <TbSearchOff className="w-4 h-4 text-gray-500" />
@@ -221,4 +216,4 @@ const SearchComponent: FC<SearchProps> = ({
     );
 };
 
-export default SearchComponent;
+export default SearchModal;

@@ -54,7 +54,16 @@ export class CommentService {
             throw new Error('Post bulunamadı');
         }
 
-        if (post.user && post.user.id !== userId) {
+        const notificationFind = await this.notificationRepository.findOne({
+            where: {
+                post: { id: postId },
+                type: 'comment',
+                user: { id: post.user.id },
+                fromUser: { id: userId },
+            },
+        });
+
+        if (!notificationFind && post.user.id !== userId) {
             const notification = this.notificationRepository.create({
                 post: { id: postId },
                 type: 'comment',
@@ -77,7 +86,7 @@ export class CommentService {
     async deleteComment(commentId: number, userId: number): Promise<void> {
         const comment = await this.commentRepository.findOne({
             where: { id: commentId },
-            relations: ['post', 'user'],
+            relations: ['post', 'user', 'replies'],
         });
 
         if (!comment) {
@@ -88,28 +97,16 @@ export class CommentService {
             throw new Error('Bu yorumu silme yetkiniz yok');
         }
 
-        const commentReplies = await this.commentRepository.find({
-            where: { replies: { id: commentId } },
-            relations: ['likes'],
-        });
-
-        const commentReplyIds = commentReplies.map((reply) => reply.id);
-
-        if (commentReplyIds.length > 0) {
-            await this.likeRepository.delete({
-                comment: In(commentReplyIds),
-            });
-
-            await this.commentRepository.delete({
-                id: In(commentReplyIds),
-            });
-        }
+        const commentReplyIds = comment.replies.map((reply) => reply.id);
+        commentReplyIds.push(commentId);
 
         await this.likeRepository.delete({
-            comment: { id: commentId },
+            comment: In(commentReplyIds),
         });
 
-        await this.commentRepository.delete(commentId);
+        await this.commentRepository.delete({
+            id: In(commentReplyIds),
+        });
 
         const post = await this.postsRepository.findOne({
             where: { id: comment.post.id },
@@ -123,7 +120,7 @@ export class CommentService {
         });
 
         if (post) {
-            post.commentCount -= 1;
+            post.commentCount -= commentReplyIds.length;
             await this.postsRepository.save(post);
             this.notificationGateway.handleMessage(null, post.user.id);
         }

@@ -16,7 +16,7 @@ export class NotificationGateway
 {
     @WebSocketServer() server: Server;
 
-    constructor(private notificationService: NotificationService) {}
+    constructor(private readonly notificationService: NotificationService) {}
 
     handleConnection(client: Socket) {
         console.log(`Client connected: ${client.id}`);
@@ -32,7 +32,6 @@ export class NotificationGateway
         @MessageBody() userId: number,
     ) {
         client.join(userId.toString());
-        console.log(`user ${userId}`);
     }
 
     @SubscribeMessage('sendNotification')

@@ -1,5 +1,5 @@
 import { TbUser } from "react-icons/tb";
-import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const ProfileSidebar: React.FC = () => {
     const { user } = useAuthStore();
@@ -41,7 +41,7 @@ const ProfileSidebar: React.FC = () => {
                     <div className="text-xs mt-0.5">{user.bio}</div>
                 </div>
             </div>
-            <div className="bg-white rounded-lg border mt-1.5 p-4">
+            {/* <div className="bg-white rounded-lg border mt-1.5 p-4">
                 <div className="flex justify-between text-xs font-semibold">
                     <p>Profil gösterimi</p>
                     <p className="text-blue-500">11</p>
@@ -50,7 +50,7 @@ const ProfileSidebar: React.FC = () => {
                     <p>Gönderi gösterimi</p>
                     <p className="text-blue-500">4</p>
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 };

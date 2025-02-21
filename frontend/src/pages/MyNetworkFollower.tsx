@@ -1,5 +1,5 @@
 import { TbUser } from "react-icons/tb";
-import ProfileSidebar from "@/components/ProfileSidebar";
+import ProfileSidebar from "@/components/profileSidebar";
 import Button from "@/components/button";
 import axios from "@/utils/axiosInstance";
 import { useEffect, useState, useCallback } from "react";
@@ -12,30 +12,6 @@ interface UserFollow {
     profileImage: string | null;
     slug: string;
 }
-
-const SkeletonLoader = () => (
-    <div className="flex animate-pulse px-4 border-t justify-between items-center py-3">
-        <div className="flex items-center gap-2.5">
-            <div className="w-14 h-14 p-2 border rounded-full bg-gray-200" />
-            <div className="flex flex-col gap-2.5">
-                <div className="w-32 bg-gray-300 h-2.5 rounded-full"></div>
-                <div className="w-40 bg-gray-300 h-2 rounded-full"></div>
-            </div>
-        </div>
-        <div className="flex gap-2.5">
-            <div className="h-8 w-16 border-2 border-gray-300 rounded-full"></div>
-            <div className="h-8 w-28 bg-gray-300 rounded-full"></div>
-        </div>
-    </div>
-);
-
-const SkeletonList = ({ count }: { count: number }) => (
-    <>
-        {Array.from({ length: count }).map((_, idx) => (
-            <SkeletonLoader key={idx} />
-        ))}
-    </>
-);
 
 const MyNetworkFollower: React.FC = () => {
     const [followers, setFollowers] = useState<UserFollow[]>([]);

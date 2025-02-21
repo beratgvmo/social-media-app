@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "../utils/axiosInstance";
-import ProfileCard from "./ProfileCard";
+import axios from "@/utils/axiosInstance";
+import ProfileCard from "@/components/rightbarFollow/profileCard";
 
 interface Friend {
     id: number;
@@ -47,7 +47,7 @@ const RightbarFollow: React.FC = () => {
                 <p className="text-sm font-medium">
                     Sizin için daha fazla profil
                 </p>
-                {Array.isArray(friends) && friends.length > 0 ? (
+                {friends.length > 0 ? (
                     friends.map((friend) => (
                         <ProfileCard
                             key={friend.id}
@@ -56,6 +56,7 @@ const RightbarFollow: React.FC = () => {
                             slug={friend.slug}
                             profileImage={friend.profileImage}
                             bio={friend.bio}
+                            loading={loading}
                         />
                     ))
                 ) : (

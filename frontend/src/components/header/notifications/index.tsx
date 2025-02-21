@@ -46,7 +46,7 @@ const Notifications: React.FC = () => {
                                 notification.type === "like"
                                     ? `profile/${user?.slug}/${notification.post.id}`
                                     : notification.type === "comment"
-                                    ? "gönderinize yorum yaptı."
+                                    ? `profile/${user?.slug}/${notification.post.id}`
                                     : "/mynetwork"
                             }
                         >

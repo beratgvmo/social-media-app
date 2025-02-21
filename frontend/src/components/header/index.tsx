@@ -1,11 +1,4 @@
-import {
-    TbBell,
-    TbChessFilled,
-    TbMessage,
-    TbSearch,
-    TbSearchOff,
-    TbUser,
-} from "react-icons/tb";
+import { TbBell, TbChessFilled, TbMessage, TbUser } from "react-icons/tb";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import { GoPeople } from "react-icons/go";
@@ -13,27 +6,11 @@ import { HiOutlineHome } from "react-icons/hi";
 import { useEffect, useRef, useState } from "react";
 import axios from "@/utils/axiosInstance";
 import Notifications from "@/components/header/notifications";
-import SearchComponent from "../SearchComponent";
+import SearchModal from "./searchModal";
 
 import { io, Socket } from "socket.io-client";
 
 let socket: Socket;
-
-interface User {
-    name: string;
-    profileImage: string | null;
-    slug: string;
-    id: number;
-    bio: string;
-}
-
-interface Notification {
-    id: number;
-    type: "like" | "comment" | "follow";
-    isRead: boolean;
-    createdAt: Date;
-    fromUser: User;
-}
 
 interface FollowerRequest {
     id: number;
@@ -53,21 +30,6 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
     const [followerCount, setFollowerCount] = useState<number>(0);
     const [notificationCount, setNotificationCount] = useState(0);
 
-    const fetchFollowerRequests = async () => {
-        try {
-            const response = await axios.get<FollowerRequest[]>(
-                "/follower/pending-requests"
-            );
-
-            setFollowerCount(
-                response.data.filter((request) => !request.isRead).length
-            );
-        } catch (error) {
-            console.error("Takipçi istekleri alınırken hata oluştu", error);
-        } finally {
-        }
-    };
-
     useEffect(() => {
         if (!socket) {
             socket = io("http://localhost:3000");
@@ -76,6 +38,15 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
         socket.emit("userId", user.id);
 
         socket.emit("sendNotification", user.id);
+
+        socket.emit("sendFollower", user.id);
+
+        const handleNewFollower = (followerCount: number) => {
+            setFollowerCount(followerCount);
+            console.log("followerCount:", followerCount);
+        };
+
+        socket.on("follower", handleNewFollower);
 
         const handleNewMessage = (notificationCount: number) => {
             setNotificationCount(notificationCount);
@@ -86,16 +57,9 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
 
         return () => {
             socket.off("notification", handleNewMessage);
+            socket.off("follower", handleNewFollower);
         };
     }, [user.id, isBubble]);
-
-    useEffect(() => {
-        if (location.pathname !== "/mynetwork") {
-            fetchFollowerRequests();
-        } else {
-            setFollowerCount(0);
-        }
-    }, [location.pathname, user?.slug, isBubble]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -120,7 +84,7 @@ const Header: React.FC<HeaderProps> = ({ setInputFocus, isInputFocused }) => {
                         <TbChessFilled size={40} className="text-blue-600" />
                     </Link>
                     <div className="flex items-center gap-4">
-                        <SearchComponent
+                        <SearchModal
                             isInputFocused={isInputFocused}
                             setInputFocus={setInputFocus}
                         />

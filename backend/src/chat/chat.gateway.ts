@@ -12,10 +12,9 @@ import { ChatService } from './chat.service';
 
 @WebSocketGateway({ cors: true })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-    @WebSocketServer()
-    server: Server;
+    @WebSocketServer() server: Server;
 
-    constructor(private chatService: ChatService) {}
+    constructor(private readonly chatService: ChatService) {}
 
     handleConnection(client: Socket) {
         console.log(`Client connected: ${client.id}`);

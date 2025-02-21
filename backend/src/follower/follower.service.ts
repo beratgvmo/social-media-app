@@ -12,6 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
 import { Notification } from 'src/notification/notification.entity';
 import { NotificationGateway } from 'src/notification/notification.gateway';
+// import { FollowerGateway } from './follower.gateway';
 
 @Injectable()
 export class FollowerService {
@@ -26,6 +27,8 @@ export class FollowerService {
         private userRepository: Repository<User>,
 
         private readonly notificationGateway: NotificationGateway,
+
+        // private followerGateway: FollowerGateway,
     ) {}
 
     async follow(followerId: number, followingId: number): Promise<void> {
@@ -68,6 +71,7 @@ export class FollowerService {
         });
 
         await this.followerRepository.save(newFollow);
+        // this.followerGateway.handleMessage(null, followingId);
 
         if (newFollowStatus === FollowStatus.PENDING) {
             const notification = this.notificationRepository.create({
@@ -108,6 +112,7 @@ export class FollowerService {
         });
 
         this.notificationGateway.handleMessage(null, userId);
+        // this.followerGateway.handleMessage(null, userId);
 
         if (follow.status === FollowStatus.ACCEPTED) {
             await Promise.all([
@@ -145,6 +150,7 @@ export class FollowerService {
         });
 
         this.notificationGateway.handleMessage(null, followingId);
+        // this.followerGateway.handleMessage(null, followingId);
 
         if (follow.status === FollowStatus.ACCEPTED) {
             await Promise.all([
@@ -160,6 +166,16 @@ export class FollowerService {
                 ),
             ]);
         }
+    }
+
+    async getUnreadFollowerCount(userId: number): Promise<number> {
+        const count = await this.followerRepository.count({
+            where: {
+                following: { id: userId },
+                isRead: false,
+            },
+        });
+        return count;
     }
 
     async acceptFollowRequest(
@@ -179,6 +195,19 @@ export class FollowerService {
         if (!followRequest) {
             throw new NotFoundException('Takip isteği bulunamadı.');
         }
+
+        const notification = await this.notificationRepository.findOne({
+            where: { user: { id: userId }, fromUser: { id: followerId } },
+        });
+
+        if (notification) {
+            await this.notificationRepository.update(notification.id, {
+                isRead: true,
+            });
+        }
+
+        this.notificationGateway.handleMessage(null, followerId);
+        // this.followerGateway.handleMessage(null, followerId);
 
         if (isAccepted) {
             followRequest.status = FollowStatus.ACCEPTED;

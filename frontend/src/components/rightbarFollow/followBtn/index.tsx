@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import axios from "../utils/axiosInstance";
-import Button from "./button";
+import axios from "@/utils/axiosInstance";
+import Button from "@/components/button";
 
 interface FollowProps {
-    userId: number;
+    id: number;
 }
 
-const FollowBtn: React.FC<FollowProps> = ({ userId }) => {
+const FollowBtn: React.FC<FollowProps> = ({ id }) => {
     const [loading, setLoading] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
 
     const checkFollowingStatus = async () => {
         try {
-            const response = await axios.get(`/follower/status/${userId}`);
+            const response = await axios.get(`/follower/status/${id}`);
             setIsFollowing(response.data.isFollowing);
         } catch (error) {
             console.error(error);
@@ -24,7 +24,7 @@ const FollowBtn: React.FC<FollowProps> = ({ userId }) => {
     const onFollow = async () => {
         try {
             setLoading(true);
-            await axios.post(`/follower/follow/${userId}`);
+            await axios.post(`/follower/follow/${id}`);
             setIsFollowing(true);
         } catch (error) {
             console.error(error);
@@ -36,7 +36,7 @@ const FollowBtn: React.FC<FollowProps> = ({ userId }) => {
     const onUnfollow = async () => {
         try {
             setLoading(true);
-            await axios.delete(`/follower/unfollow/${userId}`);
+            await axios.delete(`/follower/unfollow/${id}`);
             setIsFollowing(false);
         } catch (error) {
             console.error(error);

@@ -7,7 +7,7 @@ interface SearchState {
     clearSearches: () => void;
 }
 
-export const useSearchStore = create<SearchState>()(
+const useSearchStore = create<SearchState>()(
     persist(
         (set, get) => ({
             recentSearches: [],

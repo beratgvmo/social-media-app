@@ -4,8 +4,9 @@ import { FollowerService } from './follower.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Follower } from './follower.entity';
 import { User } from '../user/user.entity';
-import { Notification } from 'src/Notification/notification.entity';
+import { Notification } from 'src/notification/notification.entity';
 import { NotificationModule } from 'src/notification/notification.module';
+// import { FollowerGateway } from './follower.gateway';
 
 @Module({
     imports: [
@@ -14,5 +15,6 @@ import { NotificationModule } from 'src/notification/notification.module';
     ],
     controllers: [FollowerController],
     providers: [FollowerService],
+    exports: [FollowerService],
 })
 export class FollowerModule {}

@@ -19,8 +19,8 @@ export class Notification {
     })
     user: User;
 
-    @Column({ type: 'enum', enum: ['comment', 'like', 'follow', 'post'] })
-    type: 'comment' | 'like' | 'follow' | 'post';
+    @Column({ type: 'enum', enum: ['comment', 'like', 'follow'] })
+    type: 'comment' | 'like' | 'follow';
 
     @ManyToOne(() => User, { nullable: true, onDelete: 'CASCADE', eager: true })
     fromUser?: User;

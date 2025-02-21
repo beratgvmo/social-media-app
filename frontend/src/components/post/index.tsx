@@ -15,7 +15,7 @@ import { AiFillLike, AiOutlineLike } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import axios from "@/utils/axiosInstance";
 import axiosDefulat from "axios";
-import PostImageGrid from "@/components/PostImageGrid";
+import PostImageGrid from "@/components/postImageGrid";
 import TimeAgo from "@/components/TimeAgo";
 import PostComment from "@/components/post/PostComment";
 import CodeMirror from "@uiw/react-codemirror";

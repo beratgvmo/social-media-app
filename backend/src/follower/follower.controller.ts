@@ -8,6 +8,7 @@ import {
     Req,
     Body,
     Query,
+    ParseIntPipe,
 } from '@nestjs/common';
 import { FollowerService } from './follower.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -19,15 +20,21 @@ export class FollowerController {
 
     @UseGuards(JwtAuthGuard)
     @Post('follow/:userId')
-    async follow(@Param('userId') userId: number, @Req() req: Request) {
+    async follow(
+        @Param('userId', ParseIntPipe) userId: number,
+        @Req() req: Request,
+    ) {
         const followerId = req.user['sub'];
         await this.followerService.follow(followerId, userId);
-        return { message: 'Takip isteği .' };
+        return { message: 'Takip isteği gönderildi.' };
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete('unfollow/:userId')
-    async unfollow(@Param('userId') userId: number, @Req() req: Request) {
+    async unfollow(
+        @Param('userId', ParseIntPipe) userId: number,
+        @Req() req: Request,
+    ) {
         const followerId = req.user['sub'];
         await this.followerService.unfollow(followerId, userId);
         return { message: 'Takipten çıkarıldı.' };
@@ -36,18 +43,18 @@ export class FollowerController {
     @UseGuards(JwtAuthGuard)
     @Delete('remove-follower/:followerId')
     async removeFollower(
-        @Param('followerId') followerId: number,
+        @Param('followerId', ParseIntPipe) followerId: number,
         @Req() req: Request,
     ) {
         const userId = req.user['sub'];
         await this.followerService.removeFollower(userId, followerId);
-        return { message: 'Takip eden kaldırıldı.' };
+        return { message: 'Takipçi kaldırıldı.' };
     }
 
     @UseGuards(JwtAuthGuard)
     @Post(':followerId/accept')
     async respondToFollowRequest(
-        @Param('followerId') followerId: number,
+        @Param('followerId', ParseIntPipe) followerId: number,
         @Body('isAccepted') isAccepted: boolean,
         @Req() req: Request,
     ) {
@@ -62,7 +69,7 @@ export class FollowerController {
     @UseGuards(JwtAuthGuard)
     @Get('status/:userId')
     async checkFollowingStatus(
-        @Param('userId') userId: number,
+        @Param('userId', ParseIntPipe) userId: number,
         @Req() req: Request,
     ) {
         const followerId = req.user['sub'];
@@ -77,29 +84,31 @@ export class FollowerController {
     @Get('pending-requests')
     async getPendingFollowRequests(@Req() req: Request) {
         const userId = req.user['sub'];
-
         return this.followerService.getPendingFollowRequests(userId);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post('read/:followId')
-    async markAsRead(@Param('followId') followId: number) {
+    async markAsRead(@Param('followId', ParseIntPipe) followId: number) {
         return this.followerService.markAsRead(followId);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get('following-all/:userId')
     async userFollowingAll(
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 10,
-        @Param('userId') userId: number,
+        @Query('page', ParseIntPipe) page: number = 1,
+        @Query('limit', ParseIntPipe) limit: number = 10,
+        @Param('userId', ParseIntPipe) userId: number,
     ) {
         return await this.followerService.userFollowingAll(userId, page, limit);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get('follower-all/:userId')
     async userFollowerAll(
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 10,
-        @Param('userId') userId: number,
+        @Query('page', ParseIntPipe) page: number = 1,
+        @Query('limit', ParseIntPipe) limit: number = 10,
+        @Param('userId', ParseIntPipe) userId: number,
     ) {
         return await this.followerService.userFollowerAll(userId, page, limit);
     }
