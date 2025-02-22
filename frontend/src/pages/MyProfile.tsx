@@ -31,6 +31,7 @@ const MyProfile: React.FC = () => {
 
     const {
         profilePosts,
+        setProfilePosts,
         profileFetchPosts,
         profilePageInc,
         profileScrollPosition,
@@ -152,6 +153,17 @@ const MyProfile: React.FC = () => {
     const handleCloseBannerModal = () => {
         setIsModalBannerOpen(false);
         setSelectedImage(null);
+    };
+
+    const postDelete = async (id: number) => {
+        try {
+            await axios.delete(`/post/${id}`);
+            setProfilePosts((prevPosts) =>
+                prevPosts.filter((post) => post.id !== id)
+            );
+        } catch (error) {
+            console.error("Post silinirken hata oluştu:", error);
+        }
     };
 
     return (
@@ -334,6 +346,7 @@ const MyProfile: React.FC = () => {
                                 codeLanguage={post.codeLanguage}
                                 codeTheme={post.codeTheme}
                                 border={false}
+                                deletePost={postDelete}
                             />
                         ))}
                     </div>

@@ -10,10 +10,12 @@ import { extname } from 'path';
 import { randomUUID } from 'crypto';
 import { BadRequestException } from '@nestjs/common';
 import { User } from 'src/user/user.entity';
+import { Like } from 'src/like/like.entity';
+import { Comment } from 'src/comment/comment.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([Post, PostImage, User]),
+        TypeOrmModule.forFeature([Post, PostImage, User, Like, Comment]),
         MulterModule.register({
             storage: diskStorage({
                 destination: (req, file, cb) => {

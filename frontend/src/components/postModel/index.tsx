@@ -60,7 +60,7 @@ const PostModel: React.FC<PostModelProps> = ({
     const [postImages, setPostImages] = useState<File[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const { reset } = useForm<PostFormInputs>();
-    const { setProfilePosts } = usePostStore();
+    const { setProfilePosts, profilePosts } = usePostStore();
     const [isModalGithubOpen, setIsModalGithubOpen] = useState<boolean>(false);
     const quillRef = useRef<ReactQuill | null>(null);
     const [range, setRange] = useState<number | null>(null);
@@ -196,7 +196,18 @@ const PostModel: React.FC<PostModelProps> = ({
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
-            setProfilePosts([response.data.post]);
+            console.log(response.data.post);
+            setProfilePosts((prevPosts) => {
+                if (!response.data?.post) return prevPosts;
+
+                const updatedPost = response.data.post;
+                return variant === "edit"
+                    ? prevPosts.map((post) =>
+                          post.id === postId ? updatedPost : post
+                      )
+                    : [updatedPost, ...prevPosts];
+            });
+
             reset();
             handleCloseModal();
         } catch (error) {

@@ -23,11 +23,7 @@ const routes = createBrowserRouter([
             { path: "/", element: <Home /> },
             {
                 path: "/profile/:slug",
-                element: (
-                    <PrivateRouteAuthenticated>
-                        <PrivateRouteProfile />
-                    </PrivateRouteAuthenticated>
-                ),
+                element: <PrivateRouteProfile />,
             },
             {
                 path: "/profile/:slug/:postId",
@@ -96,4 +92,5 @@ const routes = createBrowserRouter([
     { path: "/404", element: <NotFound /> },
     { path: "*", element: <NotFound /> },
 ]);
+
 export default routes;

@@ -1,9 +1,4 @@
-import {
-    Injectable,
-    NotFoundException,
-    HttpException,
-    HttpStatus,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like as ILike, In } from 'typeorm';
 import { User } from './user.entity';
@@ -16,9 +11,7 @@ import { ChatRoom } from 'src/chat/chat-room.entity';
 import { FriendProfileDto } from './dto/friend-profile.dto';
 import { PostImage } from 'src/post-images/post-images.entity';
 import { PostSaved } from 'src/post-saved/post-saved.entity';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Req } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
+
 @Injectable()
 export class UserService {
     constructor(
@@ -129,6 +122,31 @@ export class UserService {
         await this.chatRoomRepository.delete({ user1: { id: userId } });
         await this.chatRoomRepository.delete({ user2: { id: userId } });
 
+        // Decrement follower and following counts
+        const followers = await this.followerRepository.find({
+            where: { following: { id: userId } },
+            relations: ['follower'],
+        });
+        for (const follower of followers) {
+            await this.userRepository.decrement(
+                { id: follower.follower.id },
+                'followingCount',
+                1,
+            );
+        }
+
+        const following = await this.followerRepository.find({
+            where: { follower: { id: userId } },
+            relations: ['following'],
+        });
+        for (const follow of following) {
+            await this.userRepository.decrement(
+                { id: follow.following.id },
+                'followerCount',
+                1,
+            );
+        }
+
         await this.followerRepository.delete({ following: { id: userId } });
         await this.followerRepository.delete({ follower: { id: userId } });
     }
@@ -186,8 +204,6 @@ export class UserService {
         user.name = updateProfileDto.name;
         user.bio = updateProfileDto.bio;
         const newUser = await this.userRepository.save(user);
-
-        console.log(newUser);
 
         return {
             user: newUser,

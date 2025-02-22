@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { RouterProvider } from "react-router-dom";
+import { RouterProvider, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";
 import axios from "@/utils/axiosInstance";
 import routes from "@/routes";
 import Loading from "@/components/loading";
+import { Navigate } from "react-router-dom";
 
 const App: React.FC = () => {
     const { setUser, logout, user } = useAuthStore();
@@ -15,18 +16,26 @@ const App: React.FC = () => {
             const response = await axios.post("/auth/refresh");
             setUser(response.data.user);
         } catch (error) {
-            console.error("Failed to refresh token", error);
             logout();
+            return <Navigate to="/" />;
         } finally {
             setLoading(false);
         }
     };
 
+    const checkUserStatus = async () => {
+        if (!user) {
+            logout();
+            return <Navigate to="/" />;
+        }
+    };
+
     useEffect(() => {
         checkLoginStatus();
-    }, [setUser, logout]);
+        checkUserStatus();
+    }, [setUser, logout, user]);
 
-    if (loading || !user) return <Loading />;
+    if (loading) return <Loading />;
     return <RouterProvider router={routes} />;
 };
 

@@ -79,7 +79,9 @@ const MainLayout: React.FC = () => {
                     isInputFocused ? "z-0" : "z-10"
                 }`}
             >
-                <div className="flex gap-5">{renderSidebars()}</div>
+                <div className="flex gap-5">
+                    {user ? renderSidebars() : <Outlet />}
+                </div>
             </div>
         </div>
     );

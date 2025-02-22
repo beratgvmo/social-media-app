@@ -90,12 +90,12 @@ export class PostController {
 
         return {
             message: 'Post başarıyla güncellendi.',
-            updatedPost,
+            post: updatedPost,
         };
     }
 
     @UseGuards(JwtAuthGuard)
-    @Delete('delete/:postId')
+    @Delete(':postId')
     async deletePost(@Param('postId') postId: number, @Req() req: Request) {
         const userId = req.user['sub'];
         await this.postService.deletePost(postId, userId);

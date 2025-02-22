@@ -22,7 +22,9 @@ interface PostState {
     profileFetchPosts: (slug: string) => Promise<void>;
     profilePageInc: () => void;
     setProfileScrollPosition: (position: number) => void;
-    setProfilePosts: (newPosts: Post[]) => void;
+    setProfilePosts: (
+        newPosts: Post[] | ((prevPosts: Post[]) => Post[])
+    ) => void;
 }
 
 const usePostStore = create<PostState>((set, get) => ({
@@ -65,9 +67,11 @@ const usePostStore = create<PostState>((set, get) => ({
         }
     },
 
-    setProfilePosts: (newPosts: Post[]) => {
+    setProfilePosts: (newPosts: Post[] | ((prevPosts: Post[]) => Post[])) => {
         const { profilePosts } = get();
-        set({ profilePosts: [...newPosts, ...profilePosts] });
+        const updatedPosts =
+            typeof newPosts === "function" ? newPosts(profilePosts) : newPosts;
+        set({ profilePosts: updatedPosts });
     },
 
     pageInc: () => set((state) => ({ page: state.page + 1 })),

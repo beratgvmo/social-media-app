@@ -41,6 +41,7 @@ interface PostProps {
     codeLanguage?: string;
     codeTheme?: "light" | "dark";
     isCommentBool?: boolean;
+    deletePost?: (id: number) => void;
 }
 
 interface User {
@@ -71,6 +72,7 @@ const Post: React.FC<PostProps> = ({
     codeLanguage,
     codeTheme,
     isCommentBool = false,
+    deletePost,
 }) => {
     const [isLike, setIsLike] = useState(false);
     const [isSave, setIsSave] = useState(false);
@@ -146,9 +148,9 @@ const Post: React.FC<PostProps> = ({
         checkPostStatus();
         checkSavePostStatus();
 
-        // if (githubType && githubApiUrl) {
-        //     githubFetcher();
-        // }
+        if (githubType && githubApiUrl) {
+            githubFetcher();
+        }
     }, []);
 
     const githubFetcher = async () => {
@@ -253,10 +255,14 @@ const Post: React.FC<PostProps> = ({
                                         <TbEdit className="mr-1" size={18} />
                                         Düzenle
                                     </button>
-                                    <p className="text-gray-800 text-sm font-medium flex items-center px-3 py-2 hover:bg-gray-100">
+                                    <button
+                                        type="button"
+                                        onClick={() => deletePost(id)}
+                                        className="text-gray-800 w-full text-sm font-medium flex items-center px-3 py-2 hover:bg-gray-100"
+                                    >
                                         <TbTrash className="mr-1" size={18} />
                                         Kaldır
-                                    </p>
+                                    </button>
                                 </div>
                             )}
                         </div>

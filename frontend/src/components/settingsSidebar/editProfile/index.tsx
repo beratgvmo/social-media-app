@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "@/components/button";
-import Modal from "@/components/Modal";
+import Modal from "@/components/modal";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useForm } from "react-hook-form";
 import axios from "@/utils/axiosInstance";
 import { Navigate } from "react-router-dom";
+
 type FormData = {
     name: string;
     bio: string;

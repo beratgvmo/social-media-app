@@ -6,19 +6,29 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CodeTheme, GithubType, Post } from './post.entity';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { PostImage } from '../post-images/post-images.entity';
 import { User } from 'src/user/user.entity';
+import { Like } from 'src/like/like.entity';
+import { Comment } from 'src/comment/comment.entity';
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectRepository(Post)
         private postRepository: Repository<Post>,
+
         @InjectRepository(PostImage)
         private postImageRepository: Repository<PostImage>,
+
         @InjectRepository(User)
         private userRepository: Repository<User>,
+
+        @InjectRepository(Comment)
+        private commentRepository: Repository<Comment>,
+
+        @InjectRepository(Like)
+        private likeRepository: Repository<Like>,
     ) {}
 
     async createPost(
@@ -216,12 +226,36 @@ export class PostService {
     async deletePost(postId: number, userId: number): Promise<void> {
         const post = await this.postRepository.findOne({
             where: { id: postId, user: { id: userId } },
+            relations: ['comments', 'likes', 'postImages'],
         });
 
         if (!post) {
             throw new NotFoundException('Post not found');
         }
 
-        await this.postRepository.remove(post);
+        const commentIds = post.comments.map((comment) => comment.id);
+        const likeIds = post.likes.map((like) => like.id);
+        const postImageIds = post.postImages.map((postImage) => postImage.id);
+
+        if (commentIds.length > 0) {
+            const commentLikes = await this.likeRepository.find({
+                where: { comment: In(commentIds) },
+            });
+            const commentLikeIds = commentLikes.map((like) => like.id);
+            if (commentLikeIds.length > 0) {
+                await this.likeRepository.delete({ id: In(commentLikeIds) });
+            }
+            await this.commentRepository.delete({ id: In(commentIds) });
+        }
+
+        if (likeIds.length > 0) {
+            await this.likeRepository.delete({ id: In(likeIds) });
+        }
+
+        if (postImageIds.length > 0) {
+            await this.postImageRepository.delete({ id: In(postImageIds) });
+        }
+
+        await this.postRepository.delete(post.id);
     }
 }

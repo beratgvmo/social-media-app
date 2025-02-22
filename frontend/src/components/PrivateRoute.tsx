@@ -24,13 +24,13 @@ const PrivateRouteProfile: React.FC = () => {
     const { slug } = useParams<{ slug?: string }>();
     const [error, setError] = useState<string | null>(null);
 
+    if (!user) return <Navigate to="/" />;
+    console.log(user);
+
     useEffect(() => {
-        const controller = new AbortController();
         const fetchProfile = async () => {
             try {
-                await axios.get(`/user/profile/${slug}`, {
-                    signal: controller.signal,
-                });
+                await axios.get(`/user/profile/${slug}`);
                 setError(null);
             } catch {
                 setError("not found");
@@ -38,11 +38,7 @@ const PrivateRouteProfile: React.FC = () => {
         };
 
         if (slug) fetchProfile();
-
-        return () => controller.abort();
     }, [slug]);
-
-    if (!user) return <Navigate to="/" />;
 
     if (error === "not found") return <Navigate to="/404" />;
 
@@ -52,7 +48,7 @@ const PrivateRouteProfile: React.FC = () => {
 const PrivateRouteAuthenticated: React.FC<Props> = ({ children }) => {
     const { user } = useAuthStore();
 
-    return user ? <>{children}</> : <Navigate to="/login" />;
+    return user ? <>{children}</> : <Navigate to="/" />;
 };
 
 export { PrivateRouteNullUser, PrivateRouteProfile, PrivateRouteAuthenticated };

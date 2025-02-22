@@ -211,24 +211,6 @@ const MyNetworkFollower: React.FC = () => {
                         {tab
                             ? renderUserList(uniqueList(followers))
                             : renderUserList(uniqueList(followings))}
-                        {/* {loading && !tab && user.followingCount > 0 && (
-                            <SkeletonList
-                                count={
-                                    user.followingCount > 4
-                                        ? 5
-                                        : user.followingCount
-                                }
-                            />
-                        )}
-                        {loading && tab && user.followerCount > 0 && (
-                            <SkeletonList
-                                count={
-                                    user.followerCount > 4
-                                        ? 5
-                                        : user.followerCount
-                                }
-                            />
-                        )} */}
                     </div>
                 </div>
             </div>
