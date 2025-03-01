@@ -1,29 +1,24 @@
 # Social Media App
-
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-  <a href="https://reactjs.org/" target="blank"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="200" alt="React Logo" /></a>
+<p align="center" style="margin-bottom: 20px;margin-top: 20px;">
+  <img src="image/1.jpg" width="400" alt="Image 1" style="margin-right: 20px;" />
+  <img src="image/2.jpg" width="400" alt="Image 2" />
 </p>
 
-<p align="center">
-  <img src="image/1.jpg" width="200" alt="Image 1" />
-  <img src="image/2.jpg" width="200" alt="Image 2" />
+<p align="center" style="margin-bottom: 20px;">
+  <img src="image/3.jpg" width="400" alt="Image 3" style="margin-right: 20px;" />
+  <img src="image/4.jpg" width="400" alt="Image 4" />
 </p>
 
-<p align="center">
-  <img src="image/3.jpg" width="200" alt="Image 3" />
-  <img src="image/4.jpg" width="200" alt="Image 4" />
+<p align="center" style="margin-bottom: 20px;">
+  <img src="image/5.jpg" width="400" alt="Image 5" style="margin-right: 20px;" />
+  <img src="image/6.jpg" width="400" alt="Image 6" />
 </p>
 
-<p align="center">
-  <img src="image/5.jpg" width="200" alt="Image 5" />
-  <img src="image/6.jpg" width="200" alt="Image 6" />
+<p align="center" style="margin-bottom: 20px;">
+  <img src="image/7.jpg" width="400" alt="Image 7" style="margin-right: 20px;" />
+  <img src="image/8.jpg" width="400" alt="Image 8" />
 </p>
 
-<p align="center">
-  <img src="image/7.jpg" width="200" alt="Image 7" />
-  <img src="image/8.jpg" width="200" alt="Image 8" />
-</p>
 
 ## Description
 
