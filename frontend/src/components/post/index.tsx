@@ -22,7 +22,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { githubDark, githubLight } from "@uiw/codemirror-theme-github";
 import { GithubRepoView, GithubUserView } from "../postModel/githubRepoView";
-import { GitHubRepo, GitHubUser } from "@/types";
+import { GitHubRepo, GitHubUser, PostImage, User } from "@/types";
 import { useAuthStore } from "@/store/useAuthStore";
 import PostModel from "../postModel";
 
@@ -42,19 +42,6 @@ interface PostProps {
     codeTheme?: "light" | "dark";
     isCommentBool?: boolean;
     deletePost?: (id: number) => void;
-}
-
-interface User {
-    id: number;
-    slug: string;
-    profileImage: string;
-    name: string;
-    bio: string;
-}
-
-interface PostImage {
-    id: number;
-    url: string;
 }
 
 const Post: React.FC<PostProps> = ({
@@ -199,6 +186,10 @@ const Post: React.FC<PostProps> = ({
         }
     };
 
+    const countLines = (text: string) => {
+        return text.split(/\r\n|\r|\n/).length;
+    };
+
     return (
         <>
             <div
@@ -271,9 +262,14 @@ const Post: React.FC<PostProps> = ({
                 <div className="mt-2.5 px-4">
                     <div className="text-base">
                         <p className="whitespace-pre-line">
-                            {expanded ? content : content.slice(0, 100)}
+                            {expanded || countLines(content) <= 3
+                                ? content
+                                : content
+                                      .split(/\r\n|\r|\n/)
+                                      .slice(0, 4)
+                                      .join("\n")}
                         </p>
-                        {content.length > 100 && (
+                        {countLines(content) > 4 && (
                             <span
                                 onClick={toggleExpanded}
                                 className="text-gray-400 text-xs cursor-pointer"

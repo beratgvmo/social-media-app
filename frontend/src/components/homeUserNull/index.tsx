@@ -42,7 +42,7 @@ const HomeUserNull: React.FC = () => {
     }, [user, navigate]);
 
     return (
-        <div className="h-screen w-full flex justify-center items-center">
+        <div className="h-screen max-h-screen w-full flex justify-center items-center">
             <div className="flex flex-col w-1/2 items-center">
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-extrabold tracking-tight leading-tight text-gray-800">

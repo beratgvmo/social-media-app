@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "@/utils/axiosInstance";
 import { useParams, useNavigate } from "react-router-dom";
 import Post from "@/components/post";
-import ProfileSidebar from "@/components/profileSidebar";
-import RightbarFollow from "@/components/rightbarFollow";
+import { PostImage, User } from "@/types";
 
 interface Post {
     user: User;
@@ -11,7 +10,6 @@ interface Post {
     likeCount: number;
     commentCount: number;
     createdAt: Date;
-    postUser: User;
     border?: boolean;
     content: string;
     postImages: PostImage[];
@@ -20,19 +18,6 @@ interface Post {
     codeContent?: string;
     codeLanguage?: string;
     codeTheme?: "light" | "dark";
-}
-
-interface PostImage {
-    id: number;
-    url: string;
-}
-
-interface User {
-    id: number;
-    name: string;
-    bio: string;
-    slug: string;
-    profileImage: string;
 }
 
 const PostDetail: React.FC = () => {

@@ -5,6 +5,20 @@
   <a href="https://reactjs.org/" target="blank"><img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" width="200" alt="React Logo" /></a>
 </p>
 
+<p align="center">
+  <img src="image/1.jpg" width="200" alt="Image 1" />
+  <img src="image/2.jpg" width="200" alt="Image 2" />
+  <img src="image/3.jpg" width="200" alt="Image 3" />
+  <img src="image/4.jpg" width="200" alt="Image 4" />
+</p>
+
+<p align="center">
+  <img src="image/5.jpg" width="200" alt="Image 5" />
+  <img src="image/6.jpg" width="200" alt="Image 6" />
+  <img src="image/7.jpg" width="200" alt="Image 7" />
+  <img src="image/8.jpg" width="200" alt="Image 8" />
+</p>
+
 ## Description
 
 This is a full-stack social media application built with [NestJS](https://nestjs.com/) for the backend and [React](https://reactjs.org/) with [Vite](https://vitejs.dev/) for the frontend. The application allows users to create posts, follow other users, like and comment on posts, and chat in real-time.

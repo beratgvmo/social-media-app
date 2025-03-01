@@ -51,6 +51,16 @@ const MainLayout: React.FC = () => {
                         <RightbarFollow />
                     </>
                 );
+            case location.pathname.startsWith("/saved"):
+                return (
+                    <>
+                        <SettingsSidebar />
+                        <div className="min-w-[570px]">
+                            <Outlet />
+                        </div>
+                        <RightbarFollow />
+                    </>
+                );
             default:
                 return (
                     <div className="min-w-[570px]">

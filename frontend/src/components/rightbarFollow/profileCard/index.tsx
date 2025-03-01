@@ -1,6 +1,6 @@
 import { TbUser } from "react-icons/tb";
 import { Link } from "react-router-dom";
-import FollowerBtn from "@/components/rightbarFollow/followBtn";
+import FollowerBtn from "@/components/followerBtn";
 
 interface Friend {
     id: number;

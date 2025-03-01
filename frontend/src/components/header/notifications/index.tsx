@@ -81,7 +81,7 @@ const Notifications: React.FC = () => {
                                             ? "gönderinize yorum yaptı."
                                             : "sizi takip etmek istiyor."}
                                     </p>
-                                    <p className="text-xs absolute bottom-2 right-3 flex justify-end text-gray-500">
+                                    <p className="text-xs absolute bottom-1 right-3 flex justify-end text-gray-500">
                                         <TimeAgo
                                             createdAt={notification.createdAt}
                                         />

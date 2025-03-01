@@ -25,7 +25,6 @@ const PrivateRouteProfile: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     if (!user) return <Navigate to="/" />;
-    console.log(user);
 
     useEffect(() => {
         const fetchProfile = async () => {

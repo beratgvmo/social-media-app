@@ -181,37 +181,34 @@ const MyNetworkFollower: React.FC = () => {
         );
 
     return (
-        <div className="flex gap-5">
-            <ProfileSidebar />
-            <div className="w-full">
-                <div className="bg-white rounded-lg border w-full">
-                    <div className="flex ml-3 gap-6 text-sm font-semibold">
-                        <button
-                            onClick={() => switchTab(true)}
-                            className={`px-4 py-2.5 transition ${
-                                tab
-                                    ? "text-blue-500 border-b-2 border-blue-500"
-                                    : "hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 "
-                            }`}
-                        >
-                            {user.followerCount} Takipçi
-                        </button>
-                        <button
-                            onClick={() => switchTab(false)}
-                            className={`px-4 py-2.5 transition ${
-                                !tab
-                                    ? "text-blue-500 border-b-2 border-blue-500"
-                                    : "hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300"
-                            }`}
-                        >
-                            {user.followingCount} Takip Edilen
-                        </button>
-                    </div>
-                    <div>
-                        {tab
-                            ? renderUserList(uniqueList(followers))
-                            : renderUserList(uniqueList(followings))}
-                    </div>
+        <div className="w-full">
+            <div className="bg-white rounded-lg border w-full">
+                <div className="flex ml-3 gap-6 text-sm font-semibold">
+                    <button
+                        onClick={() => switchTab(true)}
+                        className={`px-4 py-2.5 transition ${
+                            tab
+                                ? "text-blue-500 border-b-2 border-blue-500"
+                                : "hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 "
+                        }`}
+                    >
+                        {user.followerCount} Takipçi
+                    </button>
+                    <button
+                        onClick={() => switchTab(false)}
+                        className={`px-4 py-2.5 transition ${
+                            !tab
+                                ? "text-blue-500 border-b-2 border-blue-500"
+                                : "hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300"
+                        }`}
+                    >
+                        {user.followingCount} Takip Edilen
+                    </button>
+                </div>
+                <div>
+                    {tab
+                        ? renderUserList(uniqueList(followers))
+                        : renderUserList(uniqueList(followings))}
                 </div>
             </div>
         </div>

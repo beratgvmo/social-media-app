@@ -27,7 +27,6 @@ const MyProfile: React.FC = () => {
     const [croppedBanner, setCroppedBanner] = useState<Blob | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalBannerOpen, setIsModalBannerOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
 
     const {
         profilePosts,
@@ -44,6 +43,11 @@ const MyProfile: React.FC = () => {
     useEffect(() => {
         window.scrollTo(0, profileScrollPosition);
     }, [profileScrollPosition]);
+
+    useEffect(() => {
+        setProfilePosts([]);
+        setProfileScrollPosition(0);
+    }, [user.slug]);
 
     useEffect(() => {
         profileFetchPosts(user.slug);

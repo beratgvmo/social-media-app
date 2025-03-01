@@ -7,7 +7,7 @@ import Loading from "@/components/loading";
 import { Navigate } from "react-router-dom";
 
 const App: React.FC = () => {
-    const { setUser, logout, user } = useAuthStore();
+    const { setUser, logout } = useAuthStore();
     const [loading, setLoading] = useState(true);
 
     const checkLoginStatus = async () => {
@@ -23,17 +23,9 @@ const App: React.FC = () => {
         }
     };
 
-    const checkUserStatus = async () => {
-        if (!user) {
-            logout();
-            return <Navigate to="/" />;
-        }
-    };
-
     useEffect(() => {
         checkLoginStatus();
-        checkUserStatus();
-    }, [setUser, logout, user]);
+    }, [setUser, logout]);
 
     if (loading) return <Loading />;
     return <RouterProvider router={routes} />;

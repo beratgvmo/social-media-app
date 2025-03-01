@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "@/utils/axiosInstance";
 import { TbMessage2, TbUser } from "react-icons/tb";
-import RightbarFollow from "@/components/rightbarFollow";
 import { useParams } from "react-router-dom";
 import Post from "@/components/post";
 import { CgSpinner } from "react-icons/cg";
-import ProfileSidebar from "@/components/profileSidebar";
 import FollowerBtn from "@/components/followerBtn";
+import { PostImage, User } from "@/types";
 
 interface UserProfile {
     id: number;
@@ -22,12 +21,11 @@ interface UserProfile {
 }
 
 interface Post {
-    user: User;
     id: number;
     likeCount: number;
     commentCount: number;
     createdAt: Date;
-    postUser: User;
+    user: User;
     border?: boolean;
     content: string;
     postImages: PostImage[];
@@ -36,19 +34,6 @@ interface Post {
     codeContent?: string;
     codeLanguage?: string;
     codeTheme?: "light" | "dark";
-}
-
-interface PostImage {
-    id: number;
-    url: string;
-}
-
-interface User {
-    id: number;
-    name: string;
-    bio: string;
-    slug: string;
-    profileImage: string;
 }
 
 const Profile: React.FC = () => {

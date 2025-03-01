@@ -22,23 +22,20 @@ apiClient.interceptors.response.use(
                 useAuthStore.getState();
 
             try {
-                // Refresh token ile yeni access token al
                 const refreshResponse = await apiClient.post("/auth/refresh");
                 const newAccessToken = refreshResponse.data.accessToken;
-                const newRefreshToken = refreshResponse.data.refreshToken; // Eğer refresh token da alınıyorsa
+                const newRefreshToken = refreshResponse.data.refreshToken;
 
-                // Store'da yeni token'ları güncelle
                 setAccessToken(newAccessToken);
-                setRefreshToken(newRefreshToken); // Yeni refresh token'ı da kaydet
+                setRefreshToken(newRefreshToken);
 
-                // Yeni access token ile eski isteği tekrar gönder
                 error.config.headers[
                     "Authorization"
                 ] = `Bearer ${newAccessToken}`;
-                return apiClient(error.config); // Yeniden istek gönder
+                return apiClient(error.config);
             } catch (refreshError) {
                 console.error("Token yenileme başarısız:", refreshError);
-                logout(); // Token yenileme başarısızsa kullanıcıyı logout et
+                logout();
                 return Promise.reject(refreshError);
             }
         }
